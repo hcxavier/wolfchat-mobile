@@ -106,7 +106,7 @@ class Sidebar extends StatelessWidget {
                         'Buscar nas conversas...',
                         style: TextStyle(
                           color: AppColors.textSecondary,
-                          fontSize: 14,
+                          fontSize: 16,
                         ),
                       ),
                     ),
@@ -161,7 +161,7 @@ class Sidebar extends StatelessWidget {
                           'Novo chat',
                           style: TextStyle(
                             color: AppColors.textPrimary,
-                            fontSize: 14,
+                            fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -182,7 +182,7 @@ class Sidebar extends StatelessWidget {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: AppColors.textSecondary,
-                            fontSize: 14,
+                            fontSize: 16,
                           ),
                         ),
                       ),
@@ -226,7 +226,7 @@ class Sidebar extends StatelessWidget {
                             : '',
                         style: const TextStyle(
                           color: AppColors.brand300,
-                          fontSize: 12,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -238,7 +238,7 @@ class Sidebar extends StatelessWidget {
                       userName,
                       style: const TextStyle(
                         color: AppColors.textPrimary,
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -315,7 +315,7 @@ class SidebarItem extends StatelessWidget {
                     color: isSelected
                         ? AppColors.textPrimary
                         : AppColors.textSecondary,
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: isSelected
                         ? FontWeight.w500
                         : FontWeight.normal,
