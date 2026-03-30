@@ -52,15 +52,15 @@ class ConversationViewModel extends ChangeNotifier {
 
   String _getLanguageCode(String language) {
     final languageMap = {
-      'Português (Brasil)': 'português',
-      'English': 'English',
-      'Español': 'español',
-      'Français': 'français',
-      'Deutsch': 'Deutsch',
-      '日本語': 'japonês',
-      '中文': 'chinês',
+      'Português (Brasil)': 'PT-BR',
+      'English': 'EN-US',
+      'Español': 'ES-ES',
+      'Français': 'FR-FR',
+      'Deutsch': 'DE-DE',
+      '日本語': 'JA-JP',
+      '中文': 'ZH-CN',
     };
-    return languageMap[language] ?? language;
+    return languageMap[language] ?? 'PT-BR';
   }
 
   Future<void> loadConversations() async {
@@ -139,13 +139,19 @@ class ConversationViewModel extends ChangeNotifier {
     _isSendingMessage = true;
     notifyListeners();
 
-    final messageContent = language != null && language != 'Português (Brasil)'
-        ? 'Responda em ${_getLanguageCode(language)}. ${content.trim()}'
-        : content.trim();
+    // Apenas prefixamos a primeira mensagem da conversa para definir o idioma
+    final isFirstMessage = _messages.isEmpty;
+    final String apiContent;
+    
+    if (isFirstMessage && language != null) {
+      apiContent = 'Idioma: ${_getLanguageCode(language)}; User: ${content.trim()}';
+    } else {
+      apiContent = content.trim();
+    }
 
     final userMessage = ChatMessage(
       role: 'user',
-      content: messageContent,
+      content: content.trim(), // O que aparece no balão (limpo)
       timestamp: DateTime.now(),
     );
     _messages.add(userMessage);
@@ -179,8 +185,18 @@ class ConversationViewModel extends ChangeNotifier {
       final groqService = GroqService(apiKey: _groqKey);
       final modelId = _getSelectedModelId();
 
+      // Criamos uma lista temporária para a API com o conteúdo prefixado se for a 1ª mensagem
+      final apiMessages = List<ChatMessage>.from(_messages);
+      if (isFirstMessage) {
+        apiMessages[0] = ChatMessage(
+          role: 'user',
+          content: apiContent,
+          timestamp: userMessage.timestamp,
+        );
+      }
+
       final assistantResponse = await groqService.sendMessage(
-        messages: _messages,
+        messages: apiMessages,
         model: modelId,
       );
 

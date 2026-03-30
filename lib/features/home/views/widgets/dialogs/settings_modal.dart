@@ -53,6 +53,7 @@ class _SettingsModalState extends State<SettingsModal> {
     _openCodeZenController = TextEditingController(
       text: widget.viewModel.openCodeZenKey,
     );
+    _selectedLanguage = widget.viewModel.language;
   }
 
   @override
