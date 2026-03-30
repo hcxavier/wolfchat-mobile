@@ -102,12 +102,6 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const HeroIcon(
-                      HeroIcons.cpuChip,
-                      size: 24,
-                      color: AppColors.brand300,
-                    ),
-                    const SizedBox(width: 12),
                     const Expanded(
                       child: Text(
                         'Gerenciar Modelos',
