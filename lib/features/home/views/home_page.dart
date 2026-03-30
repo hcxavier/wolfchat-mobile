@@ -6,12 +6,48 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../viewmodels/home_viewmodel.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  bool _wasSettingsModalOpen = false;
+
+  void _checkAndShowSettingsModal(HomeViewModel viewModel) {
+    if (viewModel.isSettingsModalOpen && !_wasSettingsModalOpen) {
+      _wasSettingsModalOpen = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (dialogContext) => _SettingsModal(
+              userName: viewModel.userName,
+              onClose: () {
+                Navigator.of(dialogContext).pop();
+                viewModel.closeSettingsModal();
+              },
+              onSave: (name) => viewModel.updateUserName(name),
+            ),
+          ).then((_) {
+            if (mounted && viewModel.isSettingsModalOpen) {
+              viewModel.closeSettingsModal();
+            }
+            _wasSettingsModalOpen = false;
+          });
+        }
+      });
+    } else if (!viewModel.isSettingsModalOpen) {
+      _wasSettingsModalOpen = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomeViewModel>();
+    _checkAndShowSettingsModal(viewModel);
 
     return Scaffold(
       backgroundColor: AppColors.surfaceMain,
@@ -39,7 +75,11 @@ class HomePage extends StatelessWidget {
             left: viewModel.isSidebarOpen ? 0 : -280,
             top: 0,
             bottom: 0,
-            child: _Sidebar(onClose: viewModel.closeSidebar),
+            child: _Sidebar(
+              onClose: viewModel.closeSidebar,
+              onOpenSettings: viewModel.openSettingsModal,
+              userName: viewModel.userName,
+            ),
           ),
         ],
       ),
@@ -49,8 +89,14 @@ class HomePage extends StatelessWidget {
 
 class _Sidebar extends StatelessWidget {
   final VoidCallback onClose;
+  final VoidCallback onOpenSettings;
+  final String userName;
 
-  const _Sidebar({required this.onClose});
+  const _Sidebar({
+    required this.onClose,
+    required this.onOpenSettings,
+    required this.userName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -195,10 +241,17 @@ class _Sidebar extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: AppColors.accentLight,
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        'U3',
-                        style: TextStyle(
+                        userName.isNotEmpty
+                            ? userName
+                                  .trim()
+                                  .split('')
+                                  .take(2)
+                                  .join()
+                                  .toUpperCase()
+                            : '',
+                        style: const TextStyle(
                           color: AppColors.brand300,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -207,9 +260,9 @@ class _Sidebar extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Usuário 3',
+                      userName,
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 14,
@@ -217,10 +270,317 @@ class _Sidebar extends StatelessWidget {
                       ),
                     ),
                   ),
+                  Material(
+                    color: Colors.transparent,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      onTap: onOpenSettings,
+                      customBorder: const CircleBorder(),
+                      hoverColor: AppColors.surfaceHover,
+                      child: const Padding(
+                        padding: EdgeInsets.all(6),
+                        child: HeroIcon(
+                          HeroIcons.cog6Tooth,
+                          size: 20,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsModal extends StatefulWidget {
+  final String userName;
+  final VoidCallback onClose;
+  final ValueChanged<String> onSave;
+
+  const _SettingsModal({
+    required this.userName,
+    required this.onClose,
+    required this.onSave,
+  });
+
+  @override
+  State<_SettingsModal> createState() => _SettingsModalState();
+}
+
+class _SettingsModalState extends State<_SettingsModal> {
+  late final TextEditingController _nameController;
+  String _selectedLanguage = 'Português (Brasil)';
+
+  static const _languages = [
+    'Português (Brasil)',
+    'English',
+    'Español',
+    'Français',
+    'Deutsch',
+    '日本語',
+    '中文',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.userName);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Container(
+        width: 440,
+        padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  const HeroIcon(
+                    HeroIcons.cog6Tooth,
+                    size: 24,
+                    color: AppColors.brand300,
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Configurações',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Material(
+                    color: Colors.transparent,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      onTap: widget.onClose,
+                      customBorder: const CircleBorder(),
+                      hoverColor: AppColors.surfaceHover,
+                      child: const Padding(
+                        padding: EdgeInsets.all(6),
+                        child: HeroIcon(
+                          HeroIcons.xMark,
+                          size: 20,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              const Text(
+                'Nome do usuário',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _nameController,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                ),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: AppColors.surfaceInput,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              _SettingsButton(
+                icon: HeroIcons.key,
+                title: 'Configurar API Keys',
+                onTap: () {},
+              ),
+              const SizedBox(height: 8),
+              _SettingsButton(
+                icon: HeroIcons.cpuChip,
+                title: 'Gerenciar Modelos',
+                onTap: () {},
+              ),
+              const SizedBox(height: 8),
+              _SettingsButton(
+                icon: HeroIcons.adjustmentsHorizontal,
+                title: 'Personalização (System Prompt)',
+                onTap: () {},
+              ),
+              const SizedBox(height: 8),
+              _SettingsButton(
+                icon: HeroIcons.bolt,
+                title: 'Prompts Dinâmicos',
+                onTap: () {},
+              ),
+              const SizedBox(height: 24),
+
+              const Text(
+                'Idioma da Resposta',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceInput,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedLanguage,
+                    isExpanded: true,
+                    dropdownColor: AppColors.surfaceCard,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
+                    ),
+                    icon: const HeroIcon(
+                      HeroIcons.chevronDown,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                    items: _languages
+                        .map(
+                          (lang) =>
+                              DropdownMenuItem(value: lang, child: Text(lang)),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedLanguage = value);
+                      }
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              _SettingsButton(
+                icon: HeroIcons.trash,
+                title: 'Excluir todos os chats',
+                onTap: () {},
+                isDestructive: true,
+              ),
+              const SizedBox(height: 24),
+
+              SizedBox(
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    widget.onSave(_nameController.text);
+                    widget.onClose();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brand500,
+                    foregroundColor: AppColors.textPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Salvar',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsButton extends StatelessWidget {
+  final HeroIcons icon;
+  final String title;
+  final VoidCallback onTap;
+  final bool isDestructive;
+
+  const _SettingsButton({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.isDestructive = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surfaceHover,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              HeroIcon(
+                icon,
+                size: 20,
+                color: isDestructive
+                    ? AppColors.brand500
+                    : AppColors.textSecondary,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: isDestructive
+                        ? AppColors.brand500
+                        : AppColors.textPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              HeroIcon(
+                HeroIcons.chevronRight,
+                size: 16,
+                color: isDestructive
+                    ? AppColors.brand500
+                    : AppColors.textSecondary,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -283,25 +643,34 @@ class _MainChatView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-        child: Column(
-          children: [
-            _TopBar(onToggleSidebar: onToggleSidebar),
-            const Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    SizedBox(height: 48),
-                    _HeaderSection(),
-                    SizedBox(height: 48),
-                    _SuggestionsGrid(),
-                  ],
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.translucent,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+          child: Column(
+            children: [
+              _TopBar(
+                onToggleSidebar: () {
+                  FocusScope.of(context).unfocus();
+                  onToggleSidebar();
+                },
+              ),
+              const Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(height: 48),
+                      _HeaderSection(),
+                      SizedBox(height: 48),
+                      _SuggestionsGrid(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const _BottomInput(),
-          ],
+              const _BottomInput(),
+            ],
+          ),
         ),
       ),
     );
@@ -497,49 +866,58 @@ class _BottomInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceInput,
-        borderRadius: BorderRadius.circular(30),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          const HeroIcon(
-            HeroIcons.paperClip,
-            color: AppColors.textSecondary,
-            size: 24,
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: TextField(
-              style: TextStyle(color: AppColors.textPrimary),
-              decoration: InputDecoration(
-                hintText: 'Envie uma mensagem...',
-                hintStyle: TextStyle(color: AppColors.textSecondary),
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 8),
+    return GestureDetector(
+      onTap: () {},
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceInput,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: HeroIcon(
+                HeroIcons.paperClip,
+                color: AppColors.textSecondary,
+                size: 24,
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.textPrimary,
+            const SizedBox(width: 8),
+            const Expanded(
+              child: TextField(
+                minLines: 1,
+                maxLines: 4,
+                style: TextStyle(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  hintText: 'Envie uma mensagem...',
+                  hintStyle: TextStyle(color: AppColors.textSecondary),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 10),
+                ),
+              ),
             ),
-            child: const HeroIcon(
-              HeroIcons.arrowUp,
-              size: 20,
-              color: AppColors.surfaceMain,
-              style: HeroIconStyle.solid,
+            const SizedBox(width: 8),
+            Container(
+              margin: const EdgeInsets.only(bottom: 2),
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.textPrimary,
+              ),
+              child: const HeroIcon(
+                HeroIcons.arrowUp,
+                size: 20,
+                color: AppColors.surfaceMain,
+                style: HeroIconStyle.solid,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -9,10 +9,14 @@ class HomeViewModel extends ChangeNotifier {
   final HomeModel _model = const HomeModel();
   bool _isLoading = false;
   bool _isSidebarOpen = false;
+  bool _isSettingsModalOpen = false;
+  String _userName = 'Usuário';
 
   HomeModel get model => _model;
   bool get isLoading => _isLoading;
   bool get isSidebarOpen => _isSidebarOpen;
+  bool get isSettingsModalOpen => _isSettingsModalOpen;
+  String get userName => _userName;
 
   void _loadData() {
     _isLoading = true;
@@ -31,6 +35,21 @@ class HomeViewModel extends ChangeNotifier {
 
   void closeSidebar() {
     _isSidebarOpen = false;
+    notifyListeners();
+  }
+
+  void openSettingsModal() {
+    _isSettingsModalOpen = true;
+    notifyListeners();
+  }
+
+  void closeSettingsModal() {
+    _isSettingsModalOpen = false;
+    notifyListeners();
+  }
+
+  void updateUserName(String name) {
+    _userName = name;
     notifyListeners();
   }
 
