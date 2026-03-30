@@ -52,7 +52,6 @@ class _MessageBubble extends StatelessWidget {
           : MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (!isUser) const SizedBox(width: 44),
         if (isUser)
           Flexible(
             child: Container(
@@ -113,7 +112,7 @@ class _MessageBubble extends StatelessWidget {
           style: const TextStyle(
             color: Color(0xB3FFFFFF),
             fontStyle: FontStyle.italic,
-            fontSize: 14,
+            fontSize: 16,
             height: 1.4,
           ),
         ),
@@ -130,7 +129,7 @@ class _MessageBubble extends StatelessWidget {
               style: const TextStyle(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
+                fontSize: 16,
               ),
             ),
             if (commandMatch.group(2) != null)
@@ -138,7 +137,7 @@ class _MessageBubble extends StatelessWidget {
                 text: commandMatch.group(2),
                 style: const TextStyle(
                   color: AppColors.textPrimary,
-                  fontSize: 14,
+                  fontSize: 16,
                 ),
               ),
           ],
@@ -150,7 +149,7 @@ class _MessageBubble extends StatelessWidget {
       line,
       style: const TextStyle(
         color: AppColors.textPrimary,
-        fontSize: 14,
+        fontSize: 16,
         height: 1.5,
       ),
     );

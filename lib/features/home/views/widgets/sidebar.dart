@@ -171,6 +171,7 @@ class Sidebar extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
             Expanded(
               child: conversations.isEmpty
                   ? const Center(

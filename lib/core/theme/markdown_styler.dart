@@ -6,7 +6,7 @@ class MarkdownStyler {
   static MarkdownStyleSheet getStyleSheet(BuildContext context) {
     return MarkdownStyleSheet(
       p: const TextStyle(
-        fontSize: 14,
+        fontSize: 16,
         height: 1.6,
         color: AppColors.textPrimary,
       ),
