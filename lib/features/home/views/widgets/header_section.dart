@@ -3,7 +3,7 @@ import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 
 class HeaderSection extends StatelessWidget {
-  const HeaderSection();
+  const HeaderSection({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 import 'package:wolfchat/features/home/viewmodels/home_viewmodel.dart';
-import 'package:wolfchat/features/home/views/widgets/sidebar.dart';
-import 'package:wolfchat/features/home/views/widgets/main_chat_view.dart';
 import 'package:wolfchat/features/home/views/widgets/dialogs/settings_modal.dart';
+import 'package:wolfchat/features/home/views/widgets/main_chat_view.dart';
+import 'package:wolfchat/features/home/views/widgets/sidebar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

@@ -7,6 +7,7 @@ class Sidebar extends StatelessWidget {
     required this.onClose,
     required this.onOpenSettings,
     required this.userName,
+    super.key,
   });
 
   final VoidCallback onClose;
@@ -204,7 +205,7 @@ class Sidebar extends StatelessWidget {
 }
 
 class SidebarItem extends StatelessWidget {
-  const SidebarItem({required this.title});
+  const SidebarItem({required this.title, super.key});
 
   final String title;
 

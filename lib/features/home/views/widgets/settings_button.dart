@@ -8,6 +8,7 @@ class SettingsButton extends StatelessWidget {
     required this.title,
     required this.onTap,
     this.isDestructive = false,
+    super.key,
   });
 
   final HeroIcons icon;

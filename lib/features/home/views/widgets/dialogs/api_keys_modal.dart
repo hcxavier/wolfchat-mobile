@@ -10,6 +10,7 @@ class ApiKeysModal extends StatefulWidget {
     required this.initialOpenCodeZen,
     required this.onClose,
     required this.onSave,
+    super.key,
   });
 
   final String initialOpenRouter;

@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:wolfchat/features/home/viewmodels/home_viewmodel.dart';
+import 'package:wolfchat/features/home/views/widgets/bottom_input.dart';
 import 'package:wolfchat/features/home/views/widgets/header_section.dart';
 import 'package:wolfchat/features/home/views/widgets/suggestions.dart';
-import 'package:wolfchat/features/home/views/widgets/bottom_input.dart';
 import 'package:wolfchat/features/home/views/widgets/top_bar.dart';
 
 class MainChatView extends StatelessWidget {
-  const MainChatView({required this.onToggleSidebar});
+  const MainChatView({required this.onToggleSidebar, super.key});
 
   final VoidCallback onToggleSidebar;
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<HomeViewModel>();
     return SafeArea(
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -24,11 +27,15 @@ class MainChatView extends StatelessWidget {
                   FocusScope.of(context).unfocus();
                   onToggleSidebar();
                 },
+                selectedModelName: viewModel.selectedModel.name,
+                availableModels: viewModel.availableModels,
+                selectedModelIndex: viewModel.selectedModelIndex,
+                onModelSelected: viewModel.selectModel,
               ),
-              Expanded(
+              const Expanded(
                 child: SingleChildScrollView(
                   child: Column(
-                    children: const [
+                    children: [
                       SizedBox(height: 48),
                       HeaderSection(),
                       SizedBox(height: 48),

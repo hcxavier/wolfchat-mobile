@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DialogWrapper extends StatelessWidget {
-  const DialogWrapper({required this.child});
+  const DialogWrapper({required this.child, super.key});
 
   final Widget child;
 
@@ -16,7 +16,7 @@ class DialogWrapper extends StatelessWidget {
 }
 
 class KeyboardAwareDialog extends StatelessWidget {
-  const KeyboardAwareDialog({required this.child});
+  const KeyboardAwareDialog({required this.child, super.key});
 
   final Widget child;
 

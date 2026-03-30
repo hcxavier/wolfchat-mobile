@@ -3,11 +3,11 @@ import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 
 class SuggestionsGrid extends StatelessWidget {
-  const SuggestionsGrid();
+  const SuggestionsGrid({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final suggestions = <({String title, String subtitle, HeroIcons icon})>[
+    const suggestions = <({String title, String subtitle, HeroIcons icon})>[
       (
         title: 'Explique computação quânt?',
         subtitle: 'quântica de forma simples',
@@ -47,7 +47,7 @@ class SuggestionsGrid extends StatelessWidget {
 }
 
 class SuggestionCard extends StatelessWidget {
-  const SuggestionCard({required this.title, required this.icon});
+  const SuggestionCard({required this.title, required this.icon, super.key});
 
   final String title;
   final HeroIcons icon;

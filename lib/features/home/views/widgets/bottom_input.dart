@@ -3,7 +3,7 @@ import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 
 class BottomInput extends StatelessWidget {
-  const BottomInput();
+  const BottomInput({super.key});
 
   @override
   Widget build(BuildContext context) {
