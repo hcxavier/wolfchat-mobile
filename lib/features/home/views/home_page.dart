@@ -53,6 +53,17 @@ class _HomePageState extends State<HomePage> {
     final viewModel = context.watch<HomeViewModel>();
     _checkAndShowSettingsModal(viewModel);
 
+    if (!viewModel.isInitialized) {
+      return const Scaffold(
+        backgroundColor: AppColors.surfaceMain,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: AppColors.brand500,
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.surfaceMain,
       body: Stack(
@@ -83,6 +94,16 @@ class _HomePageState extends State<HomePage> {
               onClose: viewModel.closeSidebar,
               onOpenSettings: viewModel.openSettingsModal,
               userName: viewModel.userName,
+              conversations: viewModel.conversations,
+              currentConversationId: viewModel.currentConversation?.id,
+              onConversationSelected: (id) {
+                viewModel.loadConversation(id);
+                viewModel.closeSidebar();
+              },
+              onNewConversation: () {
+                viewModel.createNewConversation();
+                viewModel.closeSidebar();
+              },
             ),
           ),
         ],

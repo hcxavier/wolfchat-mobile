@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:wolfchat/core/data/models/conversation.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 
 class Sidebar extends StatelessWidget {
@@ -7,12 +8,20 @@ class Sidebar extends StatelessWidget {
     required this.onClose,
     required this.onOpenSettings,
     required this.userName,
+    required this.conversations,
+    required this.currentConversationId,
+    required this.onConversationSelected,
+    required this.onNewConversation,
     super.key,
   });
 
   final VoidCallback onClose;
   final VoidCallback onOpenSettings;
   final String userName;
+  final List<Conversation> conversations;
+  final int? currentConversationId;
+  final void Function(int) onConversationSelected;
+  final VoidCallback onNewConversation;
 
   @override
   Widget build(BuildContext context) {
@@ -106,33 +115,89 @@ class Sidebar extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text(
-                'RECENTES',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'RECENTES',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Material(
+                color: AppColors.brand500,
+                borderRadius: BorderRadius.circular(8),
+                child: InkWell(
+                  onTap: onNewConversation,
+                  borderRadius: BorderRadius.circular(8),
+                  hoverColor: AppColors.brand600,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const HeroIcon(
+                          HeroIcons.plus,
+                          size: 16,
+                          color: AppColors.textPrimary,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Novo chat',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                children: const [
-                  SidebarItem(title: 'Saudação inicial'),
-                  SidebarItem(title: 'Explique computação...'),
-                  SidebarItem(title: 'Siderbar Button Creation...'),
-                  SidebarItem(title: 'Como Fazer Pão Ca...'),
-                  SidebarItem(title: 'O que é a vida? Per...'),
-                  SidebarItem(title: 'O que é SSH - expli...'),
-                  SidebarItem(title: 'Como Manipular R...'),
-                  SidebarItem(title: '¿Qué es SSH y cóm...'),
-                  SidebarItem(title: 'Ideias para um app...'),
-                ],
-              ),
+              child: conversations.isEmpty
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Text(
+                          'Nenhuma conversa ainda.\nClique em + para começar.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      itemCount: conversations.length,
+                      itemBuilder: (context, index) {
+                        final conversation = conversations[index];
+                        return SidebarItem(
+                          title: conversation.title,
+                          isSelected: conversation.id == currentConversationId,
+                          onTap: () => onConversationSelected(conversation.id),
+                        );
+                      },
+                    ),
             ),
             Container(
               padding: const EdgeInsets.all(16),
@@ -205,48 +270,62 @@ class Sidebar extends StatelessWidget {
 }
 
 class SidebarItem extends StatelessWidget {
-  const SidebarItem({required this.title, super.key});
+  const SidebarItem({
+    required this.title,
+    this.isSelected = false,
+    this.onTap,
+    super.key,
+  });
 
   final String title;
+  final bool isSelected;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-      decoration: BoxDecoration(
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(8),
-        color: title == 'Saudação inicial'
-            ? AppColors.surfaceHover
-            : Colors.transparent,
-      ),
-      child: Row(
-        children: [
-          HeroIcon(
-            HeroIcons.chatBubbleLeft,
-            size: 16,
-            color: title == 'Saudação inicial'
-                ? AppColors.textPrimary
-                : AppColors.textSecondary,
+        hoverColor: AppColors.surfaceHover,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: isSelected ? AppColors.surfaceHover : Colors.transparent,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                color: title == 'Saudação inicial'
+          child: Row(
+            children: [
+              HeroIcon(
+                HeroIcons.chatBubbleLeft,
+                size: 16,
+                color: isSelected
                     ? AppColors.textPrimary
                     : AppColors.textSecondary,
-                fontSize: 14,
-                fontWeight: title == 'Saudação inicial'
-                    ? FontWeight.w500
-                    : FontWeight.normal,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: isSelected
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
+                    fontSize: 14,
+                    fontWeight: isSelected
+                        ? FontWeight.w500
+                        : FontWeight.normal,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
