@@ -3,8 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/app_colors.dart';
-import '../viewmodels/home_viewmodel.dart';
+import 'package:wolfchat/core/theme/app_colors.dart';
+import 'package:wolfchat/features/home/viewmodels/home_viewmodel.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,17 +21,19 @@ class _HomePageState extends State<HomePage> {
       _wasSettingsModalOpen = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          showDialog(
+          showDialog<void>(
             context: context,
             builder: (dialogContext) => _SettingsModal(
-              userName: viewModel.userName,
+              viewModel: viewModel,
               onClose: () {
                 Navigator.of(dialogContext).pop();
                 viewModel.closeSettingsModal();
               },
-              onSave: (name) => viewModel.updateUserName(name),
             ),
+            // The .then() callback is intentional for post-close cleanup
+            // ignore: discarded_futures
           ).then((_) {
+            // The callback runs after dialog closes, checking mounted is safe
             if (mounted && viewModel.isSettingsModalOpen) {
               viewModel.closeSettingsModal();
             }
@@ -88,15 +90,15 @@ class _HomePageState extends State<HomePage> {
 }
 
 class _Sidebar extends StatelessWidget {
-  final VoidCallback onClose;
-  final VoidCallback onOpenSettings;
-  final String userName;
-
   const _Sidebar({
     required this.onClose,
     required this.onOpenSettings,
     required this.userName,
   });
+
+  final VoidCallback onClose;
+  final VoidCallback onOpenSettings;
+  final String userName;
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +111,7 @@ class _Sidebar extends StatelessWidget {
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
                   Container(
@@ -161,7 +163,7 @@ class _Sidebar extends StatelessWidget {
 
             // Search
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -196,7 +198,7 @@ class _Sidebar extends StatelessWidget {
 
             // Recents Title
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
                 'RECENTES',
                 style: TextStyle(
@@ -211,7 +213,7 @@ class _Sidebar extends StatelessWidget {
             // Chat List
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 children: const [
                   _SidebarItem(title: 'Saudação inicial'),
                   _SidebarItem(title: 'Explique computação...'),
@@ -228,7 +230,7 @@ class _Sidebar extends StatelessWidget {
 
             // User Footer
             Container(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
                 border: Border(top: BorderSide(color: AppColors.surfaceHover)),
               ),
@@ -263,7 +265,7 @@ class _Sidebar extends StatelessWidget {
                   Expanded(
                     child: Text(
                       userName,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -297,16 +299,26 @@ class _Sidebar extends StatelessWidget {
   }
 }
 
-class _SettingsModal extends StatefulWidget {
-  final String userName;
-  final VoidCallback onClose;
-  final ValueChanged<String> onSave;
+class _KeyboardAwareDialog extends StatelessWidget {
+  const _KeyboardAwareDialog({required this.child});
 
-  const _SettingsModal({
-    required this.userName,
-    required this.onClose,
-    required this.onSave,
-  });
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery.removeViewInsets(
+      context: context,
+      removeBottom: true,
+      child: child,
+    );
+  }
+}
+
+class _SettingsModal extends StatefulWidget {
+  const _SettingsModal({required this.viewModel, required this.onClose});
+
+  final HomeViewModel viewModel;
+  final VoidCallback onClose;
 
   @override
   State<_SettingsModal> createState() => _SettingsModalState();
@@ -329,7 +341,7 @@ class _SettingsModalState extends State<_SettingsModal> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.userName);
+    _nameController = TextEditingController(text: widget.viewModel.userName);
   }
 
   @override
@@ -340,186 +352,213 @@ class _SettingsModalState extends State<_SettingsModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      child: Container(
-        width: 440,
-        padding: const EdgeInsets.all(24),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  const HeroIcon(
-                    HeroIcons.cog6Tooth,
-                    size: 24,
-                    color: AppColors.brand300,
+    return _KeyboardAwareDialog(
+      child: Dialog(
+        child: Container(
+          width: 440,
+          padding: const EdgeInsets.all(24),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const HeroIcon(
+                      HeroIcons.cog6Tooth,
+                      size: 24,
+                      color: AppColors.brand300,
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'Configurações',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Material(
+                      color: Colors.transparent,
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        onTap: widget.onClose,
+                        customBorder: const CircleBorder(),
+                        hoverColor: AppColors.surfaceHover,
+                        child: const Padding(
+                          padding: EdgeInsets.all(6),
+                          child: HeroIcon(
+                            HeroIcons.xMark,
+                            size: 20,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                const Text(
+                  'Nome do usuário',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
                   ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Configurações',
-                      style: TextStyle(
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _nameController,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 14,
+                  ),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: AppColors.surfaceInput,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                _SettingsButton(
+                  icon: HeroIcons.key,
+                  title: 'Configurar API Keys',
+                  onTap: () {
+                    // Result not needed, dialog is for user interaction
+                    // ignore: discarded_futures
+                    showDialog<void>(
+                      context: context,
+                      builder: (apiDialogContext) => _ApiKeysModal(
+                        initialOpenRouter: widget.viewModel.openRouterKey,
+                        initialGroq: widget.viewModel.groqKey,
+                        initialOpenCodeZen: widget.viewModel.openCodeZenKey,
+                        onClose: () => Navigator.of(apiDialogContext).pop(),
+                        onSave: (openRouter, groq, openCodeZen) {
+                          widget.viewModel.saveApiKeys(
+                            openRouter: openRouter,
+                            groq: groq,
+                            openCodeZen: openCodeZen,
+                          );
+                          Navigator.of(apiDialogContext).pop();
+                        },
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                _SettingsButton(
+                  icon: HeroIcons.cpuChip,
+                  title: 'Gerenciar Modelos',
+                  onTap: () {},
+                ),
+                const SizedBox(height: 8),
+                _SettingsButton(
+                  icon: HeroIcons.adjustmentsHorizontal,
+                  title: 'Personalização (System Prompt)',
+                  onTap: () {},
+                ),
+                const SizedBox(height: 8),
+                _SettingsButton(
+                  icon: HeroIcons.bolt,
+                  title: 'Prompts Dinâmicos',
+                  onTap: () {},
+                ),
+                const SizedBox(height: 24),
+
+                const Text(
+                  'Idioma da Resposta',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceInput,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedLanguage,
+                      isExpanded: true,
+                      dropdownColor: AppColors.surfaceCard,
+                      style: const TextStyle(
                         color: AppColors.textPrimary,
-                        fontSize: 20,
+                        fontSize: 14,
+                      ),
+                      icon: const HeroIcon(
+                        HeroIcons.chevronDown,
+                        size: 16,
+                        color: AppColors.textSecondary,
+                      ),
+                      items: _languages
+                          .map(
+                            (lang) => DropdownMenuItem(
+                              value: lang,
+                              child: Text(lang),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedLanguage = value);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                _SettingsButton(
+                  icon: HeroIcons.trash,
+                  title: 'Excluir todos os chats',
+                  onTap: () {},
+                  isDestructive: true,
+                ),
+                const SizedBox(height: 24),
+
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      widget.viewModel.updateUserName(_nameController.text);
+                      widget.onClose();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.brand500,
+                      foregroundColor: AppColors.textPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Salvar',
+                      style: TextStyle(
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  Material(
-                    color: Colors.transparent,
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      onTap: widget.onClose,
-                      customBorder: const CircleBorder(),
-                      hoverColor: AppColors.surfaceHover,
-                      child: const Padding(
-                        padding: EdgeInsets.all(6),
-                        child: HeroIcon(
-                          HeroIcons.xMark,
-                          size: 20,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              const Text(
-                'Nome do usuário',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
                 ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _nameController,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 14,
-                ),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: AppColors.surfaceInput,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              _SettingsButton(
-                icon: HeroIcons.key,
-                title: 'Configurar API Keys',
-                onTap: () {},
-              ),
-              const SizedBox(height: 8),
-              _SettingsButton(
-                icon: HeroIcons.cpuChip,
-                title: 'Gerenciar Modelos',
-                onTap: () {},
-              ),
-              const SizedBox(height: 8),
-              _SettingsButton(
-                icon: HeroIcons.adjustmentsHorizontal,
-                title: 'Personalização (System Prompt)',
-                onTap: () {},
-              ),
-              const SizedBox(height: 8),
-              _SettingsButton(
-                icon: HeroIcons.bolt,
-                title: 'Prompts Dinâmicos',
-                onTap: () {},
-              ),
-              const SizedBox(height: 24),
-
-              const Text(
-                'Idioma da Resposta',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceInput,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedLanguage,
-                    isExpanded: true,
-                    dropdownColor: AppColors.surfaceCard,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 14,
-                    ),
-                    icon: const HeroIcon(
-                      HeroIcons.chevronDown,
-                      size: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                    items: _languages
-                        .map(
-                          (lang) =>
-                              DropdownMenuItem(value: lang, child: Text(lang)),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _selectedLanguage = value);
-                      }
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              _SettingsButton(
-                icon: HeroIcons.trash,
-                title: 'Excluir todos os chats',
-                onTap: () {},
-                isDestructive: true,
-              ),
-              const SizedBox(height: 24),
-
-              SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    widget.onSave(_nameController.text);
-                    widget.onClose();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brand500,
-                    foregroundColor: AppColors.textPrimary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Salvar',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -528,17 +567,17 @@ class _SettingsModalState extends State<_SettingsModal> {
 }
 
 class _SettingsButton extends StatelessWidget {
-  final HeroIcons icon;
-  final String title;
-  final VoidCallback onTap;
-  final bool isDestructive;
-
   const _SettingsButton({
     required this.icon,
     required this.title,
     required this.onTap,
     this.isDestructive = false,
   });
+
+  final HeroIcons icon;
+  final String title;
+  final VoidCallback onTap;
+  final bool isDestructive;
 
   @override
   Widget build(BuildContext context) {
@@ -587,10 +626,230 @@ class _SettingsButton extends StatelessWidget {
   }
 }
 
-class _SidebarItem extends StatelessWidget {
-  final String title;
+class _ApiKeysModal extends StatefulWidget {
+  const _ApiKeysModal({
+    required this.initialOpenRouter,
+    required this.initialGroq,
+    required this.initialOpenCodeZen,
+    required this.onClose,
+    required this.onSave,
+  });
 
+  final String initialOpenRouter;
+  final String initialGroq;
+  final String initialOpenCodeZen;
+  final VoidCallback onClose;
+  final void Function(String openRouter, String groq, String openCodeZen)
+  onSave;
+
+  @override
+  State<_ApiKeysModal> createState() => _ApiKeysModalState();
+}
+
+class _ApiKeysModalState extends State<_ApiKeysModal> {
+  late final TextEditingController _openRouterController;
+  late final TextEditingController _groqController;
+  late final TextEditingController _openCodeZenController;
+  bool _obscureOpenRouter = true;
+  bool _obscureGroq = true;
+  bool _obscureOpenCodeZen = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _openRouterController = TextEditingController(
+      text: widget.initialOpenRouter,
+    );
+    _groqController = TextEditingController(text: widget.initialGroq);
+    _openCodeZenController = TextEditingController(
+      text: widget.initialOpenCodeZen,
+    );
+  }
+
+  @override
+  void dispose() {
+    _openRouterController.dispose();
+    _groqController.dispose();
+    _openCodeZenController.dispose();
+    super.dispose();
+  }
+
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+      filled: true,
+      fillColor: AppColors.surfaceInput,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _KeyboardAwareDialog(
+      child: Dialog(
+        child: Container(
+          width: 440,
+          padding: const EdgeInsets.all(24),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const HeroIcon(
+                      HeroIcons.key,
+                      size: 24,
+                      color: AppColors.brand300,
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'Configurar API Keys',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Material(
+                      color: Colors.transparent,
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        onTap: widget.onClose,
+                        customBorder: const CircleBorder(),
+                        hoverColor: AppColors.surfaceHover,
+                        child: const Padding(
+                          padding: EdgeInsets.all(6),
+                          child: HeroIcon(
+                            HeroIcons.xMark,
+                            size: 20,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                _buildKeyField(
+                  label: 'OpenRouter',
+                  controller: _openRouterController,
+                  obscure: _obscureOpenRouter,
+                  onToggleObscure: () =>
+                      setState(() => _obscureOpenRouter = !_obscureOpenRouter),
+                  hint: 'sk-or-v1-...',
+                ),
+                const SizedBox(height: 16),
+
+                _buildKeyField(
+                  label: 'Groq',
+                  controller: _groqController,
+                  obscure: _obscureGroq,
+                  onToggleObscure: () =>
+                      setState(() => _obscureGroq = !_obscureGroq),
+                  hint: 'gsk_...',
+                ),
+                const SizedBox(height: 16),
+
+                _buildKeyField(
+                  label: 'Opencode Zen',
+                  controller: _openCodeZenController,
+                  obscure: _obscureOpenCodeZen,
+                  onToggleObscure: () => setState(
+                    () => _obscureOpenCodeZen = !_obscureOpenCodeZen,
+                  ),
+                  hint: 'oz-...',
+                ),
+                const SizedBox(height: 24),
+
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      widget.onSave(
+                        _openRouterController.text,
+                        _groqController.text,
+                        _openCodeZenController.text,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.brand500,
+                      foregroundColor: AppColors.textPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Concluído',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildKeyField({
+    required String label,
+    required TextEditingController controller,
+    required bool obscure,
+    required VoidCallback onToggleObscure,
+    required String hint,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          obscureText: obscure,
+          style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+          scrollPadding: const EdgeInsets.only(bottom: 120),
+          decoration: _inputDecoration(hint).copyWith(
+            suffixIcon: IconButton(
+              onPressed: onToggleObscure,
+              icon: HeroIcon(
+                obscure ? HeroIcons.eyeSlash : HeroIcons.eye,
+                size: 18,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SidebarItem extends StatelessWidget {
   const _SidebarItem({required this.title});
+
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -636,9 +895,9 @@ class _SidebarItem extends StatelessWidget {
 }
 
 class _MainChatView extends StatelessWidget {
-  final VoidCallback onToggleSidebar;
-
   const _MainChatView({required this.onToggleSidebar});
+
+  final VoidCallback onToggleSidebar;
 
   @override
   Widget build(BuildContext context) {
@@ -647,7 +906,7 @@ class _MainChatView extends StatelessWidget {
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.translucent,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             children: [
               _TopBar(
@@ -678,9 +937,9 @@ class _MainChatView extends StatelessWidget {
 }
 
 class _TopBar extends StatelessWidget {
-  final VoidCallback onToggleSidebar;
-
   const _TopBar({required this.onToggleSidebar});
+
+  final VoidCallback onToggleSidebar;
 
   @override
   Widget build(BuildContext context) {
@@ -780,27 +1039,27 @@ class _SuggestionsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final suggestions = [
-      {
-        'title': 'Explique computação quânt?',
-        'subtitle': 'quântica de forma simples',
-        'icon': HeroIcons.lightBulb,
-      },
-      {
-        'title': 'Script Python para auto...',
-        'subtitle': 'automação de tarefas',
-        'icon': HeroIcons.codeBracket,
-      },
-      {
-        'title': 'Simule uma entrevista',
-        'subtitle': 'para o cargo de dev',
-        'icon': HeroIcons.userGroup,
-      },
-      {
-        'title': 'Ideias para um app inova...',
-        'subtitle': 'inovador no mercado',
-        'icon': HeroIcons.sparkles,
-      },
+    final suggestions = <({String title, String subtitle, HeroIcons icon})>[
+      (
+        title: 'Explique computação quânt?',
+        subtitle: 'quântica de forma simples',
+        icon: HeroIcons.lightBulb,
+      ),
+      (
+        title: 'Script Python para auto...',
+        subtitle: 'automação de tarefas',
+        icon: HeroIcons.codeBracket,
+      ),
+      (
+        title: 'Simule uma entrevista',
+        subtitle: 'para o cargo de dev',
+        icon: HeroIcons.userGroup,
+      ),
+      (
+        title: 'Ideias para um app inova...',
+        subtitle: 'inovador no mercado',
+        icon: HeroIcons.sparkles,
+      ),
     ];
 
     return Wrap(
@@ -810,8 +1069,8 @@ class _SuggestionsGrid extends StatelessWidget {
       children: suggestions
           .map(
             (s) => _SuggestionCard(
-              title: s['title'] as String,
-              icon: s['icon'] as HeroIcons,
+              title: s.title,
+              icon: s.icon,
             ),
           )
           .toList(),
@@ -820,10 +1079,10 @@ class _SuggestionsGrid extends StatelessWidget {
 }
 
 class _SuggestionCard extends StatelessWidget {
+  const _SuggestionCard({required this.title, required this.icon});
+
   final String title;
   final HeroIcons icon;
-
-  const _SuggestionCard({required this.title, required this.icon});
 
   @override
   Widget build(BuildContext context) {

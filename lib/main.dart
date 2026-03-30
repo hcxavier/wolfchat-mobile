@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'core/di/service_locator.dart';
-import 'core/router/app_router.dart';
-import 'core/theme/app_theme.dart';
+import 'package:wolfchat/core/di/service_locator.dart';
+import 'package:wolfchat/core/router/app_router.dart';
+import 'package:wolfchat/core/theme/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import '../models/home_model.dart';
+import 'package:wolfchat/features/home/models/home_model.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel() {
@@ -11,12 +11,18 @@ class HomeViewModel extends ChangeNotifier {
   bool _isSidebarOpen = false;
   bool _isSettingsModalOpen = false;
   String _userName = 'Usuário';
+  String _openRouterKey = '';
+  String _groqKey = '';
+  String _openCodeZenKey = '';
 
   HomeModel get model => _model;
   bool get isLoading => _isLoading;
   bool get isSidebarOpen => _isSidebarOpen;
   bool get isSettingsModalOpen => _isSettingsModalOpen;
   String get userName => _userName;
+  String get openRouterKey => _openRouterKey;
+  String get groqKey => _groqKey;
+  String get openCodeZenKey => _openCodeZenKey;
 
   void _loadData() {
     _isLoading = true;
@@ -53,11 +59,22 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void saveApiKeys({
+    required String openRouter,
+    required String groq,
+    required String openCodeZen,
+  }) {
+    _openRouterKey = openRouter;
+    _groqKey = groq;
+    _openCodeZenKey = openCodeZen;
+    notifyListeners();
+  }
+
   void onGetStartedPressed() {
-    // TODO: Implementar navegação para tela principal do chat
+    // TODO(proxjie): Implementar navegação para tela principal do chat
   }
 
   void onLearnMorePressed() {
-    // TODO: Implementar navegação para tela de informações
+    // TODO(proxjie): Implementar navegação para tela de informações
   }
 }

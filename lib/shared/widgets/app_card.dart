@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
+import 'package:wolfchat/core/theme/app_colors.dart';
 
 class AppCard extends StatelessWidget {
   const AppCard({
-    super.key,
     required this.child,
+    super.key,
     this.padding = const EdgeInsets.all(16),
     this.onTap,
   });

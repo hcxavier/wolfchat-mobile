@@ -1,5 +1,5 @@
 import 'package:go_router/go_router.dart';
-import '../../features/home/views/home_page.dart';
+import 'package:wolfchat/features/home/views/home_page.dart';
 
 abstract final class AppRouter {
   static final router = GoRouter(

@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:wolfchat/main.dart';
 import 'package:wolfchat/core/di/service_locator.dart';
+import 'package:wolfchat/main.dart';
 
 void main() {
-  testWidgets('App renders home page', (WidgetTester tester) async {
+  testWidgets('App renders home page', (tester) async {
     await tester.pumpWidget(
       MultiProvider(
         providers: ServiceLocator.providers,

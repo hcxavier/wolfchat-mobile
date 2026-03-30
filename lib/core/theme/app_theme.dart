@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'app_colors.dart';
-import 'app_typography.dart';
+import 'package:wolfchat/core/theme/app_colors.dart';
+import 'package:wolfchat/core/theme/app_typography.dart';
 
 abstract final class AppTheme {
   static ThemeData get darkTheme => ThemeData(
@@ -28,7 +28,6 @@ abstract final class AppTheme {
       error: AppColors.brand600,
       onError: AppColors.textPrimary,
       surface: AppColors.surfaceMain,
-      onSurface: AppColors.textPrimary,
       surfaceContainerHighest: AppColors.surfaceCard,
       onSurfaceVariant: AppColors.textSecondary,
       outline: AppColors.accentLight,

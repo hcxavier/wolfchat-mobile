@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
+import 'package:wolfchat/core/theme/app_colors.dart';
 
 class AppButton extends StatelessWidget {
   const AppButton({
-    super.key,
     required this.label,
+    super.key,
     this.onPressed,
     this.icon,
     this.isLoading = false,
