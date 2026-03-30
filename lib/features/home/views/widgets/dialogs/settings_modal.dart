@@ -186,8 +186,9 @@ class _SettingsModalState extends State<SettingsModal> {
         SizedBox(
           height: 48,
           child: ElevatedButton(
-            onPressed: () async {
-              await widget.viewModel.saveApiKeys(
+            onPressed: () {
+              // ignore: discarded_futures, Intentional background update
+              widget.viewModel.saveApiKeys(
                 openRouter: _openRouterController.text,
                 groq: _groqController.text,
                 openCodeZen: _openCodeZenController.text,
@@ -281,10 +282,13 @@ class _SettingsModalState extends State<SettingsModal> {
       );
     }
 
-    return DialogWrapper(
+    return KeyboardAwareDialog(
       child: Dialog(
         child: Container(
           width: 440,
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.9,
+          ),
           padding: const EdgeInsets.all(24),
           child: SingleChildScrollView(
             child: _showApiKeys ? _buildApiKeysSection() : _buildMainContent(),
@@ -516,9 +520,11 @@ class _SettingsModalState extends State<SettingsModal> {
         SizedBox(
           height: 48,
           child: ElevatedButton(
-            onPressed: () async {
-              await widget.viewModel.updateUserName(_nameController.text);
-              await widget.viewModel.updateLanguage(_selectedLanguage);
+            onPressed: () {
+              // ignore: discarded_futures, Intentional background update
+              widget.viewModel.updateUserName(_nameController.text);
+              // ignore: discarded_futures, Intentional background update
+              widget.viewModel.updateLanguage(_selectedLanguage);
               widget.onClose();
             },
             style: ElevatedButton.styleFrom(
