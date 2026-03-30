@@ -294,6 +294,73 @@ class _SettingsModalState extends State<SettingsModal> {
     );
   }
 
+  Future<void> _showLanguageSelector(BuildContext context) async {
+    final overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox?;
+    final button = context.findRenderObject() as RenderBox?;
+    if (overlay == null || button == null) return;
+
+    final position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(
+          button.size.bottomLeft(const Offset(0, 8)),
+          ancestor: overlay,
+        ),
+        button.localToGlobal(
+          button.size.bottomRight(const Offset(0, 8)),
+          ancestor: overlay,
+        ),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    final result = await showMenu<String>(
+      context: context,
+      position: position,
+      color: AppColors.surfaceCard,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      constraints: BoxConstraints(
+        minWidth: button.size.width,
+        maxWidth: button.size.width,
+        maxHeight: 250,
+      ),
+      items: _languages.map((lang) {
+        final isSelected = lang == _selectedLanguage;
+        return PopupMenuItem<String>(
+          value: lang,
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  lang,
+                  style: TextStyle(
+                    color: isSelected
+                        ? AppColors.brand400
+                        : AppColors.textPrimary,
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  ),
+                ),
+              ),
+              if (isSelected)
+                const HeroIcon(
+                  HeroIcons.check,
+                  size: 18,
+                  color: AppColors.brand400,
+                ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+
+    if (result != null) {
+      setState(() => _selectedLanguage = result);
+    }
+  }
+
   Widget _buildMainContent() {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -401,39 +468,40 @@ class _SettingsModalState extends State<SettingsModal> {
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceInput,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _selectedLanguage,
-              isExpanded: true,
-              dropdownColor: AppColors.surfaceCard,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 14,
-              ),
-              icon: const HeroIcon(
-                HeroIcons.chevronDown,
-                size: 16,
-                color: AppColors.textSecondary,
-              ),
-              items: _languages
-                  .map(
-                    (lang) => DropdownMenuItem(
-                      value: lang,
-                      child: Text(lang),
+        Builder(
+          builder: (context) => Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => _showLanguageSelector(context),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceInput,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _selectedLanguage,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
-                  )
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _selectedLanguage = value);
-                }
-              },
+                    const HeroIcon(
+                      HeroIcons.chevronDown,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

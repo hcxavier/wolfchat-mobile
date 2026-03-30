@@ -25,22 +25,30 @@ class TopBar extends StatelessWidget {
     final button = context.findRenderObject() as RenderBox?;
     if (overlay == null || button == null) return;
 
-    final position = button.localToGlobal(
-      button.size.bottomCenter(const Offset(0, 8)),
-      ancestor: overlay,
+    final position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(
+          button.size.bottomLeft(const Offset(0, 8)),
+          ancestor: overlay,
+        ),
+        button.localToGlobal(
+          button.size.bottomRight(const Offset(0, 8)),
+          ancestor: overlay,
+        ),
+      ),
+      Offset.zero & overlay.size,
     );
 
     final item = await showMenu<int>(
       context: context,
-      position: RelativeRect.fromLTRB(
-        position.dx,
-        position.dy,
-        position.dx,
-        position.dy,
-      ),
+      position: position,
       color: AppColors.surfaceCard,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+      ),
+      constraints: const BoxConstraints(
+        minWidth: 200,
+        maxWidth: 300,
       ),
       items: List.generate(availableModels.length, (index) {
         final model = availableModels[index];
@@ -107,35 +115,40 @@ class TopBar extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => _showModelSelector(context),
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceHover,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    selectedModelName,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+        Builder(
+          builder: (context) => Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => _showModelSelector(context),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceHover,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      selectedModelName,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  const HeroIcon(
-                    HeroIcons.chevronDown,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    const HeroIcon(
+                      HeroIcons.chevronDown,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
