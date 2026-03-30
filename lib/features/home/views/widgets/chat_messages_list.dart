@@ -160,6 +160,10 @@ class _MessageBubble extends StatelessWidget {
       data: message.content,
       styleSheet: MarkdownStyler.getStyleSheet(context),
       selectable: true,
+      builders: {
+        'code': CodeBlockBuilder(),
+        'hr': HrBuilder(),
+      },
       onTapLink: (text, href, title) {
         if (href != null) {
           // Handle link tap

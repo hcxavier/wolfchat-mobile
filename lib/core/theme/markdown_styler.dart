@@ -1,137 +1,309 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_highlighter/flutter_highlighter.dart';
+import 'package:flutter_highlighter/themes/dracula.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:markdown/markdown.dart' as md;
 import 'package:wolfchat/core/theme/app_colors.dart';
 
 class MarkdownStyler {
   static MarkdownStyleSheet getStyleSheet(BuildContext context) {
+    const defaultText = TextStyle(
+      fontSize: 16,
+      height: 1.6,
+      color: AppColors.textPrimary,
+      letterSpacing: 0.2,
+    );
+
     return MarkdownStyleSheet(
-      p: const TextStyle(
-        fontSize: 16,
-        height: 1.6,
-        color: AppColors.textPrimary,
-      ),
-      pPadding: const EdgeInsets.only(bottom: 16),
+      p: defaultText,
+      pPadding: const EdgeInsets.only(bottom: 12),
       h1: const TextStyle(
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
+        fontSize: 26,
+        fontWeight: FontWeight.w700,
         color: AppColors.textPrimary,
+        height: 1.3,
+        letterSpacing: -0.5,
       ),
-      h1Padding: const EdgeInsets.only(bottom: 16),
+      h1Padding: const EdgeInsets.only(top: 24, bottom: 12),
       h2: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
+        fontSize: 22,
+        fontWeight: FontWeight.w700,
         color: AppColors.textPrimary,
+        height: 1.3,
+        letterSpacing: -0.5,
       ),
-      h2Padding: const EdgeInsets.only(bottom: 12),
+      h2Padding: const EdgeInsets.only(top: 20, bottom: 10),
       h3: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
+        height: 1.3,
       ),
-      h3Padding: const EdgeInsets.only(bottom: 8),
+      h3Padding: const EdgeInsets.only(top: 16, bottom: 8),
       h4: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
       ),
-      h4Padding: const EdgeInsets.only(bottom: 8),
+      h4Padding: const EdgeInsets.only(top: 16, bottom: 8),
       h5: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.bold,
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
       ),
-      h5Padding: const EdgeInsets.only(bottom: 8),
+      h5Padding: const EdgeInsets.only(top: 16, bottom: 8),
       h6: const TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textSecondary,
       ),
-      h6Padding: const EdgeInsets.only(bottom: 8),
-      em: const TextStyle(
-        fontStyle: FontStyle.italic,
-        color: AppColors.textPrimary,
-      ),
-      strong: const TextStyle(
-        fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
-      ),
+      h6Padding: const EdgeInsets.only(top: 16, bottom: 8),
+      em: const TextStyle(fontStyle: FontStyle.italic),
+      strong: const TextStyle(fontWeight: FontWeight.w700),
       del: const TextStyle(
         decoration: TextDecoration.lineThrough,
         color: AppColors.textSecondary,
       ),
       blockquote: const TextStyle(
+        color: AppColors.textSecondary,
         fontStyle: FontStyle.italic,
-        color: Color(0xB3FFFFFF),
+        fontSize: 16,
+        height: 1.6,
       ),
-      blockquotePadding: const EdgeInsets.only(left: 16, top: 4, bottom: 8),
-      blockquoteDecoration: const BoxDecoration(
-        border: Border(
-          left: BorderSide(
-            color: AppColors.brand500,
-            width: 4,
-          ),
+      blockquotePadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 12,
+      ),
+      blockquoteDecoration: BoxDecoration(
+        color: AppColors.brand500.withValues(alpha: 0.05),
+        border: const Border(
+          left: BorderSide(color: AppColors.brand500, width: 4),
         ),
-        color: Color(0x0DFFFFFF),
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
           topRight: Radius.circular(8),
           bottomRight: Radius.circular(8),
         ),
       ),
-      code: const TextStyle(
+      code: TextStyle(
         fontFamily: 'JetBrains Mono',
-        fontSize: 13,
-        backgroundColor: Color(0x1AFFFFFF),
+        fontSize: 14,
+        backgroundColor: AppColors.brand500.withValues(alpha: 0.1),
         color: AppColors.brand300,
       ),
-      codeblockPadding: const EdgeInsets.all(16),
-      codeblockDecoration: const BoxDecoration(
-        color: Color(0xFF282A36),
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-        border: Border.fromBorderSide(
-          BorderSide(
-            color: Color(0x1AFFFFFF),
-          ),
-        ),
-      ),
+      codeblockPadding: EdgeInsets.zero,
+      codeblockDecoration: const BoxDecoration(),
       listBullet: const TextStyle(
         color: AppColors.brand500,
+        fontSize: 16,
         fontWeight: FontWeight.bold,
       ),
-      listBulletPadding: const EdgeInsets.only(left: 8),
+      listBulletPadding: const EdgeInsets.only(right: 8),
       listIndent: 24,
-      blockSpacing: 16,
-      horizontalRuleDecoration: const BoxDecoration(
+      blockSpacing: 12,
+      horizontalRuleDecoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: Color(0x0DFFFFFF),
+            color: Colors.white.withValues(alpha: 0.1),
           ),
         ),
       ),
       tableHead: const TextStyle(
-        fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: Color(0xFF818CF8),
-      ),
-      tableBody: const TextStyle(
+        color: AppColors.brand300,
         fontSize: 14,
-        color: AppColors.textPrimary,
       ),
+      tableBody: defaultText.copyWith(fontSize: 14),
       tableBorder: TableBorder.all(
-        color: const Color(0x0DFFFFFF),
+        color: Colors.white.withValues(alpha: 0.1),
       ),
-      tableCellsPadding: const EdgeInsets.all(12),
-      tableCellsDecoration: const BoxDecoration(
-        color: Color(0x0DFFFFFF),
+      tableCellsPadding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 8,
+      ),
+      tableCellsDecoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.02),
       ),
       tableHeadAlign: TextAlign.left,
-      tablePadding: const EdgeInsets.all(8),
-      tableColumnWidth: const IntrinsicColumnWidth(),
       a: const TextStyle(
         color: AppColors.brand400,
         decoration: TextDecoration.underline,
       ),
-      checkbox: const TextStyle(
-        color: AppColors.brand500,
+    );
+  }
+}
+
+class CodeBlockBuilder extends MarkdownElementBuilder {
+  @override
+  Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
+    if (!element.textContent.contains('\n')) return null;
+
+    var language = 'text';
+    if (element.attributes['class'] != null) {
+      final lgPattern = element.attributes['class'] ?? '';
+      if (lgPattern.startsWith('language-')) {
+        language = lgPattern.substring(9);
+      }
+    }
+
+    return CodeBlockWidget(
+      language: language,
+      code: element.textContent.trimRight(),
+    );
+  }
+}
+
+class HrBuilder extends MarkdownElementBuilder {
+  @override
+  Widget visitElementAfter(md.Element element, TextStyle? preferredStyle) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Divider(
+        color: Colors.white.withValues(alpha: 0.1),
+        thickness: 1,
+        height: 1,
+      ),
+    );
+  }
+}
+
+class CodeBlockWidget extends StatefulWidget {
+  const CodeBlockWidget({
+    required this.language, required this.code, super.key,
+  });
+
+  final String language;
+  final String code;
+
+  @override
+  State<CodeBlockWidget> createState() => _CodeBlockWidgetState();
+}
+
+class _CodeBlockWidgetState extends State<CodeBlockWidget> {
+  bool _copied = false;
+
+  Future<void> _handleCopy() async {
+    await Clipboard.setData(ClipboardData(text: widget.code));
+    setState(() => _copied = true);
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _copied = false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF282A36), // Dracula background
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.05),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.05),
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.code,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      widget.language.isEmpty
+                          ? 'TEXT'
+                          : widget.language.toUpperCase(),
+                      style: const TextStyle(
+                        fontFamily: 'JetBrains Mono',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                InkWell(
+                  onTap: _handleCopy,
+                  borderRadius: BorderRadius.circular(6),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _copied ? Icons.check : Icons.copy,
+                          size: 14,
+                          color: _copied
+                              ? AppColors.brand400
+                              : AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _copied ? 'Copiado' : 'Copiar',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: _copied
+                                ? AppColors.brand400
+                                : AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Code Content
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: HighlightView(
+                widget.code,
+                language: widget.language.isEmpty ? 'text' : widget.language,
+                theme: draculaTheme,
+                padding: EdgeInsets.zero,
+                textStyle: const TextStyle(
+                  fontFamily: 'JetBrains Mono',
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
