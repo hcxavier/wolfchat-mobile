@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:wolfchat/core/data/models/conversation.dart';
 import 'package:wolfchat/core/data/services/persistence_service.dart';
-import 'package:wolfchat/core/services/groq_service.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
 import 'package:wolfchat/features/home/models/home_model.dart';
+import 'package:wolfchat/features/home/models/custom_model.dart';
+import 'package:wolfchat/features/home/viewmodels/conversation_viewmodel.dart';
+import 'package:wolfchat/features/home/viewmodels/settings_viewmodel.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel() {
@@ -13,136 +15,105 @@ class HomeViewModel extends ChangeNotifier {
   PersistenceService? _persistence;
   final HomeModel _model = const HomeModel();
   bool _isInitialized = false;
-  bool _isLoading = false;
-  bool _isSidebarOpen = false;
-  bool _isSettingsModalOpen = false;
-  String _userName = 'Usuário';
-  String _openRouterKey = '';
-  String _groqKey = '';
-  String _openCodeZenKey = '';
-  final List<CustomModel> _customModels = [];
-  int _selectedModelIndex = 0;
-  final List<ChatMessage> _messages = [];
-  bool _isSendingMessage = false;
-  String? _errorMessage;
-  List<Conversation> _conversations = [];
-  Conversation? _currentConversation;
 
-  static const List<CustomModel> _defaultModels = [
-    CustomModel(
-      id: 'moonshotai/kimi-k2-instruct',
-      name: 'Kimi K2 Instruct',
-      provider: 'Groq',
-    ),
-    CustomModel(
-      id: 'llama-3.3-70b-versatile',
-      name: 'Llama 3.3 70B',
-      provider: 'Groq',
-    ),
-    CustomModel(
-      id: 'llama-3.1-70b-versatile',
-      name: 'Llama 3.1 70B',
-      provider: 'Groq',
-    ),
-    CustomModel(
-      id: 'llama-3.1-8b-instant',
-      name: 'Llama 3.1 8B',
-      provider: 'Groq',
-    ),
-    CustomModel(
-      id: 'mixtral-8x7b-32768',
-      name: 'Mixtral 8x7B',
-      provider: 'Groq',
-    ),
-    CustomModel(
-      id: 'gemma2-9b-it',
-      name: 'Gemma 2 9B',
-      provider: 'Groq',
-    ),
-  ];
+  late final SettingsViewModel settings;
+  late final ConversationViewModel conversation;
 
   HomeModel get model => _model;
   bool get isInitialized => _isInitialized;
-  bool get isLoading => _isLoading;
-  bool get isSidebarOpen => _isSidebarOpen;
-  bool get isSettingsModalOpen => _isSettingsModalOpen;
-  String get userName => _userName;
-  String get openRouterKey => _openRouterKey;
-  String get groqKey => _groqKey;
-  String get openCodeZenKey => _openCodeZenKey;
-  List<CustomModel> get customModels => List.unmodifiable(_customModels);
-  List<CustomModel> get availableModels => [
-    ..._defaultModels,
-    ..._customModels,
-  ];
-  CustomModel get selectedModel => availableModels[_selectedModelIndex];
-  int get selectedModelIndex => _selectedModelIndex;
-  List<ChatMessage> get messages => List.unmodifiable(_messages);
-  bool get isSendingMessage => _isSendingMessage;
-  String? get errorMessage => _errorMessage;
-  bool get hasApiKey => _groqKey.isNotEmpty;
-  List<Conversation> get conversations => List.unmodifiable(_conversations);
-  Conversation? get currentConversation => _currentConversation;
+  bool get isLoading => _isInitialized && settings.isLoading;
+  bool get isSidebarOpen => _isInitialized && settings.isSidebarOpen;
+  bool get isSettingsModalOpen =>
+      _isInitialized && settings.isSettingsModalOpen;
+  String get userName => _isInitialized ? settings.userName : 'Usuário';
+  String get openRouterKey => _isInitialized ? settings.openRouterKey : '';
+  String get groqKey => _isInitialized ? settings.groqKey : '';
+  String get openCodeZenKey => _isInitialized ? settings.openCodeZenKey : '';
+  List<CustomModel> get customModels =>
+      _isInitialized ? settings.customModels : [];
+  List<CustomModel> get availableModels =>
+      _isInitialized ? settings.availableModels : [];
+  CustomModel get selectedModel => _isInitialized
+      ? settings.selectedModel
+      : const CustomModel(id: '', name: 'Selecione', provider: '');
+  int get selectedModelIndex =>
+      _isInitialized ? settings.selectedModelIndex : 0;
+  List<ConversationViewModel> get conversationList =>
+      _isInitialized ? [conversation] : [];
+  bool get isSendingMessage => _isInitialized && conversation.isSendingMessage;
+  String? get errorMessage => _isInitialized ? conversation.errorMessage : null;
+  bool get hasApiKey => _isInitialized && settings.hasApiKey;
+  List<Conversation> get conversations =>
+      _isInitialized ? conversation.conversations : [];
+  Conversation? get currentConversation =>
+      _isInitialized ? conversation.currentConversation : null;
+  List<ChatMessage> get messages => _isInitialized ? conversation.messages : [];
 
   Future<void> _init() async {
     _persistence = await PersistenceService.getInstance();
-    await _loadData();
-  }
 
-  Future<void> _loadData() async {
-    _isLoading = true;
-    notifyListeners();
+    settings = SettingsViewModel(persistence: _persistence);
+    conversation = ConversationViewModel(
+      persistence: _persistence,
+      groqKey: '',
+      getSelectedModelId: () => settings.selectedModelId,
+    );
 
-    try {
-      if (_persistence != null) {
-        debugPrint('Loading conversations from database...');
-        _conversations = await _persistence!.getAllConversations();
-        debugPrint('Loaded ${_conversations.length} conversations');
+    settings.addListener(_onSettingsChanged);
+    conversation.addListener(_onConversationChanged);
 
-        final apiKeys = await _persistence!.getAllApiKeys();
-        _openRouterKey = apiKeys['open_router'] ?? '';
-        _groqKey = apiKeys['groq'] ?? '';
-        _openCodeZenKey = apiKeys['open_code_zen'] ?? '';
+    await settings.loadSettings();
+    await conversation.loadConversations();
 
-        final savedUserName = await _persistence!.getUserName();
-        if (savedUserName != null && savedUserName.isNotEmpty) {
-          _userName = savedUserName;
-        }
-      }
-    } catch (e, stackTrace) {
-      debugPrint('Error loading data: $e');
-      debugPrint('Stack trace: $stackTrace');
-    }
-
-    _isLoading = false;
     _isInitialized = true;
     notifyListeners();
   }
 
-  void toggleSidebar() {
-    _isSidebarOpen = !_isSidebarOpen;
+  void _onSettingsChanged() {
+    if (!_isInitialized) return;
+    conversation.updateGroqKey(settings.groqKey);
     notifyListeners();
+  }
+
+  void _onConversationChanged() {
+    if (!_isInitialized) return;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    if (_isInitialized) {
+      settings.removeListener(_onSettingsChanged);
+      conversation.removeListener(_onConversationChanged);
+      settings.dispose();
+      conversation.dispose();
+    }
+    super.dispose();
+  }
+
+  void toggleSidebar() {
+    if (!_isInitialized) return;
+    settings.toggleSidebar();
   }
 
   void closeSidebar() {
-    _isSidebarOpen = false;
-    notifyListeners();
+    if (!_isInitialized) return;
+    settings.closeSidebar();
   }
 
   void openSettingsModal() {
-    _isSettingsModalOpen = true;
-    notifyListeners();
+    if (!_isInitialized) return;
+    settings.openSettingsModal();
   }
 
   void closeSettingsModal() {
-    _isSettingsModalOpen = false;
-    notifyListeners();
+    if (!_isInitialized) return;
+    settings.closeSettingsModal();
   }
 
   void updateUserName(String name) {
-    _userName = name;
-    _persistence?.saveUserName(name);
-    notifyListeners();
+    if (!_isInitialized) return;
+    settings.updateUserName(name);
   }
 
   Future<void> saveApiKeys({
@@ -150,29 +121,12 @@ class HomeViewModel extends ChangeNotifier {
     required String groq,
     required String openCodeZen,
   }) async {
-    _openRouterKey = openRouter;
-    _groqKey = groq;
-    _openCodeZenKey = openCodeZen;
-
-    if (_persistence != null) {
-      if (openRouter.isNotEmpty) {
-        await _persistence!.saveApiKey('open_router', openRouter);
-      } else {
-        await _persistence!.deleteApiKey('open_router');
-      }
-      if (groq.isNotEmpty) {
-        await _persistence!.saveApiKey('groq', groq);
-      } else {
-        await _persistence!.deleteApiKey('groq');
-      }
-      if (openCodeZen.isNotEmpty) {
-        await _persistence!.saveApiKey('open_code_zen', openCodeZen);
-      } else {
-        await _persistence!.deleteApiKey('open_code_zen');
-      }
-    }
-
-    notifyListeners();
+    if (!_isInitialized) return;
+    await settings.saveApiKeys(
+      openRouter: openRouter,
+      groq: groq,
+      openCodeZen: openCodeZen,
+    );
   }
 
   void addCustomModel({
@@ -180,81 +134,37 @@ class HomeViewModel extends ChangeNotifier {
     required String modelId,
     required ModelProvider provider,
   }) {
-    final model = CustomModel(
-      id: modelId,
+    if (!_isInitialized) return;
+    settings.addCustomModel(
       name: name,
-      provider: provider.displayName,
+      modelId: modelId,
+      provider: provider,
     );
-    _customModels.add(model);
-    notifyListeners();
   }
 
   void removeCustomModel(int index) {
-    if (index >= 0 && index < _customModels.length) {
-      _customModels.removeAt(index);
-      if (_selectedModelIndex >= availableModels.length) {
-        _selectedModelIndex = availableModels.length - 1;
-      }
-      notifyListeners();
-    }
+    if (!_isInitialized) return;
+    settings.removeCustomModel(index);
   }
 
   void selectModel(int index) {
-    if (index >= 0 && index < availableModels.length) {
-      _selectedModelIndex = index;
-      notifyListeners();
-    }
+    if (!_isInitialized) return;
+    settings.selectModel(index);
   }
 
   Future<void> createNewConversation() async {
-    _currentConversation = null;
-    _messages.clear();
-    _errorMessage = null;
-
-    if (_persistence != null) {
-      _currentConversation = await _persistence!.createConversation(
-        'Nova conversa',
-        modelId: selectedModel.id,
-      );
-      _conversations = await _persistence!.getAllConversations();
-    }
-
-    notifyListeners();
+    if (!_isInitialized) return;
+    await conversation.createNewConversation();
   }
 
   Future<void> loadConversation(int conversationId) async {
-    if (_persistence == null) return;
-
-    _currentConversation = await _persistence!.getConversation(conversationId);
-    if (_currentConversation != null) {
-      final messages = await _persistence!.getMessages(conversationId);
-      _messages.clear();
-      for (final msg in messages) {
-        _messages.add(
-          ChatMessage(
-            role: msg.role,
-            content: msg.content,
-            timestamp: msg.timestamp,
-          ),
-        );
-      }
-    }
-
-    notifyListeners();
+    if (!_isInitialized) return;
+    await conversation.loadConversation(conversationId);
   }
 
   Future<void> deleteConversation(int conversationId) async {
-    if (_persistence == null) return;
-
-    await _persistence!.deleteConversation(conversationId);
-    _conversations = await _persistence!.getAllConversations();
-
-    if (_currentConversation?.id == conversationId) {
-      _currentConversation = null;
-      _messages.clear();
-    }
-
-    notifyListeners();
+    if (!_isInitialized) return;
+    await conversation.deleteConversation(conversationId);
   }
 
   void onGetStartedPressed() {}
@@ -262,90 +172,17 @@ class HomeViewModel extends ChangeNotifier {
   void onLearnMorePressed() {}
 
   Future<void> sendMessage(String content) async {
-    if (content.trim().isEmpty || _isSendingMessage) return;
-
-    _errorMessage = null;
-    _isSendingMessage = true;
-    notifyListeners();
-
-    final userMessage = ChatMessage(
-      role: 'user',
-      content: content.trim(),
-      timestamp: DateTime.now(),
-    );
-    _messages.add(userMessage);
-
-    if (_currentConversation == null && _persistence != null) {
-      final firstContent = content.trim().length > 50
-          ? '${content.trim().substring(0, 50)}...'
-          : content.trim();
-      _currentConversation = await _persistence!.createConversation(
-        firstContent,
-        modelId: selectedModel.id,
-      );
-      _conversations = await _persistence!.getAllConversations();
-    }
-
-    if (_currentConversation != null && _persistence != null) {
-      await _persistence!.addMessage(
-        _currentConversation!.id,
-        'user',
-        content.trim(),
-      );
-    }
-
-    notifyListeners();
-
-    try {
-      if (_groqKey.isEmpty) {
-        throw Exception('API key do Groq não configurada');
-      }
-
-      final groqService = GroqService(apiKey: _groqKey);
-      final modelId = selectedModel.id;
-
-      final assistantResponse = await groqService.sendMessage(
-        messages: _messages,
-        model: modelId,
-      );
-
-      final assistantMessage = ChatMessage(
-        role: 'assistant',
-        content: assistantResponse,
-        timestamp: DateTime.now(),
-      );
-      _messages.add(assistantMessage);
-
-      if (_currentConversation != null && _persistence != null) {
-        await _persistence!.addMessage(
-          _currentConversation!.id,
-          'assistant',
-          assistantResponse,
-        );
-        _conversations = await _persistence!.getAllConversations();
-      }
-    } on Exception catch (e) {
-      _errorMessage = e.toString();
-      final errorMessage = ChatMessage(
-        role: 'assistant',
-        content: 'Erro: $e',
-        timestamp: DateTime.now(),
-      );
-      _messages.add(errorMessage);
-    } finally {
-      _isSendingMessage = false;
-      notifyListeners();
-    }
+    if (!_isInitialized) return;
+    await conversation.sendMessage(content);
   }
 
   void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+    if (!_isInitialized) return;
+    conversation.clearError();
   }
 
   void clearMessages() {
-    _messages.clear();
-    _errorMessage = null;
-    notifyListeners();
+    if (!_isInitialized) return;
+    conversation.clearMessages();
   }
 }

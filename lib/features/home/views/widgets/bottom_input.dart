@@ -18,11 +18,24 @@ class BottomInput extends StatefulWidget {
 
 class _BottomInputState extends State<BottomInput> {
   final _controller = TextEditingController();
+  final _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_onFocusChange);
+  }
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _onFocusChange() {
+    setState(() {});
   }
 
   void _sendMessage() {
@@ -35,8 +48,11 @@ class _BottomInputState extends State<BottomInput> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {},
+    final isFocused = _focusNode.hasFocus;
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomPadding),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.surfaceInput,
@@ -46,9 +62,9 @@ class _BottomInputState extends State<BottomInput> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            const Padding(
-              padding: EdgeInsets.only(bottom: 8),
-              child: HeroIcon(
+            Padding(
+              padding: EdgeInsets.only(bottom: isFocused ? 12 : 8),
+              child: const HeroIcon(
                 HeroIcons.paperClip,
                 color: AppColors.textSecondary,
                 size: 24,
@@ -58,6 +74,7 @@ class _BottomInputState extends State<BottomInput> {
             Expanded(
               child: TextField(
                 controller: _controller,
+                focusNode: _focusNode,
                 minLines: 1,
                 maxLines: 4,
                 style: const TextStyle(color: AppColors.textPrimary),
