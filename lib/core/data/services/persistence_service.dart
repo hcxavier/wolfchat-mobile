@@ -100,6 +100,10 @@ class PersistenceService {
     await _database.deleteConversation(id);
   }
 
+  Future<void> deleteAllConversations() async {
+    await _database.deleteAllConversations();
+  }
+
   Future<Message> addMessage(
     int conversationId,
     String role,

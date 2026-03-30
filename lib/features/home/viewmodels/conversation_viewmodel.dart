@@ -107,6 +107,17 @@ class ConversationViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> deleteAllConversations() async {
+    if (_persistence == null) return;
+
+    await _persistence!.deleteAllConversations();
+    _conversations = [];
+    _currentConversation = null;
+    _messages.clear();
+
+    notifyListeners();
+  }
+
   Future<void> sendMessage(String content) async {
     if (content.trim().isEmpty || _isSendingMessage) return;
 

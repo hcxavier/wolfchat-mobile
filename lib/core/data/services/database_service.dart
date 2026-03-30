@@ -168,6 +168,12 @@ class DatabaseService {
     return db.delete('conversations', where: 'id = ?', whereArgs: [id]);
   }
 
+  Future<void> deleteAllConversations() async {
+    final db = await database;
+    await db.delete('messages');
+    await db.delete('conversations');
+  }
+
   Future<int> insertMessage(Message message) async {
     final db = await database;
     final id = await db.insert('messages', message.toMap()..remove('id'));

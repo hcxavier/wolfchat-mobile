@@ -167,6 +167,11 @@ class HomeViewModel extends ChangeNotifier {
     await conversation.deleteConversation(conversationId);
   }
 
+  Future<void> deleteAllConversations() async {
+    if (!_isInitialized) return;
+    await conversation.deleteAllConversations();
+  }
+
   void onGetStartedPressed() {}
 
   void onLearnMorePressed() {}

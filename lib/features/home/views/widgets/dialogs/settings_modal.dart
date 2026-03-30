@@ -142,12 +142,6 @@ class _SettingsModalState extends State<SettingsModal> {
               ),
             ),
             const SizedBox(width: 8),
-            const HeroIcon(
-              HeroIcons.key,
-              size: 24,
-              color: AppColors.brand300,
-            ),
-            const SizedBox(width: 12),
             const Expanded(
               child: Text(
                 'Configurar API Keys',
@@ -217,6 +211,60 @@ class _SettingsModalState extends State<SettingsModal> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showDeleteAllChatsDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          'Excluir todos os chats?',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: const Text(
+          'Esta ação não pode ser desfeita. Todos os seus chats serão excluídos permanentemente.',
+          style: TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 14,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            child: const Text('Cancelar'),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton(
+            onPressed: () {
+              widget.viewModel.deleteAllConversations();
+              Navigator.of(context).pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade600,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
+            ),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -389,7 +437,7 @@ class _SettingsModalState extends State<SettingsModal> {
         SettingsButton(
           icon: HeroIcons.trash,
           title: 'Excluir todos os chats',
-          onTap: () {},
+          onTap: () => _showDeleteAllChatsDialog(),
           isDestructive: true,
         ),
         const SizedBox(height: 24),
