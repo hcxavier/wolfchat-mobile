@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wolfchat/features/home/viewmodels/home_viewmodel.dart';
 import 'package:wolfchat/features/home/views/widgets/bottom_input.dart';
+import 'package:wolfchat/features/home/views/widgets/chat_messages_list.dart';
 import 'package:wolfchat/features/home/views/widgets/header_section.dart';
 import 'package:wolfchat/features/home/views/widgets/suggestions.dart';
 import 'package:wolfchat/features/home/views/widgets/top_bar.dart';
@@ -14,6 +15,8 @@ class MainChatView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomeViewModel>();
+    final hasMessages = viewModel.messages.isNotEmpty;
+
     return SafeArea(
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -32,19 +35,24 @@ class MainChatView extends StatelessWidget {
                 selectedModelIndex: viewModel.selectedModelIndex,
                 onModelSelected: viewModel.selectModel,
               ),
-              const Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      SizedBox(height: 48),
-                      HeaderSection(),
-                      SizedBox(height: 48),
-                      SuggestionsGrid(),
-                    ],
-                  ),
-                ),
+              Expanded(
+                child: hasMessages
+                    ? ChatMessagesList(messages: viewModel.messages)
+                    : SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 48),
+                            HeaderSection(),
+                            const SizedBox(height: 48),
+                            SuggestionsGrid(),
+                          ],
+                        ),
+                      ),
               ),
-              const BottomInput(),
+              BottomInput(
+                onSendMessage: viewModel.sendMessage,
+                isLoading: viewModel.isSendingMessage,
+              ),
             ],
           ),
         ),

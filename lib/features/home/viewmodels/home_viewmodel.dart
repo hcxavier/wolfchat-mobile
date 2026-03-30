@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:wolfchat/core/services/groq_service.dart';
+import 'package:wolfchat/features/home/models/chat_message.dart';
 import 'package:wolfchat/features/home/models/home_model.dart';
 
 class HomeViewModel extends ChangeNotifier {
@@ -16,23 +18,40 @@ class HomeViewModel extends ChangeNotifier {
   String _openCodeZenKey = '';
   final List<CustomModel> _customModels = [];
   int _selectedModelIndex = 0;
+  final List<ChatMessage> _messages = [];
+  bool _isSendingMessage = false;
+  String? _errorMessage;
 
   static const List<CustomModel> _defaultModels = [
     CustomModel(
-      id: 'kimi-k2-instruct',
+      id: 'moonshotai/kimi-k2-instruct',
       name: 'Kimi K2 Instruct',
-      provider: 'Moonshot',
+      provider: 'Groq',
     ),
     CustomModel(
-      id: 'llama3-70b-8192',
-      name: 'Llama 3 70B',
-      provider: 'OpenRouter',
+      id: 'llama-3.3-70b-versatile',
+      name: 'Llama 3.3 70B',
+      provider: 'Groq',
     ),
-    CustomModel(id: 'gemma2-9b-it', name: 'Gemma 2 9B', provider: 'OpenRouter'),
+    CustomModel(
+      id: 'llama-3.1-70b-versatile',
+      name: 'Llama 3.1 70B',
+      provider: 'Groq',
+    ),
+    CustomModel(
+      id: 'llama-3.1-8b-instant',
+      name: 'Llama 3.1 8B',
+      provider: 'Groq',
+    ),
     CustomModel(
       id: 'mixtral-8x7b-32768',
       name: 'Mixtral 8x7B',
-      provider: 'OpenRouter',
+      provider: 'Groq',
+    ),
+    CustomModel(
+      id: 'gemma2-9b-it',
+      name: 'Gemma 2 9B',
+      provider: 'Groq',
     ),
   ];
 
@@ -51,6 +70,10 @@ class HomeViewModel extends ChangeNotifier {
   ];
   CustomModel get selectedModel => availableModels[_selectedModelIndex];
   int get selectedModelIndex => _selectedModelIndex;
+  List<ChatMessage> get messages => List.unmodifiable(_messages);
+  bool get isSendingMessage => _isSendingMessage;
+  String? get errorMessage => _errorMessage;
+  bool get hasApiKey => _groqKey.isNotEmpty;
 
   void _loadData() {
     _isLoading = true;
@@ -135,5 +158,64 @@ class HomeViewModel extends ChangeNotifier {
 
   void onLearnMorePressed() {
     // TODO(proxjie): Implementar navegação para tela de informações
+  }
+
+  Future<void> sendMessage(String content) async {
+    if (content.trim().isEmpty || _isSendingMessage) return;
+
+    _errorMessage = null;
+    _isSendingMessage = true;
+    notifyListeners();
+
+    final userMessage = ChatMessage(
+      role: 'user',
+      content: content.trim(),
+      timestamp: DateTime.now(),
+    );
+    _messages.add(userMessage);
+    notifyListeners();
+
+    try {
+      if (_groqKey.isEmpty) {
+        throw Exception('API key do Groq não configurada');
+      }
+
+      final groqService = GroqService(apiKey: _groqKey);
+      final modelId = selectedModel.id;
+
+      final assistantResponse = await groqService.sendMessage(
+        messages: _messages,
+        model: modelId,
+      );
+
+      final assistantMessage = ChatMessage(
+        role: 'assistant',
+        content: assistantResponse,
+        timestamp: DateTime.now(),
+      );
+      _messages.add(assistantMessage);
+    } on Exception catch (e) {
+      _errorMessage = e.toString();
+      final errorMessage = ChatMessage(
+        role: 'assistant',
+        content: 'Erro: $e',
+        timestamp: DateTime.now(),
+      );
+      _messages.add(errorMessage);
+    } finally {
+      _isSendingMessage = false;
+      notifyListeners();
+    }
+  }
+
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  void clearMessages() {
+    _messages.clear();
+    _errorMessage = null;
+    notifyListeners();
   }
 }
