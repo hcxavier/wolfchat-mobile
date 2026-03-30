@@ -144,7 +144,8 @@ class ConversationViewModel extends ChangeNotifier {
     final String apiContent;
     
     if (isFirstMessage && language != null) {
-      apiContent = 'Idioma: ${_getLanguageCode(language)}; User: ${content.trim()}';
+      apiContent =
+          'Idioma: ${_getLanguageCode(language)}; User: ${content.trim()}';
     } else {
       apiContent = content.trim();
     }
@@ -185,7 +186,8 @@ class ConversationViewModel extends ChangeNotifier {
       final groqService = GroqService(apiKey: _groqKey);
       final modelId = _getSelectedModelId();
 
-      // Criamos uma lista temporária para a API com o conteúdo prefixado se for a 1ª mensagem
+      // Criamos uma lista temporária para a API
+      // com o conteúdo prefixado se for a 1ª mensagem
       final apiMessages = List<ChatMessage>.from(_messages);
       if (isFirstMessage) {
         apiMessages[0] = ChatMessage(
