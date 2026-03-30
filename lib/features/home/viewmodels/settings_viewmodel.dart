@@ -76,17 +76,17 @@ class SettingsViewModel extends ChangeNotifier {
 
     try {
       if (_persistence != null) {
-        final apiKeys = await _persistence!.getAllApiKeys();
+        final apiKeys = await _persistence.getAllApiKeys();
         _openRouterKey = apiKeys['open_router'] ?? '';
         _groqKey = apiKeys['groq'] ?? '';
         _openCodeZenKey = apiKeys['open_code_zen'] ?? '';
 
-        final savedUserName = await _persistence!.getUserName();
+        final savedUserName = await _persistence.getUserName();
         if (savedUserName != null && savedUserName.isNotEmpty) {
           _userName = savedUserName;
         }
       }
-    } catch (e, stackTrace) {
+    } on Exception catch (e, stackTrace) {
       debugPrint('Error loading settings: $e');
       debugPrint('Stack trace: $stackTrace');
     }
@@ -115,9 +115,9 @@ class SettingsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateUserName(String name) {
+  Future<void> updateUserName(String name) async {
     _userName = name;
-    _persistence?.saveUserName(name);
+    await _persistence?.saveUserName(name);
     notifyListeners();
   }
 
@@ -132,19 +132,19 @@ class SettingsViewModel extends ChangeNotifier {
 
     if (_persistence != null) {
       if (openRouter.isNotEmpty) {
-        await _persistence!.saveApiKey('open_router', openRouter);
+        await _persistence.saveApiKey('open_router', openRouter);
       } else {
-        await _persistence!.deleteApiKey('open_router');
+        await _persistence.deleteApiKey('open_router');
       }
       if (groq.isNotEmpty) {
-        await _persistence!.saveApiKey('groq', groq);
+        await _persistence.saveApiKey('groq', groq);
       } else {
-        await _persistence!.deleteApiKey('groq');
+        await _persistence.deleteApiKey('groq');
       }
       if (openCodeZen.isNotEmpty) {
-        await _persistence!.saveApiKey('open_code_zen', openCodeZen);
+        await _persistence.saveApiKey('open_code_zen', openCodeZen);
       } else {
-        await _persistence!.deleteApiKey('open_code_zen');
+        await _persistence.deleteApiKey('open_code_zen');
       }
     }
 

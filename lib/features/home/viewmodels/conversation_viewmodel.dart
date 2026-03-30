@@ -3,7 +3,6 @@ import 'package:wolfchat/core/data/models/conversation.dart';
 import 'package:wolfchat/core/data/services/persistence_service.dart';
 import 'package:wolfchat/core/services/groq_service.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
-import 'package:wolfchat/features/home/models/custom_model.dart';
 
 class ConversationViewModel extends ChangeNotifier {
   ConversationViewModel({
@@ -30,10 +29,12 @@ class ConversationViewModel extends ChangeNotifier {
   List<Conversation> get conversations => List.unmodifiable(_conversations);
   Conversation? get currentConversation => _currentConversation;
 
+  // ignore: use_setters_to_change_properties - method naming is clearer for this use case
   void updateGroqKey(String key) {
     _groqKey = key;
   }
 
+  // ignore: use_setters_to_change_properties - method naming is clearer for this use case
   void setPersistence(PersistenceService? persistence) {
     _persistence = persistence;
   }

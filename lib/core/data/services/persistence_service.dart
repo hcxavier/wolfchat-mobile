@@ -5,11 +5,11 @@ import 'package:wolfchat/core/data/services/cache_service.dart';
 import 'package:wolfchat/core/data/services/database_service.dart';
 
 class PersistenceService {
+  PersistenceService._();
+
   static PersistenceService? _instance;
   static final DatabaseService _database = DatabaseService();
   static CacheService? _cache;
-
-  PersistenceService._();
 
   static Future<PersistenceService> getInstance() async {
     if (_instance != null) return _instance!;

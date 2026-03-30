@@ -52,54 +52,28 @@ class _MessageBubble extends StatelessWidget {
           : MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (!isUser) ...[
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: AppColors.brand500,
-              borderRadius: BorderRadius.circular(8),
+        if (!isUser) const SizedBox(width: 44),
+        if (isUser)
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.brand500,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: _buildUserMessage(),
             ),
-            child: const Icon(
-              Icons.smart_toy_outlined,
-              size: 18,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(width: 12),
-        ],
-        Flexible(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: isUser ? AppColors.brand500 : AppColors.surfaceCard,
-              borderRadius: BorderRadius.circular(16),
-              border: isUser
-                  ? null
-                  : Border.all(
-                      color: const Color(0x1AFFFFFF),
-                      width: 1,
-                    ),
-            ),
-            child: isUser ? _buildUserMessage() : _buildBotMessage(context),
-          ),
-        ),
-        if (isUser) ...[
-          const SizedBox(width: 12),
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceCard,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.person_outline,
-              size: 18,
-              color: AppColors.textSecondary,
+          )
+        else
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: _buildBotMessage(context),
             ),
           ),
-        ],
       ],
     );
   }
@@ -108,7 +82,6 @@ class _MessageBubble extends StatelessWidget {
     final lines = message.content.split('\n');
 
     return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.start,
       children: [
         for (int i = 0; i < lines.length; i++) ...[
           _buildUserLine(lines[i]),
@@ -122,15 +95,15 @@ class _MessageBubble extends StatelessWidget {
     if (line.startsWith('> ')) {
       return Container(
         padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(
             left: BorderSide(
               color: AppColors.brand500,
               width: 3,
             ),
           ),
-          color: const Color(0x0DFFFFFF),
-          borderRadius: const BorderRadius.only(
+          color: Color(0x0DFFFFFF),
+          borderRadius: BorderRadius.only(
             topRight: Radius.circular(6),
             bottomRight: Radius.circular(6),
           ),

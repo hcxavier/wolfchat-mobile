@@ -62,7 +62,8 @@ class DatabaseService {
       'CREATE INDEX idx_messages_conversation ON messages(conversation_id)',
     );
     await db.execute(
-      'CREATE INDEX idx_conversations_updated ON conversations(updated_at DESC)',
+      'CREATE INDEX idx_conversations_updated '
+      'ON conversations(updated_at DESC)',
     );
 
     await db.execute('''
@@ -96,7 +97,7 @@ class DatabaseService {
   Future<List<ApiKey>> getAllApiKeys() async {
     final db = await database;
     final results = await db.query('api_keys');
-    return results.map((e) => ApiKey.fromMap(e)).toList();
+    return results.map(ApiKey.fromMap).toList();
   }
 
   Future<int> deleteApiKey(String provider) async {
@@ -144,7 +145,7 @@ class DatabaseService {
         orderBy: 'updated_at DESC',
       );
       debugPrint('Found ${results.length} conversations');
-      return results.map((e) => Conversation.fromMap(e)).toList();
+      return results.map(Conversation.fromMap).toList();
     } catch (e, stack) {
       debugPrint('Error getting conversations: $e');
       debugPrint('Stack: $stack');
@@ -198,7 +199,7 @@ class DatabaseService {
       whereArgs: [conversationId],
       orderBy: 'timestamp ASC',
     );
-    return results.map((e) => Message.fromMap(e)).toList();
+    return results.map(Message.fromMap).toList();
   }
 
   Future<int> deleteMessagesByConversation(int conversationId) async {

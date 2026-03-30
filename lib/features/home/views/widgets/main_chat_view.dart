@@ -38,12 +38,12 @@ class MainChatView extends StatelessWidget {
               Expanded(
                 child: hasMessages
                     ? ChatMessagesList(messages: viewModel.messages)
-                    : SingleChildScrollView(
+                    : const SingleChildScrollView(
                         child: Column(
                           children: [
-                            const SizedBox(height: 48),
+                            SizedBox(height: 48),
                             HeaderSection(),
-                            const SizedBox(height: 48),
+                            SizedBox(height: 48),
                             SuggestionsGrid(),
                           ],
                         ),

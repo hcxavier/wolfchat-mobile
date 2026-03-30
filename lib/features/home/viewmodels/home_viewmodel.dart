@@ -2,13 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:wolfchat/core/data/models/conversation.dart';
 import 'package:wolfchat/core/data/services/persistence_service.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
-import 'package:wolfchat/features/home/models/home_model.dart';
 import 'package:wolfchat/features/home/models/custom_model.dart';
+import 'package:wolfchat/features/home/models/home_model.dart';
 import 'package:wolfchat/features/home/viewmodels/conversation_viewmodel.dart';
 import 'package:wolfchat/features/home/viewmodels/settings_viewmodel.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel() {
+    // ignore: discarded_futures - async init called in constructor
     _init();
   }
 
@@ -111,9 +112,9 @@ class HomeViewModel extends ChangeNotifier {
     settings.closeSettingsModal();
   }
 
-  void updateUserName(String name) {
+  Future<void> updateUserName(String name) async {
     if (!_isInitialized) return;
-    settings.updateUserName(name);
+    await settings.updateUserName(name);
   }
 
   Future<void> saveApiKeys({

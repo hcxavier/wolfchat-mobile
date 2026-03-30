@@ -64,35 +64,35 @@ class MarkdownStyler {
         color: Color(0xB3FFFFFF),
       ),
       blockquotePadding: const EdgeInsets.only(left: 16, top: 4, bottom: 8),
-      blockquoteDecoration: BoxDecoration(
+      blockquoteDecoration: const BoxDecoration(
         border: Border(
           left: BorderSide(
             color: AppColors.brand500,
             width: 4,
           ),
         ),
-        color: const Color(0x0DFFFFFF),
-        borderRadius: const BorderRadius.only(
+        color: Color(0x0DFFFFFF),
+        borderRadius: BorderRadius.only(
           topRight: Radius.circular(8),
           bottomRight: Radius.circular(8),
         ),
       ),
-      code: TextStyle(
+      code: const TextStyle(
         fontFamily: 'JetBrains Mono',
         fontSize: 13,
-        backgroundColor: const Color(0x1AFFFFFF),
+        backgroundColor: Color(0x1AFFFFFF),
         color: AppColors.brand300,
       ),
       codeblockPadding: const EdgeInsets.all(16),
-      codeblockDecoration: BoxDecoration(
-        color: const Color(0xFF282A36),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0x1AFFFFFF),
-          width: 1,
+      codeblockDecoration: const BoxDecoration(
+        color: Color(0xFF282A36),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        border: Border.fromBorderSide(
+          BorderSide(
+            color: Color(0x1AFFFFFF),
+          ),
         ),
       ),
-      codeblockAlign: WrapAlignment.start,
       listBullet: const TextStyle(
         color: AppColors.brand500,
         fontWeight: FontWeight.bold,
@@ -100,11 +100,10 @@ class MarkdownStyler {
       listBulletPadding: const EdgeInsets.only(left: 8),
       listIndent: 24,
       blockSpacing: 16,
-      horizontalRuleDecoration: BoxDecoration(
+      horizontalRuleDecoration: const BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: const Color(0x0DFFFFFF),
-            width: 1,
+            color: Color(0x0DFFFFFF),
           ),
         ),
       ),
@@ -119,16 +118,14 @@ class MarkdownStyler {
       ),
       tableBorder: TableBorder.all(
         color: const Color(0x0DFFFFFF),
-        width: 1,
       ),
       tableCellsPadding: const EdgeInsets.all(12),
-      tableCellsDecoration: BoxDecoration(
-        color: const Color(0x0DFFFFFF),
+      tableCellsDecoration: const BoxDecoration(
+        color: Color(0x0DFFFFFF),
       ),
       tableHeadAlign: TextAlign.left,
       tablePadding: const EdgeInsets.all(8),
       tableColumnWidth: const IntrinsicColumnWidth(),
-      tableVerticalAlignment: TableCellVerticalAlignment.middle,
       a: const TextStyle(
         color: AppColors.brand400,
         decoration: TextDecoration.underline,

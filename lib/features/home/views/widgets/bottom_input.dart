@@ -29,8 +29,9 @@ class _BottomInputState extends State<BottomInput> {
   @override
   void dispose() {
     _controller.dispose();
-    _focusNode.removeListener(_onFocusChange);
-    _focusNode.dispose();
+    _focusNode
+      ..removeListener(_onFocusChange)
+      ..dispose();
     super.dispose();
   }
 

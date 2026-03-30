@@ -163,12 +163,12 @@ class _HomePageState extends State<HomePage>
                 userName: viewModel.userName,
                 conversations: viewModel.conversations,
                 currentConversationId: viewModel.currentConversation?.id,
-                onConversationSelected: (id) {
-                  viewModel.loadConversation(id);
+                onConversationSelected: (id) async {
+                  await viewModel.loadConversation(id);
                   viewModel.closeSidebar();
                 },
-                onNewConversation: () {
-                  viewModel.createNewConversation();
+                onNewConversation: () async {
+                  await viewModel.createNewConversation();
                   viewModel.closeSidebar();
                 },
               ),

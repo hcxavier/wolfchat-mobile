@@ -3,12 +3,12 @@ import 'package:redis/redis.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CacheService {
-  static CacheService? _instance;
-  static Command? _command;
-  static String? _redisHost;
-  static int? _redisPort;
-
   CacheService._();
+
+  static CacheService? _instance;
+  static late Command? _command;
+  static late String _redisHost;
+  static late int _redisPort;
 
   static Future<CacheService> getInstance() async {
     if (_instance != null) return _instance!;
@@ -24,8 +24,8 @@ class CacheService {
 
   Future<void> _init() async {
     try {
-      _command = await RedisConnection().connect(_redisHost!, _redisPort!);
-    } catch (e) {
+      _command = await RedisConnection().connect(_redisHost, _redisPort);
+    } on Exception {
       _command = null;
     }
   }
@@ -55,7 +55,7 @@ class CacheService {
       } else {
         await _command!.send_object(['SET', key, value]);
       }
-    } catch (e) {
+    } on Exception {
       await _fallbackToMemory(key, value, expiry);
     }
   }
@@ -69,7 +69,7 @@ class CacheService {
       final result = await _command!.send_object(['GET', key]);
       if (result is String) return result;
       return null;
-    } catch (e) {
+    } on Exception {
       return _getFromMemory(key);
     }
   }
@@ -82,7 +82,7 @@ class CacheService {
 
     try {
       await _command!.send_object(['DEL', key]);
-    } catch (e) {
+    } on Exception {
       await _deleteFromMemory(key);
     }
   }
@@ -100,7 +100,7 @@ class CacheService {
     if (value == null) return null;
     try {
       return jsonDecode(value) as Map<String, dynamic>;
-    } catch (e) {
+    } on Exception {
       return null;
     }
   }
@@ -113,7 +113,7 @@ class CacheService {
 
     try {
       await _command!.send_object(['RPUSH', key, value]);
-    } catch (e) {
+    } on Exception {
       await _addToMemoryList(key, value);
     }
   }
@@ -129,7 +129,7 @@ class CacheService {
         return result.map((e) => e.toString()).toList();
       }
       return [];
-    } catch (e) {
+    } on Exception {
       return _getMemoryList(key);
     }
   }
@@ -142,7 +142,7 @@ class CacheService {
 
     try {
       await _command!.send_object(['FLUSHDB']);
-    } catch (e) {
+    } on Exception {
       _memoryCache.clear();
     }
   }

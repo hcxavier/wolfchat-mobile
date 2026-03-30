@@ -115,11 +115,11 @@ class Sidebar extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'RECENTES',
                       style: TextStyle(
@@ -142,8 +142,8 @@ class Sidebar extends StatelessWidget {
                   onTap: onNewConversation,
                   borderRadius: BorderRadius.circular(8),
                   hoverColor: AppColors.brand600,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 12,
                     ),
@@ -151,13 +151,13 @@ class Sidebar extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const HeroIcon(
+                        HeroIcon(
                           HeroIcons.plus,
                           size: 16,
                           color: AppColors.textPrimary,
                         ),
-                        const SizedBox(width: 8),
-                        const Text(
+                        SizedBox(width: 8),
+                        Text(
                           'Novo chat',
                           style: TextStyle(
                             color: AppColors.textPrimary,

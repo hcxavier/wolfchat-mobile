@@ -185,8 +185,8 @@ class _SettingsModalState extends State<SettingsModal> {
         SizedBox(
           height: 48,
           child: ElevatedButton(
-            onPressed: () {
-              widget.viewModel.saveApiKeys(
+            onPressed: () async {
+              await widget.viewModel.saveApiKeys(
                 openRouter: _openRouterController.text,
                 groq: _groqController.text,
                 openCodeZen: _openCodeZenController.text,
@@ -214,8 +214,8 @@ class _SettingsModalState extends State<SettingsModal> {
     );
   }
 
-  void _showDeleteAllChatsDialog() {
-    showDialog<void>(
+  Future<void> _showDeleteAllChatsDialog() async {
+    await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surfaceCard,
@@ -231,7 +231,8 @@ class _SettingsModalState extends State<SettingsModal> {
           ),
         ),
         content: const Text(
-          'Esta ação não pode ser desfeita. Todos os seus chats serão excluídos permanentemente.',
+          'Esta ação não pode ser desfeita. '
+          'Todos os seus chats serão excluídos permanentemente.',
           style: TextStyle(
             color: AppColors.textSecondary,
             fontSize: 14,
@@ -248,9 +249,11 @@ class _SettingsModalState extends State<SettingsModal> {
           ),
           const SizedBox(width: 8),
           ElevatedButton(
-            onPressed: () {
-              widget.viewModel.deleteAllConversations();
-              Navigator.of(context).pop();
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              await widget.viewModel.deleteAllConversations();
+              if (!mounted) return;
+              navigator.pop();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red.shade600,
@@ -437,15 +440,15 @@ class _SettingsModalState extends State<SettingsModal> {
         SettingsButton(
           icon: HeroIcons.trash,
           title: 'Excluir todos os chats',
-          onTap: () => _showDeleteAllChatsDialog(),
+          onTap: _showDeleteAllChatsDialog,
           isDestructive: true,
         ),
         const SizedBox(height: 24),
         SizedBox(
           height: 48,
           child: ElevatedButton(
-            onPressed: () {
-              widget.viewModel.updateUserName(_nameController.text);
+            onPressed: () async {
+              await widget.viewModel.updateUserName(_nameController.text);
               widget.onClose();
             },
             style: ElevatedButton.styleFrom(
