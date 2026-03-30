@@ -1,0 +1,31 @@
+- Use a arquitetura MVVM:
+	- O MVVM separa a interface (View) dos dados (Model) através do ViewModel. A View exibe a tela e reage a mudanças, enquanto o ViewModel processa a lógica de negócios sem acoplar à UI, garantindo código limpo e testável;
+- Fontes usadas:
+	- Principal: Montserrat;
+	- Monospace: Jetbrains Mono
+- Pacote de ícones: hero-icons;
+- Design base: Material Design 3;
+- Paleta de Cores:
+	- Cores de Marca (Brand - Pink/Magenta):
+		- Brand 50: #FFF0F5;
+		- Brand 100: #FFD6E0;
+		- Brand 200: #FFBDCE;
+		- Brand 300: #FF94B3;
+		- Brand 400: #FF5C8D;
+		- Brand 500 (Destaque): #FF1457;
+		- Brand 600: #E60042;
+		- Brand 700: #B30033;
+		- Brand 800: #90002B;
+		- Brand 900: #7A0026;
+	- Tema Escuro (Único):
+		- Fundo Principal (Surface Main): #2B2C30;
+		- Cartões (Surface Card): #35313B;
+		- Campos de Entrada (Surface Input): #453745;
+		- Efeito Hover (Surface Hover): #3E3945;
+		- Texto Principal: #FFFFFF;
+		- Texto Secundário: #9CA3AF;
+		- Acento Claro: #613C4C;
+		- Acento Escuro: #1E1E20;
+- Não use gradiente
+- Não use grades
+
