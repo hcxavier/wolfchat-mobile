@@ -16,6 +16,7 @@ class SettingsViewModel extends ChangeNotifier {
   String _openRouterKey = '';
   String _groqKey = '';
   String _openCodeZenKey = '';
+  String _language = 'Português (Brasil)';
   final List<CustomModel> _customModels = [];
   int _selectedModelIndex = 0;
 
@@ -59,6 +60,7 @@ class SettingsViewModel extends ChangeNotifier {
   String get openRouterKey => _openRouterKey;
   String get groqKey => _groqKey;
   String get openCodeZenKey => _openCodeZenKey;
+  String get language => _language;
   List<CustomModel> get customModels => List.unmodifiable(_customModels);
   List<CustomModel> get availableModels => [
     ..._defaultModels,
@@ -84,6 +86,11 @@ class SettingsViewModel extends ChangeNotifier {
         final savedUserName = await _persistence.getUserName();
         if (savedUserName != null && savedUserName.isNotEmpty) {
           _userName = savedUserName;
+        }
+
+        final savedLanguage = await _persistence.getLanguage();
+        if (savedLanguage != null && savedLanguage.isNotEmpty) {
+          _language = savedLanguage;
         }
       }
     } on Exception catch (e, stackTrace) {
@@ -118,6 +125,12 @@ class SettingsViewModel extends ChangeNotifier {
   Future<void> updateUserName(String name) async {
     _userName = name;
     await _persistence?.saveUserName(name);
+    notifyListeners();
+  }
+
+  Future<void> updateLanguage(String language) async {
+    _language = language;
+    await _persistence?.saveLanguage(language);
     notifyListeners();
   }
 

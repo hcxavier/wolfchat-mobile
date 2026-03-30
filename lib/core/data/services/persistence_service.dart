@@ -137,4 +137,12 @@ class PersistenceService {
   Future<String?> getUserName() async {
     return _database.getUserSetting('user_name');
   }
+
+  Future<void> saveLanguage(String language) async {
+    await _database.saveUserSetting('language', language);
+  }
+
+  Future<String?> getLanguage() async {
+    return _database.getUserSetting('language');
+  }
 }

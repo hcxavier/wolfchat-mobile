@@ -27,9 +27,11 @@ class HomeViewModel extends ChangeNotifier {
   bool get isSettingsModalOpen =>
       _isInitialized && settings.isSettingsModalOpen;
   String get userName => _isInitialized ? settings.userName : 'Usuário';
-  String get openRouterKey => _isInitialized ? settings.openRouterKey : '';
   String get groqKey => _isInitialized ? settings.groqKey : '';
+  String get openRouterKey => _isInitialized ? settings.openRouterKey : '';
   String get openCodeZenKey => _isInitialized ? settings.openCodeZenKey : '';
+  String get language =>
+      _isInitialized ? settings.language : 'Português (Brasil)';
   List<CustomModel> get customModels =>
       _isInitialized ? settings.customModels : [];
   List<CustomModel> get availableModels =>
@@ -117,6 +119,11 @@ class HomeViewModel extends ChangeNotifier {
     await settings.updateUserName(name);
   }
 
+  Future<void> updateLanguage(String language) async {
+    if (!_isInitialized) return;
+    await settings.updateLanguage(language);
+  }
+
   Future<void> saveApiKeys({
     required String openRouter,
     required String groq,
@@ -179,7 +186,7 @@ class HomeViewModel extends ChangeNotifier {
 
   Future<void> sendMessage(String content) async {
     if (!_isInitialized) return;
-    await conversation.sendMessage(content);
+    await conversation.sendMessage(content, language: settings.language);
   }
 
   void clearError() {

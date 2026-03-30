@@ -50,6 +50,19 @@ class ConversationViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  String _getLanguageCode(String language) {
+    final languageMap = {
+      'Português (Brasil)': 'português',
+      'English': 'English',
+      'Español': 'español',
+      'Français': 'français',
+      'Deutsch': 'Deutsch',
+      '日本語': 'japonês',
+      '中文': 'chinês',
+    };
+    return languageMap[language] ?? language;
+  }
+
   Future<void> loadConversations() async {
     if (_persistence != null) {
       _conversations = await _persistence!.getAllConversations();
@@ -119,16 +132,20 @@ class ConversationViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> sendMessage(String content) async {
+  Future<void> sendMessage(String content, {String? language}) async {
     if (content.trim().isEmpty || _isSendingMessage) return;
 
     _errorMessage = null;
     _isSendingMessage = true;
     notifyListeners();
 
+    final messageContent = language != null && language != 'Português (Brasil)'
+        ? 'Responda em ${_getLanguageCode(language)}. ${content.trim()}'
+        : content.trim();
+
     final userMessage = ChatMessage(
       role: 'user',
-      content: content.trim(),
+      content: messageContent,
       timestamp: DateTime.now(),
     );
     _messages.add(userMessage);

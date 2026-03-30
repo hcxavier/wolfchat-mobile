@@ -449,6 +449,7 @@ class _SettingsModalState extends State<SettingsModal> {
           child: ElevatedButton(
             onPressed: () async {
               await widget.viewModel.updateUserName(_nameController.text);
+              await widget.viewModel.updateLanguage(_selectedLanguage);
               widget.onClose();
             },
             style: ElevatedButton.styleFrom(
