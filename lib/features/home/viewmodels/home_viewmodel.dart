@@ -78,9 +78,9 @@ class HomeViewModel extends ChangeNotifier {
   void _onSettingsChanged() {
     if (!_isInitialized) return;
     conversation
-      ..updateGroqKey(settings.groqKey)
-      ..updateOpenRouterKey(settings.openRouterKey)
-      ..updateOpenCodeZenKey(settings.openCodeZenKey);
+      ..groqKey = settings.groqKey
+      ..openRouterKey = settings.openRouterKey
+      ..openCodeZenKey = settings.openCodeZenKey;
     notifyListeners();
   }
 

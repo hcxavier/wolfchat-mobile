@@ -10,23 +10,19 @@ import 'package:wolfchat/features/home/models/chat_message.dart';
 
 class ConversationViewModel extends ChangeNotifier {
   ConversationViewModel({
-    required PersistenceService? persistence,
-    required String groqKey,
-    required String openRouterKey,
-    required String openCodeZenKey,
+    required this.persistence,
+    required this.groqKey,
+    required this.openRouterKey,
+    required this.openCodeZenKey,
     required String Function() getSelectedModelId,
     required String Function() getSelectedModelProvider,
-  }) : _persistence = persistence,
-       _groqKey = groqKey,
-       _openRouterKey = openRouterKey,
-       _openCodeZenKey = openCodeZenKey,
-       _getSelectedModelId = getSelectedModelId,
+  }) : _getSelectedModelId = getSelectedModelId,
        _getSelectedModelProvider = getSelectedModelProvider;
 
-  PersistenceService? _persistence;
-  String _groqKey;
-  String _openRouterKey;
-  String _openCodeZenKey;
+  PersistenceService? persistence;
+  String groqKey;
+  String openRouterKey;
+  String openCodeZenKey;
   final String Function() _getSelectedModelId;
   final String Function() _getSelectedModelProvider;
 
@@ -42,22 +38,6 @@ class ConversationViewModel extends ChangeNotifier {
   List<Conversation> get conversations => List.unmodifiable(_conversations);
   Conversation? get currentConversation => _currentConversation;
 
-  void updateGroqKey(String key) {
-    _groqKey = key;
-  }
-
-  void updateOpenRouterKey(String key) {
-    _openRouterKey = key;
-  }
-
-  void updateOpenCodeZenKey(String key) {
-    _openCodeZenKey = key;
-  }
-
-  void setPersistence(PersistenceService? persistence) {
-    _persistence = persistence;
-  }
-
   void clearError() {
     _errorMessage = null;
     notifyListeners();
@@ -70,8 +50,8 @@ class ConversationViewModel extends ChangeNotifier {
   }
 
   Future<void> loadConversations() async {
-    if (_persistence != null) {
-      _conversations = await _persistence!.getAllConversations();
+    if (persistence != null) {
+      _conversations = await persistence!.getAllConversations();
       notifyListeners();
     }
   }
@@ -81,23 +61,23 @@ class ConversationViewModel extends ChangeNotifier {
     _messages.clear();
     _errorMessage = null;
 
-    if (_persistence != null) {
-      _currentConversation = await _persistence!.createConversation(
+    if (persistence != null) {
+      _currentConversation = await persistence!.createConversation(
         'Nova conversa',
         modelId: _getSelectedModelId(),
       );
-      _conversations = await _persistence!.getAllConversations();
+      _conversations = await persistence!.getAllConversations();
     }
 
     notifyListeners();
   }
 
   Future<void> loadConversation(int conversationId) async {
-    if (_persistence == null) return;
+    if (persistence == null) return;
 
-    _currentConversation = await _persistence!.getConversation(conversationId);
+    _currentConversation = await persistence!.getConversation(conversationId);
     if (_currentConversation != null) {
-      final messages = await _persistence!.getMessages(conversationId);
+      final messages = await persistence!.getMessages(conversationId);
       _messages.clear();
       for (final msg in messages) {
         _messages.add(
@@ -114,10 +94,10 @@ class ConversationViewModel extends ChangeNotifier {
   }
 
   Future<void> deleteConversation(int conversationId) async {
-    if (_persistence == null) return;
+    if (persistence == null) return;
 
-    await _persistence!.deleteConversation(conversationId);
-    _conversations = await _persistence!.getAllConversations();
+    await persistence!.deleteConversation(conversationId);
+    _conversations = await persistence!.getAllConversations();
 
     if (_currentConversation?.id == conversationId) {
       _currentConversation = null;
@@ -128,9 +108,9 @@ class ConversationViewModel extends ChangeNotifier {
   }
 
   Future<void> deleteAllConversations() async {
-    if (_persistence == null) return;
+    if (persistence == null) return;
 
-    await _persistence!.deleteAllConversations();
+    await persistence!.deleteAllConversations();
     _conversations = [];
     _currentConversation = null;
     _messages.clear();
@@ -141,24 +121,24 @@ class ConversationViewModel extends ChangeNotifier {
   AiService _createService(String provider) {
     switch (provider) {
       case 'OpenRouter':
-        return OpenRouterService(apiKey: _openRouterKey);
+        return OpenRouterService(apiKey: openRouterKey);
       case 'OpenCode Zen':
-        return OpenCodeZenService(apiKey: _openCodeZenKey);
+        return OpenCodeZenService(apiKey: openCodeZenKey);
       case 'Groq':
       default:
-        return GroqService(apiKey: _groqKey);
+        return GroqService(apiKey: groqKey);
     }
   }
 
   String _getApiKeyForProvider(String provider) {
     switch (provider) {
       case 'OpenRouter':
-        return _openRouterKey;
+        return openRouterKey;
       case 'OpenCode Zen':
-        return _openCodeZenKey;
+        return openCodeZenKey;
       case 'Groq':
       default:
-        return _groqKey;
+        return groqKey;
     }
   }
 
@@ -200,16 +180,22 @@ class ConversationViewModel extends ChangeNotifier {
 
       final service = _createService(provider);
 
-      if (_persistence != null) {
+      if (persistence != null) {
         if (_currentConversation == null) {
-          _currentConversation = await _persistence!.createConversation(
-            'Nova conversa',
+          _currentConversation = await persistence!.createConversation(
+            content.trim(),
             modelId: _getSelectedModelId(),
           );
-          _conversations = await _persistence!.getAllConversations();
+          _conversations = await persistence!.getAllConversations();
+        } else if (_currentConversation!.title == 'Nova conversa') {
+          _currentConversation = _currentConversation!.copyWith(
+            title: content.trim(),
+          );
+          await persistence!.updateConversation(_currentConversation!);
+          _conversations = await persistence!.getAllConversations();
         }
 
-        await _persistence!.addMessage(
+        await persistence!.addMessage(
           _currentConversation!.id,
           'user',
           content.trim(),
@@ -242,13 +228,13 @@ class ConversationViewModel extends ChangeNotifier {
         notifyListeners();
       }
 
-      if (_currentConversation != null && _persistence != null) {
-        await _persistence!.addMessage(
+      if (_currentConversation != null && persistence != null) {
+        await persistence!.addMessage(
           _currentConversation!.id,
           'assistant',
           assistantBuffer.toString(),
         );
-        _conversations = await _persistence!.getAllConversations();
+        _conversations = await persistence!.getAllConversations();
       }
     } on Exception catch (e) {
       _errorMessage = e.toString();

@@ -56,6 +56,11 @@ class SettingsViewModel extends ChangeNotifier {
       name: 'MiniMax M2.5',
       provider: 'OpenCode Zen',
     ),
+    CustomModel(
+      id: 'mimo-v2-pro-free',
+      name: 'Mimo V2 Pro',
+      provider: 'OpenCode Zen',
+    ),
   ];
 
   bool get isLoading => _isLoading;
