@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:wolfchat/core/data/models/conversation.dart';
 import 'package:wolfchat/core/data/services/persistence_service.dart';
@@ -157,33 +158,49 @@ class ConversationViewModel extends ChangeNotifier {
     );
     _messages.add(userMessage);
 
-    if (_currentConversation == null && _persistence != null) {
-      final firstContent = content.trim().length > 50
-          ? '${content.trim().substring(0, 50)}...'
-          : content.trim();
-      _currentConversation = await _persistence!.createConversation(
-        firstContent,
-        modelId: _getSelectedModelId(),
-      );
-      _conversations = await _persistence!.getAllConversations();
-    }
-
-    if (_currentConversation != null && _persistence != null) {
-      await _persistence!.addMessage(
-        _currentConversation!.id,
-        'user',
-        content.trim(),
-      );
-    }
-
-    notifyListeners();
-
     try {
       if (_groqKey.isEmpty) {
         throw Exception('API key do Groq não configurada');
       }
 
       final groqService = GroqService(apiKey: _groqKey);
+
+      // Garante que a conversa existe e salva a mensagem imediatamente
+      if (_persistence != null) {
+        if (_currentConversation == null) {
+          _currentConversation = await _persistence!.createConversation(
+            'Nova conversa',
+            modelId: _getSelectedModelId(),
+          );
+          _conversations = await _persistence!.getAllConversations();
+        }
+
+        await _persistence!.addMessage(
+          _currentConversation!.id,
+          'user',
+          content.trim(),
+        );
+      }
+
+      notifyListeners();
+
+      // Gera o título se for a 1ª mensagem (sem bloquear o resto)
+      if (isFirstMessage && _persistence != null) {
+        unawaited(groqService.generateTitle(content.trim()).then((title) async {
+          if (_currentConversation != null) {
+            _currentConversation = _currentConversation!.copyWith(
+              title: title,
+              updatedAt: DateTime.now(),
+            );
+            await _persistence!.updateConversation(_currentConversation!);
+            _conversations = await _persistence!.getAllConversations();
+            notifyListeners();
+          }
+        }).catchError((Object e) {
+          debugPrint('Erro ao gerar título: $e');
+        }));
+      }
+
       final modelId = _getSelectedModelId();
 
       // Criamos uma lista temporária para a API
