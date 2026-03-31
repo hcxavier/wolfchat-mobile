@@ -152,6 +152,9 @@ class ConversationViewModel extends ChangeNotifier {
   }
 
   String _getProviderName(String provider) {
+    if (provider.isEmpty || provider.contains('Closure')) {
+      return 'provedor';
+    }
     switch (provider) {
       case 'OpenRouter':
         return 'OpenRouter';
@@ -186,24 +189,37 @@ class ConversationViewModel extends ChangeNotifier {
   Future<void> _sendToAI(String content, {String? language}) async {
     if (content.trim().isEmpty || _isSendingMessage) return;
 
+    final modelId = _getSelectedModelId();
+    if (modelId.isEmpty || modelId.contains('Closure')) {
+      _errorMessage = 'Selecione um modelo primeiro';
+      notifyListeners();
+      return;
+    }
+
     _errorMessage = null;
     _isSendingMessage = true;
     notifyListeners();
 
     try {
       final provider = _getSelectedModelProvider();
+
+      if (provider.isEmpty || provider.contains('Closure')) {
+        throw Exception(
+          'Modelo não selecionado. Selecione um modelo primeiro.',
+        );
+      }
+
       final apiKey = _getApiKeyForProvider(provider);
 
       if (apiKey.isEmpty) {
         throw Exception(
-          'API key do $_getProviderName(provider) não configurada',
+          'API key do ${_getProviderName(provider)} não configurada',
         );
       }
 
       final service = _createService(provider);
       _currentService = service;
 
-      final modelId = _getSelectedModelId();
       final modelName = _getSelectedModelName();
       final systemPrompt = buildSystemPrompt(
         modelName,
@@ -261,6 +277,13 @@ class ConversationViewModel extends ChangeNotifier {
   Future<void> sendMessage(String content, {String? language}) async {
     if (content.trim().isEmpty || _isSendingMessage) return;
 
+    final modelId = _getSelectedModelId();
+    if (modelId.isEmpty || modelId.contains('Closure')) {
+      _errorMessage = 'Selecione um modelo primeiro';
+      notifyListeners();
+      return;
+    }
+
     _errorMessage = null;
     _isSendingMessage = true;
     notifyListeners();
@@ -274,11 +297,18 @@ class ConversationViewModel extends ChangeNotifier {
 
     try {
       final provider = _getSelectedModelProvider();
+
+      if (provider.isEmpty || provider.contains('Closure')) {
+        throw Exception(
+          'Modelo não selecionado. Selecione um modelo primeiro.',
+        );
+      }
+
       final apiKey = _getApiKeyForProvider(provider);
 
       if (apiKey.isEmpty) {
         throw Exception(
-          'API key do $_getProviderName(provider) não configurada',
+          'API key do ${_getProviderName(provider)} não configurada',
         );
       }
 

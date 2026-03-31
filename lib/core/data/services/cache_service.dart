@@ -24,7 +24,9 @@ class CacheService {
 
   Future<void> _init() async {
     try {
-      _command = await RedisConnection().connect(_redisHost, _redisPort);
+      _command = await RedisConnection()
+          .connect(_redisHost, _redisPort)
+          .timeout(const Duration(seconds: 2));
     } on Exception {
       _command = null;
     }

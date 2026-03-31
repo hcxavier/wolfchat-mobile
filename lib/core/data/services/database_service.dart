@@ -26,7 +26,7 @@ class DatabaseService {
       version: _dbVersion,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
-    );
+    ).timeout(const Duration(seconds: 5));
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {

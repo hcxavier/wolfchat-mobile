@@ -72,17 +72,21 @@ class HomeViewModel extends ChangeNotifier {
     await settings.loadSettings();
     await conversation.loadConversations();
 
+    // Sincroniza as chaves inicialmente após o carregamento das configurações
+    _onSettingsChanged();
+
     _isInitialized = true;
     notifyListeners();
   }
 
   void _onSettingsChanged() {
-    if (!_isInitialized) return;
     conversation
       ..groqKey = settings.groqKey
       ..openRouterKey = settings.openRouterKey
       ..openCodeZenKey = settings.openCodeZenKey;
-    notifyListeners();
+    if (_isInitialized) {
+      notifyListeners();
+    }
   }
 
   void _onConversationChanged() {
