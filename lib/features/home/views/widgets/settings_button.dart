@@ -19,11 +19,16 @@ class SettingsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surfaceHover,
+      color: isDestructive
+          ? AppColors.brand800.withValues(alpha: 0.3)
+          : AppColors.surfaceHover,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
+        hoverColor: isDestructive
+            ? AppColors.brand700.withValues(alpha: 0.3)
+            : AppColors.surfaceInput,
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
@@ -32,7 +37,7 @@ class SettingsButton extends StatelessWidget {
                 icon,
                 size: 20,
                 color: isDestructive
-                    ? AppColors.brand500
+                    ? AppColors.brand400
                     : AppColors.textSecondary,
               ),
               const SizedBox(width: 12),
@@ -41,7 +46,7 @@ class SettingsButton extends StatelessWidget {
                   title,
                   style: TextStyle(
                     color: isDestructive
-                        ? AppColors.brand500
+                        ? AppColors.brand400
                         : AppColors.textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -52,7 +57,7 @@ class SettingsButton extends StatelessWidget {
                 HeroIcons.chevronRight,
                 size: 16,
                 color: isDestructive
-                    ? AppColors.brand500
+                    ? AppColors.brand400
                     : AppColors.textSecondary,
               ),
             ],

@@ -21,8 +21,8 @@ class MainSettingsContent extends StatelessWidget {
   final TextEditingController nameController;
   final String selectedLanguage;
   final VoidCallback onClose;
-  final VoidCallback onShowApiKeys;
-  final VoidCallback onShowManageModels;
+  final ValueChanged<BuildContext> onShowApiKeys;
+  final ValueChanged<BuildContext> onShowManageModels;
   final ValueChanged<String> onLanguageChanged;
   final VoidCallback onDeleteAllChats;
   final VoidCallback onSave;
@@ -35,6 +35,8 @@ class MainSettingsContent extends StatelessWidget {
       children: [
         _SettingsHeader(onClose: onClose),
         const SizedBox(height: 24),
+        _buildSectionTitle('Perfil'),
+        const SizedBox(height: 10),
         _UserNameField(controller: nameController),
         const SizedBox(height: 24),
         _SettingsButtonsGroup(
@@ -42,19 +44,48 @@ class MainSettingsContent extends StatelessWidget {
           onShowManageModels: onShowManageModels,
         ),
         const SizedBox(height: 24),
+        _buildSectionTitle('Preferências'),
+        const SizedBox(height: 10),
         _LanguageSelector(
           selectedLanguage: selectedLanguage,
           onChanged: onLanguageChanged,
         ),
         const SizedBox(height: 24),
+        _buildSectionTitle('Dados'),
+        const SizedBox(height: 10),
         SettingsButton(
           icon: HeroIcons.trash,
           title: 'Excluir todos os chats',
           onTap: onDeleteAllChats,
           isDestructive: true,
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 28),
         _SaveButton(onSave: onSave),
+      ],
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Row(
+      children: [
+        Container(
+          width: 3,
+          height: 14,
+          decoration: BoxDecoration(
+            color: AppColors.brand500,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title.toUpperCase(),
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.8,
+          ),
+        ),
       ],
     );
   }
@@ -68,35 +99,69 @@ class _SettingsHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const HeroIcon(
-          HeroIcons.cog6Tooth,
-          size: 24,
-          color: AppColors.brand300,
-        ),
-        const SizedBox(width: 12),
-        const Expanded(
-          child: Text(
-            'Configurações',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceInput,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppColors.surfaceHover,
             ),
           ),
+          child: const HeroIcon(
+            HeroIcons.cog6Tooth,
+            size: 20,
+            color: AppColors.brand400,
+          ),
         ),
-        Material(
-          color: Colors.transparent,
-          shape: const CircleBorder(),
-          child: InkWell(
-            onTap: onClose,
-            customBorder: const CircleBorder(),
-            hoverColor: AppColors.surfaceHover,
-            child: const Padding(
-              padding: EdgeInsets.all(6),
-              child: HeroIcon(
-                HeroIcons.xMark,
-                size: 20,
-                color: AppColors.textSecondary,
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Configurações',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Personalize sua experiência',
+                style: TextStyle(
+                  color: AppColors.textSecondary.withValues(alpha: 0.8),
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceInput,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: AppColors.surfaceHover,
+            ),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            shape: const CircleBorder(),
+            child: InkWell(
+              onTap: onClose,
+              customBorder: const CircleBorder(),
+              hoverColor: AppColors.surfaceHover,
+              child: const Padding(
+                padding: EdgeInsets.all(4),
+                child: HeroIcon(
+                  HeroIcons.xMark,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
           ),
@@ -112,36 +177,47 @@ class _UserNameField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Nome do usuário',
-          style: TextStyle(
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceInput,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.surfaceHover,
+        ),
+      ),
+      child: TextField(
+        controller: controller,
+        style: const TextStyle(
+          color: AppColors.textPrimary,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        decoration: InputDecoration(
+          prefixIcon: const Padding(
+            padding: EdgeInsets.only(left: 14, right: 12),
+            child: HeroIcon(
+              HeroIcons.user,
+              size: 18,
+              color: AppColors.brand400,
+            ),
+          ),
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 40,
+            minHeight: 40,
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+          hintText: 'Seu nome',
+          hintStyle: const TextStyle(
             color: AppColors.textSecondary,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
           ),
         ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: AppColors.surfaceInput,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -151,37 +227,118 @@ class _SettingsButtonsGroup extends StatelessWidget {
     required this.onShowApiKeys,
     required this.onShowManageModels,
   });
-  final VoidCallback onShowApiKeys;
-  final VoidCallback onShowManageModels;
+  final ValueChanged<BuildContext> onShowApiKeys;
+  final ValueChanged<BuildContext> onShowManageModels;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SettingsButton(
-          icon: HeroIcons.key,
-          title: 'Configurar API Keys',
-          onTap: onShowApiKeys,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceInput.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.surfaceHover,
         ),
-        const SizedBox(height: 8),
-        SettingsButton(
-          icon: HeroIcons.cpuChip,
-          title: 'Gerenciar Modelos',
-          onTap: onShowManageModels,
+      ),
+      child: Column(
+        children: [
+          _SettingsButtonItem(
+            icon: HeroIcons.key,
+            title: 'Configurar API Keys',
+            onTap: () => onShowApiKeys(context),
+          ),
+          Container(
+            height: 1,
+            color: AppColors.surfaceHover.withValues(alpha: 0.5),
+          ),
+          _SettingsButtonItem(
+            icon: HeroIcons.cpuChip,
+            title: 'Gerenciar Modelos',
+            onTap: () => onShowManageModels(context),
+          ),
+          Container(
+            height: 1,
+            color: AppColors.surfaceHover.withValues(alpha: 0.5),
+          ),
+          _SettingsButtonItem(
+            icon: HeroIcons.adjustmentsHorizontal,
+            title: 'Personalização (System Prompt)',
+            onTap: () {},
+          ),
+          Container(
+            height: 1,
+            color: AppColors.surfaceHover.withValues(alpha: 0.5),
+          ),
+          _SettingsButtonItem(
+            icon: HeroIcons.bolt,
+            title: 'Prompts Dinâmicos',
+            onTap: () {},
+            isLast: true,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsButtonItem extends StatelessWidget {
+  const _SettingsButtonItem({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.isLast = false,
+  });
+  final HeroIcons icon;
+  final String title;
+  final VoidCallback onTap;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.vertical(
+          top: const Radius.circular(14),
+          bottom: isLast ? const Radius.circular(14) : Radius.zero,
         ),
-        const SizedBox(height: 8),
-        SettingsButton(
-          icon: HeroIcons.adjustmentsHorizontal,
-          title: 'Personalização (System Prompt)',
-          onTap: () {},
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.brand900.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: HeroIcon(
+                  icon,
+                  size: 18,
+                  color: AppColors.brand400,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const HeroIcon(
+                HeroIcons.chevronRight,
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 8),
-        SettingsButton(
-          icon: HeroIcons.bolt,
-          title: 'Prompts Dinâmicos',
-          onTap: () {},
-        ),
-      ],
+      ),
     );
   }
 }
@@ -206,52 +363,56 @@ class _LanguageSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Idioma da Resposta',
-          style: TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceInput,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.surfaceHover,
         ),
-        const SizedBox(height: 8),
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => _showLanguageMenu(context),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceInput,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      selectedLanguage,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 14,
-                      ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showLanguageMenu(context),
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.brand900.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const HeroIcon(
+                    HeroIcons.language,
+                    size: 18,
+                    color: AppColors.brand400,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    selectedLanguage,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const HeroIcon(
-                    HeroIcons.chevronDown,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                ],
-              ),
+                ),
+                const HeroIcon(
+                  HeroIcons.chevronDown,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 
@@ -326,20 +487,43 @@ class _SaveButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 48,
-      child: ElevatedButton(
-        onPressed: onSave,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.brand500,
-          foregroundColor: AppColors.textPrimary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+      height: 52,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onSave,
+          borderRadius: BorderRadius.circular(14),
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppColors.brand500, AppColors.brand600],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.brand500.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Salvar',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
           ),
-          elevation: 0,
-        ),
-        child: const Text(
-          'Salvar',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
     );

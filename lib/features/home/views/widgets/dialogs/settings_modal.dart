@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:wolfchat/core/theme/app_colors.dart';
 import 'package:wolfchat/features/home/viewmodels/home_viewmodel.dart';
+import 'package:wolfchat/features/home/views/widgets/dialogs/api_keys_modal.dart';
 import 'package:wolfchat/features/home/views/widgets/dialogs/dialog_wrappers.dart';
 import 'package:wolfchat/features/home/views/widgets/dialogs/manage_models_modal.dart';
-import 'package:wolfchat/features/home/views/widgets/dialogs/settings_api_keys_section.dart';
 import 'package:wolfchat/features/home/views/widgets/dialogs/settings_sections.dart';
+import 'package:wolfchat/shared/widgets/animated_dialog.dart';
 
 class SettingsModal extends StatefulWidget {
   const SettingsModal({
@@ -28,8 +30,6 @@ class _SettingsModalState extends State<SettingsModal> {
   bool _obscureGroq = true;
   bool _obscureOpenCodeZen = true;
   String _selectedLanguage = 'Português (Brasil)';
-  bool _showApiKeys = false;
-  bool _showManageModels = false;
 
   @override
   void initState() {
@@ -62,67 +62,87 @@ class _SettingsModalState extends State<SettingsModal> {
     widget.onClose();
   }
 
+  void _onShowApiKeys(BuildContext context) {
+    showAnimatedDialog<void>(
+      context: context,
+      builder: (dialogContext) => ApiKeysModal(
+        openRouterController: _openRouterController,
+        groqController: _groqController,
+        openCodeZenController: _openCodeZenController,
+        obscureOpenRouter: _obscureOpenRouter,
+        obscureGroq: _obscureGroq,
+        obscureOpenCodeZen: _obscureOpenCodeZen,
+        onToggleOpenRouter: () =>
+            setState(() => _obscureOpenRouter = !_obscureOpenRouter),
+        onToggleGroq: () => setState(() => _obscureGroq = !_obscureGroq),
+        onToggleOpenCodeZen: () =>
+            setState(() => _obscureOpenCodeZen = !_obscureOpenCodeZen),
+        onClose: () => Navigator.of(dialogContext).pop(),
+        onSave: () {
+          widget.viewModel.saveApiKeys(
+            openRouter: _openRouterController.text,
+            groq: _groqController.text,
+            openCodeZen: _openCodeZenController.text,
+          );
+          Navigator.of(dialogContext).pop();
+        },
+      ),
+    );
+  }
+
+  void _onShowManageModels(BuildContext context) {
+    showAnimatedDialog<void>(
+      context: context,
+      builder: (dialogContext) => ManageModelsModal(
+        viewModel: widget.viewModel,
+        onClose: () => Navigator.of(dialogContext).pop(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_showManageModels) {
-      return ManageModelsModal(
-        viewModel: widget.viewModel,
-        onClose: () => setState(() => _showManageModels = false),
-      );
-    }
-
     return DialogWrapper(
       child: Dialog(
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
         child: Container(
-          width: 440,
+          width: 480,
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.9,
           ),
-          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceCard,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: AppColors.accentLight.withValues(alpha: 0.3),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.brand500.withValues(alpha: 0.1),
+                blurRadius: 40,
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(28),
           child: SingleChildScrollView(
-            child: _showApiKeys
-                ? ApiKeysSection(
-                    openRouterController: _openRouterController,
-                    groqController: _groqController,
-                    openCodeZenController: _openCodeZenController,
-                    obscureOpenRouter: _obscureOpenRouter,
-                    obscureGroq: _obscureGroq,
-                    obscureOpenCodeZen: _obscureOpenCodeZen,
-                    onToggleOpenRouter: () => setState(
-                      () => _obscureOpenRouter = !_obscureOpenRouter,
-                    ),
-                    onToggleGroq: () =>
-                        setState(() => _obscureGroq = !_obscureGroq),
-                    onToggleOpenCodeZen: () => setState(
-                      () => _obscureOpenCodeZen = !_obscureOpenCodeZen,
-                    ),
-                    onBack: () => setState(() => _showApiKeys = false),
-                    onDone: () {
-                      // ignore: discarded_futures, Intentional background update
-                      widget.viewModel.saveApiKeys(
-                        openRouter: _openRouterController.text,
-                        groq: _groqController.text,
-                        openCodeZen: _openCodeZenController.text,
-                      );
-                      setState(() => _showApiKeys = false);
-                    },
-                  )
-                : MainSettingsContent(
-                    nameController: _nameController,
-                    selectedLanguage: _selectedLanguage,
-                    onClose: widget.onClose,
-                    onShowApiKeys: () => setState(() => _showApiKeys = true),
-                    onShowManageModels: () =>
-                        setState(() => _showManageModels = true),
-                    onLanguageChanged: (lang) {
-                      setState(() => _selectedLanguage = lang);
-                      // ignore: discarded_futures, Update immediately
-                      widget.viewModel.updateLanguage(lang);
-                    },
-                    onDeleteAllChats: () =>
-                        showDeleteAllChatsDialog(context, widget.viewModel),
-                    onSave: _onSave,
-                  ),
+            child: MainSettingsContent(
+              nameController: _nameController,
+              selectedLanguage: _selectedLanguage,
+              onClose: widget.onClose,
+              onShowApiKeys: _onShowApiKeys,
+              onShowManageModels: _onShowManageModels,
+              onLanguageChanged: (lang) {
+                setState(() => _selectedLanguage = lang);
+                // ignore: discarded_futures, Update immediately
+                widget.viewModel.updateLanguage(lang);
+              },
+              onDeleteAllChats: () =>
+                  showDeleteAllChatsDialog(context, widget.viewModel),
+              onSave: _onSave,
+            ),
           ),
         ),
       ),
