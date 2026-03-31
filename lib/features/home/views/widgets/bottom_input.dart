@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
@@ -50,16 +52,27 @@ class _BottomInputState extends State<BottomInput> {
   @override
   Widget build(BuildContext context) {
     final isFocused = _focusNode.hasFocus;
-    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+    final mediaQuery = MediaQuery.of(context);
+    final bottomPadding = math.max(
+      mediaQuery.viewInsets.bottom,
+      mediaQuery.viewPadding.bottom,
+    );
 
-    return Padding(
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOut,
       padding: EdgeInsets.only(bottom: bottomPadding),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.surfaceInput,
           borderRadius: BorderRadius.circular(16),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.only(
+          left: 12,
+          right: 12,
+          top: 0,
+          bottom: 8,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [

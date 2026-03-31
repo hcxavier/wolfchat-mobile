@@ -121,6 +121,7 @@ class _HomePageState extends State<HomePage>
 
     return Scaffold(
       backgroundColor: AppColors.surfaceMain,
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           MainChatView(onToggleSidebar: viewModel.toggleSidebar),
