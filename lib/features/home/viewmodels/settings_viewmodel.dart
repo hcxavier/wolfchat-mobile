@@ -22,8 +22,8 @@ class SettingsViewModel extends ChangeNotifier {
 
   static const List<CustomModel> _defaultModels = [
     CustomModel(
-      name: 'Kimi K2',
-      modelId: 'moonshotai/kimi-k2-instruct',
+      name: 'GPT OSS 120B',
+      modelId: 'openai/gpt-oss-120b',
       provider: 'Groq',
     ),
     CustomModel(
