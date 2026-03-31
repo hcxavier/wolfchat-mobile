@@ -50,6 +50,61 @@ class GroqService {
     }
   }
 
+  Stream<String> sendMessageStream({
+    required List<ChatMessage> messages,
+    required String model,
+  }) async* {
+    final url = Uri.parse('$_baseUrl/chat/completions');
+
+    final body = jsonEncode({
+      'model': model,
+      'messages': messages.map((m) => m.toJson()).toList(),
+      'temperature': 0.7,
+      'max_tokens': 2048,
+      'stream': true,
+    });
+
+    final request = http.Request('POST', url)
+      ..headers.addAll({
+        'Authorization': 'Bearer $apiKey',
+        'Content-Type': 'application/json',
+      })
+      ..body = body;
+
+    final client = http.Client();
+    final response = await client.send(request);
+
+    if (response.statusCode == 200) {
+      final stream = response.stream
+          .transform(utf8.decoder)
+          .transform(const LineSplitter());
+
+      await for (final line in stream) {
+        if (line.isEmpty) continue;
+        if (line == 'data: [DONE]') break;
+
+        if (line.startsWith('data: ')) {
+          final data = jsonDecode(line.substring(6)) as Map<String, dynamic>;
+          final choices = data['choices'] as List<dynamic>;
+          if (choices.isNotEmpty) {
+            final choice = choices[0] as Map<String, dynamic>;
+            final delta = choice['delta'] as Map<String, dynamic>;
+            final content = delta['content'] as String?;
+            if (content != null) {
+              yield content;
+            }
+          }
+        }
+      }
+    } else {
+      final responseBody = await response.stream.bytesToString();
+      throw Exception(
+        'Failed to get streaming response: ${response.statusCode} '
+        '- $responseBody',
+      );
+    }
+  }
+
   Future<String> generateTitle(String content) async {
     try {
       final url = Uri.parse('$_baseUrl/chat/completions');

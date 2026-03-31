@@ -219,23 +219,34 @@ class ConversationViewModel extends ChangeNotifier {
         );
       }
 
-      final assistantResponse = await groqService.sendMessage(
+      final assistantBuffer = StringBuffer();
+      final assistantMessage = ChatMessage(
+        role: 'assistant',
+        content: '',
+        timestamp: DateTime.now(),
+      );
+      _messages.add(assistantMessage);
+      notifyListeners();
+
+      final stream = groqService.sendMessageStream(
         messages: apiMessages,
         model: modelId,
       );
 
-      final assistantMessage = ChatMessage(
-        role: 'assistant',
-        content: assistantResponse,
-        timestamp: DateTime.now(),
-      );
-      _messages.add(assistantMessage);
+      await for (final chunk in stream) {
+        assistantBuffer.write(chunk);
+        // Atualiza a última mensagem com o conteúdo acumulado
+        _messages[_messages.length - 1] = assistantMessage.copyWith(
+          content: assistantBuffer.toString(),
+        );
+        notifyListeners();
+      }
 
       if (_currentConversation != null && _persistence != null) {
         await _persistence!.addMessage(
           _currentConversation!.id,
           'assistant',
-          assistantResponse,
+          assistantBuffer.toString(),
         );
         _conversations = await _persistence!.getAllConversations();
       }
