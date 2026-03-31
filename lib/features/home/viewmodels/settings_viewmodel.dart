@@ -23,32 +23,7 @@ class SettingsViewModel extends ChangeNotifier {
   static const List<CustomModel> _defaultModels = [
     CustomModel(
       id: 'moonshotai/kimi-k2-instruct',
-      name: 'Kimi K2 Instruct',
-      provider: 'Groq',
-    ),
-    CustomModel(
-      id: 'llama-3.3-70b-versatile',
-      name: 'Llama 3.3 70B',
-      provider: 'Groq',
-    ),
-    CustomModel(
-      id: 'llama-3.1-70b-versatile',
-      name: 'Llama 3.1 70B',
-      provider: 'Groq',
-    ),
-    CustomModel(
-      id: 'llama-3.1-8b-instant',
-      name: 'Llama 3.1 8B',
-      provider: 'Groq',
-    ),
-    CustomModel(
-      id: 'mixtral-8x7b-32768',
-      name: 'Mixtral 8x7B',
-      provider: 'Groq',
-    ),
-    CustomModel(
-      id: 'gemma2-9b-it',
-      name: 'Gemma 2 9B',
+      name: 'Kimi K2',
       provider: 'Groq',
     ),
   ];
