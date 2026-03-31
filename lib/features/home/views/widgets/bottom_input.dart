@@ -53,13 +53,16 @@ class _BottomInputState extends State<BottomInput> {
   Widget build(BuildContext context) {
     final isFocused = _focusNode.hasFocus;
     final mediaQuery = MediaQuery.of(context);
-    final bottomPadding = math.max(
-      mediaQuery.viewInsets.bottom,
-      mediaQuery.viewPadding.bottom,
-    );
+    
+    // Only follow keyboard if this specific field is focused.
+    // If a modal is open, this field won't have focus and won't jump up.
+    final bottomPadding = isFocused 
+      ? math.max(mediaQuery.viewInsets.bottom, mediaQuery.viewPadding.bottom)
+      : mediaQuery.viewPadding.bottom;
 
     return AnimatedPadding(
-      duration: const Duration(milliseconds: 10),
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOutCubic,
       padding: EdgeInsets.only(bottom: bottomPadding),
       child: Container(
         decoration: BoxDecoration(

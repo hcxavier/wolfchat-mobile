@@ -71,7 +71,7 @@ class _SettingsModalState extends State<SettingsModal> {
       );
     }
 
-    return KeyboardAwareDialog(
+    return DialogWrapper(
       child: Dialog(
         child: Container(
           width: 440,
