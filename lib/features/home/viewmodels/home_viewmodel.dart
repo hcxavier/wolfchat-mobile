@@ -59,7 +59,10 @@ class HomeViewModel extends ChangeNotifier {
     conversation = ConversationViewModel(
       persistence: _persistence,
       groqKey: '',
+      openRouterKey: '',
+      openCodeZenKey: '',
       getSelectedModelId: () => settings.selectedModelId,
+      getSelectedModelProvider: () => settings.selectedModelProvider,
     );
 
     settings.addListener(_onSettingsChanged);
@@ -74,7 +77,10 @@ class HomeViewModel extends ChangeNotifier {
 
   void _onSettingsChanged() {
     if (!_isInitialized) return;
-    conversation.updateGroqKey(settings.groqKey);
+    conversation
+      ..updateGroqKey(settings.groqKey)
+      ..updateOpenRouterKey(settings.openRouterKey)
+      ..updateOpenCodeZenKey(settings.openCodeZenKey);
     notifyListeners();
   }
 

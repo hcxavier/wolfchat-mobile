@@ -26,6 +26,36 @@ class SettingsViewModel extends ChangeNotifier {
       name: 'Kimi K2',
       provider: 'Groq',
     ),
+    CustomModel(
+      id: 'meta-llama/llama-3.3-70b-instruct:free',
+      name: 'Llama 3.3 70B',
+      provider: 'OpenRouter',
+    ),
+    CustomModel(
+      id: 'google/gemma-3-12b-it:free',
+      name: 'Gemma 3 12B',
+      provider: 'OpenRouter',
+    ),
+    CustomModel(
+      id: 'openrouter/free',
+      name: 'OpenRouter Free',
+      provider: 'OpenRouter',
+    ),
+    CustomModel(
+      id: 'big-pickle',
+      name: 'Big Pickle',
+      provider: 'OpenCode Zen',
+    ),
+    CustomModel(
+      id: 'qwen3.6-plus-free',
+      name: 'Qwen 3.6 Plus',
+      provider: 'OpenCode Zen',
+    ),
+    CustomModel(
+      id: 'minimax-m2.5-free',
+      name: 'MiniMax M2.5',
+      provider: 'OpenCode Zen',
+    ),
   ];
 
   bool get isLoading => _isLoading;
@@ -43,9 +73,13 @@ class SettingsViewModel extends ChangeNotifier {
   ];
   CustomModel get selectedModel => availableModels[_selectedModelIndex];
   int get selectedModelIndex => _selectedModelIndex;
-  bool get hasApiKey => _groqKey.isNotEmpty;
+  bool get hasApiKey =>
+      _groqKey.isNotEmpty ||
+      _openRouterKey.isNotEmpty ||
+      _openCodeZenKey.isNotEmpty;
 
   String get selectedModelId => selectedModel.id;
+  String get selectedModelProvider => selectedModel.provider;
 
   Future<void> loadSettings() async {
     _isLoading = true;

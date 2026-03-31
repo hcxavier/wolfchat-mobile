@@ -7,6 +7,7 @@ import 'package:wolfchat/features/home/viewmodels/home_viewmodel.dart';
 import 'package:wolfchat/features/home/views/widgets/dialogs/settings_modal.dart';
 import 'package:wolfchat/features/home/views/widgets/main_chat_view.dart';
 import 'package:wolfchat/features/home/views/widgets/sidebar.dart';
+import 'package:wolfchat/shared/widgets/animated_dialog.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -42,7 +43,7 @@ class _HomePageState extends State<HomePage>
       _wasSettingsModalOpen = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          showDialog<void>(
+          showAnimatedDialog<void>(
             context: context,
             builder: (dialogContext) => SettingsModal(
               viewModel: viewModel,
@@ -52,7 +53,7 @@ class _HomePageState extends State<HomePage>
               },
             ),
             // The .then() callback is intentional for post-close cleanup
-            // ignore: discarded_futures
+            // ignore: discarded_futures, Intentional background update
           ).then((_) {
             // The callback runs after dialog closes, checking mounted is safe
             if (mounted && viewModel.isSettingsModalOpen) {

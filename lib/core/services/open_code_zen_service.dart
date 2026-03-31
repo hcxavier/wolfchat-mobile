@@ -4,12 +4,12 @@ import 'package:http/http.dart' as http;
 import 'package:wolfchat/core/services/ai_service.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
 
-class GroqService implements AiService {
-  GroqService({required this.apiKey});
+class OpenCodeZenService implements AiService {
+  OpenCodeZenService({required this.apiKey});
 
   @override
   final String apiKey;
-  static const String _baseUrl = 'https://api.groq.com/openai/v1';
+  static const String _baseUrl = 'https://opencode.ai/zen/v1';
 
   @override
   Future<String> sendMessage({
@@ -111,22 +111,11 @@ class GroqService implements AiService {
 
   @override
   Future<String?> generateTitle(String content) async {
-    final title = await _generateTitleWithModel(
-      content,
-      'llama-3.1-8b-instant',
-    );
-
-    if (title != null) return title;
-
-    return content.length > 20 ? '${content.substring(0, 17)}...' : content;
-  }
-
-  Future<String?> _generateTitleWithModel(String content, String model) async {
     try {
       final url = Uri.parse('$_baseUrl/chat/completions');
 
       final body = jsonEncode({
-        'model': model,
+        'model': 'big-pickle',
         'messages': [
           {
             'role': 'system',
@@ -167,8 +156,8 @@ class GroqService implements AiService {
         }
       }
     } on Exception catch (e) {
-      debugPrint('Erro ao gerar título com modelo $model: $e');
+      debugPrint('Erro ao gerar título: $e');
     }
-    return null;
+    return content.length > 20 ? '${content.substring(0, 17)}...' : content;
   }
 }

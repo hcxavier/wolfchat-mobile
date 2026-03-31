@@ -16,11 +16,10 @@ class ChatMessagesList extends StatelessWidget {
     }
 
     return ListView.builder(
-      reverse: true,
       padding: const EdgeInsets.symmetric(vertical: 16),
       itemCount: messages.length,
       itemBuilder: (context, index) {
-        final message = messages[messages.length - 1 - index];
+        final message = messages[index];
         final isUser = message.role == 'user';
 
         return Padding(

@@ -61,82 +61,83 @@ class _BottomInputState extends State<BottomInput> {
       : mediaQuery.viewPadding.bottom;
 
     return AnimatedPadding(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 80),
       curve: Curves.easeOutCubic,
       padding: EdgeInsets.only(bottom: bottomPadding),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: AppColors.surfaceInput,
-        ),
-        padding: const EdgeInsets.only(
-          left: 12,
-          right: 12,
-          bottom: 8,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(bottom: isFocused ? 12 : 8),
-              child: const HeroIcon(
-                HeroIcons.paperClip,
+      child: AnimatedScale(
+        scale: isFocused ? 1.02 : 1.0,
+        duration: const Duration(milliseconds: 80),
+        curve: Curves.easeOutCubic,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 80),
+          curve: Curves.easeOutCubic,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: AppColors.surfaceInput,
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 4,
+          ),
+          child: Row(
+            children: [
+              const HeroIcon(
+                HeroIcons.plusCircle,
                 color: AppColors.textSecondary,
                 size: 24,
               ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                controller: _controller,
-                focusNode: _focusNode,
-                minLines: 1,
-                maxLines: 4,
-                style: const TextStyle(color: AppColors.textPrimary),
-                enabled: !widget.isLoading,
-                onSubmitted: (_) => _sendMessage(),
-                decoration: const InputDecoration(
-                  hintText: 'Envie uma mensagem...',
-                  hintStyle: TextStyle(color: AppColors.textSecondary),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 10),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  minLines: 1,
+                  maxLines: 4,
+                  style: const TextStyle(color: AppColors.textPrimary),
+                  enabled: !widget.isLoading,
+                  onSubmitted: (_) => _sendMessage(),
+                  decoration: const InputDecoration(
+                    hintText: 'Envie uma mensagem...',
+                    hintStyle: TextStyle(color: AppColors.textSecondary),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(vertical: 12),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: widget.isLoading ? null : _sendMessage,
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 2),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: widget.isLoading
-                      ? AppColors.textSecondary
-                      : AppColors.textPrimary,
-                ),
-                child: widget.isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: widget.isLoading ? null : _sendMessage,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: widget.isLoading
+                        ? AppColors.textSecondary
+                        : AppColors.textPrimary,
+                  ),
+                  child: widget.isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.surfaceMain,
+                          ),
+                        )
+                      : const HeroIcon(
+                          HeroIcons.arrowUp,
+                          size: 20,
                           color: AppColors.surfaceMain,
                         ),
-                      )
-                    : const HeroIcon(
-                        HeroIcons.arrowUp,
-                        size: 20,
-                        color: AppColors.surfaceMain,
-                        style: HeroIconStyle.solid,
-                      ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+
   }
 }

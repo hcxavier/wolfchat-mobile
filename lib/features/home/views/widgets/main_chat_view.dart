@@ -45,13 +45,15 @@ class MainChatView extends StatelessWidget {
               Expanded(
                 child: hasMessages
                     ? ChatMessagesList(messages: viewModel.messages)
-                    : const SingleChildScrollView(
+                    : SingleChildScrollView(
                         child: Column(
                           children: [
-                            SizedBox(height: 48),
-                            HeaderSection(),
-                            SizedBox(height: 48),
-                            SuggestionsGrid(),
+                            const SizedBox(height: 48),
+                            const HeaderSection(),
+                            const SizedBox(height: 48),
+                            SuggestionsGrid(
+                              onSuggestionTap: viewModel.sendMessage,
+                            ),
                           ],
                         ),
                       ),

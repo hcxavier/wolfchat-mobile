@@ -2,21 +2,33 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:wolfchat/core/data/models/conversation.dart';
 import 'package:wolfchat/core/data/services/persistence_service.dart';
+import 'package:wolfchat/core/services/ai_service.dart';
 import 'package:wolfchat/core/services/groq_service.dart';
+import 'package:wolfchat/core/services/open_code_zen_service.dart';
+import 'package:wolfchat/core/services/open_router_service.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
 
 class ConversationViewModel extends ChangeNotifier {
   ConversationViewModel({
     required PersistenceService? persistence,
     required String groqKey,
+    required String openRouterKey,
+    required String openCodeZenKey,
     required String Function() getSelectedModelId,
+    required String Function() getSelectedModelProvider,
   }) : _persistence = persistence,
        _groqKey = groqKey,
-       _getSelectedModelId = getSelectedModelId;
+       _openRouterKey = openRouterKey,
+       _openCodeZenKey = openCodeZenKey,
+       _getSelectedModelId = getSelectedModelId,
+       _getSelectedModelProvider = getSelectedModelProvider;
 
   PersistenceService? _persistence;
   String _groqKey;
+  String _openRouterKey;
+  String _openCodeZenKey;
   final String Function() _getSelectedModelId;
+  final String Function() _getSelectedModelProvider;
 
   final List<ChatMessage> _messages = [];
   bool _isSendingMessage = false;
@@ -30,12 +42,18 @@ class ConversationViewModel extends ChangeNotifier {
   List<Conversation> get conversations => List.unmodifiable(_conversations);
   Conversation? get currentConversation => _currentConversation;
 
-  // ignore: use_setters_to_change_properties - method naming is clearer for this use case
   void updateGroqKey(String key) {
     _groqKey = key;
   }
 
-  // ignore: use_setters_to_change_properties - method naming is clearer for this use case
+  void updateOpenRouterKey(String key) {
+    _openRouterKey = key;
+  }
+
+  void updateOpenCodeZenKey(String key) {
+    _openCodeZenKey = key;
+  }
+
   void setPersistence(PersistenceService? persistence) {
     _persistence = persistence;
   }
@@ -49,19 +67,6 @@ class ConversationViewModel extends ChangeNotifier {
     _messages.clear();
     _errorMessage = null;
     notifyListeners();
-  }
-
-  String _getLanguageCode(String language) {
-    final languageMap = {
-      'Português (Brasil)': 'PT-BR',
-      'English': 'EN-US',
-      'Español': 'ES-ES',
-      'Français': 'FR-FR',
-      'Deutsch': 'DE-DE',
-      '日本語': 'JA-JP',
-      '中文': 'ZH-CN',
-    };
-    return languageMap[language] ?? 'PT-BR';
   }
 
   Future<void> loadConversations() async {
@@ -133,6 +138,42 @@ class ConversationViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  AiService _createService(String provider) {
+    switch (provider) {
+      case 'OpenRouter':
+        return OpenRouterService(apiKey: _openRouterKey);
+      case 'OpenCode Zen':
+        return OpenCodeZenService(apiKey: _openCodeZenKey);
+      case 'Groq':
+      default:
+        return GroqService(apiKey: _groqKey);
+    }
+  }
+
+  String _getApiKeyForProvider(String provider) {
+    switch (provider) {
+      case 'OpenRouter':
+        return _openRouterKey;
+      case 'OpenCode Zen':
+        return _openCodeZenKey;
+      case 'Groq':
+      default:
+        return _groqKey;
+    }
+  }
+
+  String _getProviderName(String provider) {
+    switch (provider) {
+      case 'OpenRouter':
+        return 'OpenRouter';
+      case 'OpenCode Zen':
+        return 'OpenCode Zen';
+      case 'Groq':
+      default:
+        return 'Groq';
+    }
+  }
+
   Future<void> sendMessage(String content, {String? language}) async {
     if (content.trim().isEmpty || _isSendingMessage) return;
 
@@ -140,32 +181,25 @@ class ConversationViewModel extends ChangeNotifier {
     _isSendingMessage = true;
     notifyListeners();
 
-    // Apenas prefixamos a primeira mensagem da conversa para definir o idioma
-    final isFirstMessage = _messages.isEmpty;
-    final String apiContent;
-
-    if (isFirstMessage && language != null) {
-      apiContent =
-          'Idioma: ${_getLanguageCode(language)}; User: ${content.trim()}';
-    } else {
-      apiContent = content.trim();
-    }
-
     final userMessage = ChatMessage(
       role: 'user',
-      content: content.trim(), // O que aparece no balão (limpo)
+      content: content.trim(),
       timestamp: DateTime.now(),
     );
     _messages.add(userMessage);
 
     try {
-      if (_groqKey.isEmpty) {
-        throw Exception('API key do Groq não configurada');
+      final provider = _getSelectedModelProvider();
+      final apiKey = _getApiKeyForProvider(provider);
+
+      if (apiKey.isEmpty) {
+        throw Exception(
+          'API key do $_getProviderName(provider) não configurada',
+        );
       }
 
-      final groqService = GroqService(apiKey: _groqKey);
+      final service = _createService(provider);
 
-      // Garante que a conversa existe e salva a mensagem imediatamente
       if (_persistence != null) {
         if (_currentConversation == null) {
           _currentConversation = await _persistence!.createConversation(
@@ -184,41 +218,7 @@ class ConversationViewModel extends ChangeNotifier {
 
       notifyListeners();
 
-      // Gera o título se for a 1ª mensagem (sem bloquear o resto)
-      if (isFirstMessage && _persistence != null) {
-        final selectedModel = _getSelectedModelId();
-        unawaited(
-          groqService
-              .generateTitle(content.trim(), fallbackModel: selectedModel)
-              .then((title) async {
-                if (_currentConversation != null) {
-                  _currentConversation = _currentConversation!.copyWith(
-                    title: title,
-                    updatedAt: DateTime.now(),
-                  );
-                  await _persistence!.updateConversation(_currentConversation!);
-                  _conversations = await _persistence!.getAllConversations();
-                  notifyListeners();
-                }
-              })
-              .catchError((Object e) {
-                debugPrint('Erro ao gerar título: $e');
-              }),
-        );
-      }
-
       final modelId = _getSelectedModelId();
-
-      // Criamos uma lista temporária para a API
-      // com o conteúdo prefixado se for a 1ª mensagem
-      final apiMessages = List<ChatMessage>.from(_messages);
-      if (isFirstMessage) {
-        apiMessages[0] = ChatMessage(
-          role: 'user',
-          content: apiContent,
-          timestamp: userMessage.timestamp,
-        );
-      }
 
       final assistantBuffer = StringBuffer();
       final assistantMessage = ChatMessage(
@@ -229,14 +229,13 @@ class ConversationViewModel extends ChangeNotifier {
       _messages.add(assistantMessage);
       notifyListeners();
 
-      final stream = groqService.sendMessageStream(
-        messages: apiMessages,
+      final stream = service.sendMessageStream(
+        messages: _messages,
         model: modelId,
       );
 
       await for (final chunk in stream) {
         assistantBuffer.write(chunk);
-        // Atualiza a última mensagem com o conteúdo acumulado
         _messages[_messages.length - 1] = assistantMessage.copyWith(
           content: assistantBuffer.toString(),
         );

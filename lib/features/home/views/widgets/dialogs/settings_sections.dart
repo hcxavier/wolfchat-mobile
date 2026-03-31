@@ -3,6 +3,7 @@ import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 import 'package:wolfchat/features/home/viewmodels/home_viewmodel.dart';
 import 'package:wolfchat/features/home/views/widgets/settings_button.dart';
+import 'package:wolfchat/shared/widgets/animated_dialog.dart';
 
 class MainSettingsContent extends StatelessWidget {
   const MainSettingsContent({
@@ -349,7 +350,7 @@ Future<void> showDeleteAllChatsDialog(
   BuildContext context,
   HomeViewModel viewModel,
 ) async {
-  await showDialog<void>(
+  await showAnimatedDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
       backgroundColor: AppColors.surfaceCard,
