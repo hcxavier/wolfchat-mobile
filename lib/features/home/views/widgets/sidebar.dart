@@ -15,6 +15,7 @@ class Sidebar extends StatelessWidget {
     required this.currentConversationId,
     required this.onConversationSelected,
     required this.onNewConversation,
+    required this.onDeleteConversation,
     super.key,
   });
 
@@ -25,6 +26,7 @@ class Sidebar extends StatelessWidget {
   final int? currentConversationId;
   final void Function(int) onConversationSelected;
   final VoidCallback onNewConversation;
+  final void Function(int) onDeleteConversation;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +47,7 @@ class Sidebar extends StatelessWidget {
               conversations: conversations,
               currentConversationId: currentConversationId,
               onConversationSelected: onConversationSelected,
+              onDeleteConversation: onDeleteConversation,
             ),
             SidebarFooter(
               userName: userName,

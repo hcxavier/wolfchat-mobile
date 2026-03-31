@@ -143,20 +143,22 @@ class _MessageBubble extends StatelessWidget {
 
     final commandMatch = RegExp(r'^(\/[\w-]+)(\s.*)?$').firstMatch(line);
     if (commandMatch != null) {
+      final command = commandMatch.group(1)!;
+      final args = commandMatch.group(2);
       return RichText(
         text: TextSpan(
           children: [
             TextSpan(
-              text: commandMatch.group(1),
+              text: command,
               style: const TextStyle(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
             ),
-            if (commandMatch.group(2) != null)
+            if (args != null)
               TextSpan(
-                text: commandMatch.group(2),
+                text: args,
                 style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 16,

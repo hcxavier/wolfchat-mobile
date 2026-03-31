@@ -173,6 +173,9 @@ class _HomePageState extends State<HomePage>
                   await viewModel.createNewConversation();
                   viewModel.closeSidebar();
                 },
+                onDeleteConversation: (id) async {
+                  await viewModel.deleteConversation(id);
+                },
               ),
             ),
           ),
