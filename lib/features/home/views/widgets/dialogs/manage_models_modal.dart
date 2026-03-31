@@ -39,13 +39,13 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
     super.dispose();
   }
 
-  void _addModel() {
+  Future<void> _addModel() async {
     final name = _nameController.text.trim();
     final modelId = _modelIdController.text.trim();
 
     if (name.isEmpty || modelId.isEmpty) return;
 
-    widget.viewModel.addCustomModel(
+    await widget.viewModel.addCustomModel(
       name: name,
       modelId: modelId,
       provider: _selectedProvider,

@@ -4,11 +4,12 @@ import 'package:sqflite/sqflite.dart';
 import 'package:wolfchat/core/data/models/api_key.dart';
 import 'package:wolfchat/core/data/models/conversation.dart';
 import 'package:wolfchat/core/data/models/message.dart';
+import 'package:wolfchat/features/home/models/custom_model.dart';
 
 class DatabaseService {
   static Database? _database;
   static const String _dbName = 'wolfchat.db';
-  static const int _dbVersion = 1;
+  static const int _dbVersion = 2;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -24,7 +25,21 @@ class DatabaseService {
       path,
       version: _dbVersion,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS custom_models (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          model_id TEXT NOT NULL,
+          provider TEXT NOT NULL
+        )
+      ''');
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -70,6 +85,15 @@ class DatabaseService {
       CREATE TABLE user_settings (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE custom_models (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        model_id TEXT NOT NULL,
+        provider TEXT NOT NULL
       )
     ''');
   }
@@ -230,6 +254,22 @@ class DatabaseService {
     if (results.isEmpty) return null;
     final value = results.first['value'];
     return value as String?;
+  }
+
+  Future<int> insertCustomModel(CustomModel model) async {
+    final db = await database;
+    return db.insert('custom_models', model.toMap()..remove('id'));
+  }
+
+  Future<List<CustomModel>> getAllCustomModels() async {
+    final db = await database;
+    final results = await db.query('custom_models');
+    return results.map(CustomModel.fromMap).toList();
+  }
+
+  Future<int> deleteCustomModel(int id) async {
+    final db = await database;
+    return db.delete('custom_models', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> close() async {

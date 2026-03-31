@@ -38,7 +38,7 @@ class HomeViewModel extends ChangeNotifier {
       _isInitialized ? settings.availableModels : [];
   CustomModel get selectedModel => _isInitialized
       ? settings.selectedModel
-      : const CustomModel(id: '', name: 'Selecione', provider: '');
+      : const CustomModel(name: 'Selecione', modelId: '', provider: '');
   int get selectedModelIndex =>
       _isInitialized ? settings.selectedModelIndex : 0;
   List<ConversationViewModel> get conversationList =>
@@ -144,22 +144,22 @@ class HomeViewModel extends ChangeNotifier {
     );
   }
 
-  void addCustomModel({
+  Future<void> addCustomModel({
     required String name,
     required String modelId,
     required ModelProvider provider,
-  }) {
+  }) async {
     if (!_isInitialized) return;
-    settings.addCustomModel(
+    await settings.addCustomModel(
       name: name,
       modelId: modelId,
       provider: provider,
     );
   }
 
-  void removeCustomModel(int index) {
+  Future<void> removeCustomModel(int index) async {
     if (!_isInitialized) return;
-    settings.removeCustomModel(index);
+    await settings.removeCustomModel(index);
   }
 
   void selectModel(int index) {

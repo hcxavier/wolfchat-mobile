@@ -22,43 +22,43 @@ class SettingsViewModel extends ChangeNotifier {
 
   static const List<CustomModel> _defaultModels = [
     CustomModel(
-      id: 'moonshotai/kimi-k2-instruct',
       name: 'Kimi K2',
+      modelId: 'moonshotai/kimi-k2-instruct',
       provider: 'Groq',
     ),
     CustomModel(
-      id: 'meta-llama/llama-3.3-70b-instruct:free',
       name: 'Llama 3.3 70B',
+      modelId: 'meta-llama/llama-3.3-70b-instruct:free',
       provider: 'OpenRouter',
     ),
     CustomModel(
-      id: 'google/gemma-3-12b-it:free',
       name: 'Gemma 3 12B',
+      modelId: 'google/gemma-3-12b-it:free',
       provider: 'OpenRouter',
     ),
     CustomModel(
-      id: 'openrouter/free',
       name: 'OpenRouter Free',
+      modelId: 'openrouter/free',
       provider: 'OpenRouter',
     ),
     CustomModel(
-      id: 'big-pickle',
       name: 'Big Pickle',
+      modelId: 'big-pickle',
       provider: 'OpenCode Zen',
     ),
     CustomModel(
-      id: 'qwen3.6-plus-free',
       name: 'Qwen 3.6 Plus',
+      modelId: 'qwen3.6-plus-free',
       provider: 'OpenCode Zen',
     ),
     CustomModel(
-      id: 'minimax-m2.5-free',
       name: 'MiniMax M2.5',
+      modelId: 'minimax-m2.5-free',
       provider: 'OpenCode Zen',
     ),
     CustomModel(
-      id: 'mimo-v2-pro-free',
       name: 'Mimo V2 Pro',
+      modelId: 'mimo-v2-pro-free',
       provider: 'OpenCode Zen',
     ),
   ];
@@ -83,7 +83,7 @@ class SettingsViewModel extends ChangeNotifier {
       _openRouterKey.isNotEmpty ||
       _openCodeZenKey.isNotEmpty;
 
-  String get selectedModelId => selectedModel.id;
+  String get selectedModelId => selectedModel.modelId;
   String get selectedModelName => selectedModel.name;
   String get selectedModelProvider => selectedModel.provider;
 
@@ -106,6 +106,16 @@ class SettingsViewModel extends ChangeNotifier {
         final savedLanguage = await _persistence.getLanguage();
         if (savedLanguage != null && savedLanguage.isNotEmpty) {
           _language = savedLanguage;
+        }
+
+        final savedModels = await _persistence.getAllCustomModels();
+        _customModels
+          ..clear()
+          ..addAll(savedModels);
+
+        _selectedModelIndex = await _persistence.getSelectedModelIndex();
+        if (_selectedModelIndex >= availableModels.length) {
+          _selectedModelIndex = 0;
         }
       }
     } on Exception catch (e, stackTrace) {
@@ -179,33 +189,75 @@ class SettingsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addCustomModel({
+  Future<void> addCustomModel({
     required String name,
     required String modelId,
     required ModelProvider provider,
-  }) {
+  }) async {
     final model = CustomModel(
-      id: modelId,
       name: name,
+      modelId: modelId,
       provider: provider.displayName,
     );
-    _customModels.add(model);
+    final persistence = _persistence;
+    if (persistence != null) {
+      final dbId = await persistence.saveCustomModel(model);
+      _customModels.add(
+        CustomModel(
+          id: dbId,
+          name: name,
+          modelId: modelId,
+          provider: provider.displayName,
+        ),
+      );
+      _selectedModelIndex = _defaultModels.length + _customModels.length - 1;
+      await persistence.saveSelectedModelIndex(_selectedModelIndex);
+    } else {
+      _customModels.add(model);
+      _selectedModelIndex = _defaultModels.length + _customModels.length - 1;
+    }
     notifyListeners();
   }
 
-  void removeCustomModel(int index) {
-    if (index >= 0 && index < _customModels.length) {
-      _customModels.removeAt(index);
-      if (_selectedModelIndex >= availableModels.length) {
-        _selectedModelIndex = availableModels.length - 1;
-      }
-      notifyListeners();
+  Future<void> removeCustomModel(int index) async {
+    if (index < 0 || index >= _customModels.length) return;
+    final model = _customModels[index];
+    final persistence = _persistence;
+    final modelId = model.id;
+    if (persistence != null && modelId != null) {
+      await persistence.deleteCustomModel(modelId);
     }
+    _customModels.removeAt(index);
+
+    final customModelStartIndex = _defaultModels.length;
+    final wasSelectedCustom = _selectedModelIndex >= customModelStartIndex;
+    if (wasSelectedCustom) {
+      final customIndex = _selectedModelIndex - customModelStartIndex;
+      if (customIndex > index) {
+        _selectedModelIndex--;
+      } else if (customIndex == index) {
+        if (_customModels.isEmpty) {
+          _selectedModelIndex = _defaultModels.length - 1;
+        } else if (index >= _customModels.length) {
+          _selectedModelIndex =
+              _defaultModels.length + _customModels.length - 1;
+        }
+      }
+    }
+
+    if (_selectedModelIndex >= availableModels.length) {
+      _selectedModelIndex = availableModels.length - 1;
+    }
+
+    await _persistence?.saveSelectedModelIndex(_selectedModelIndex);
+    notifyListeners();
   }
 
   void selectModel(int index) {
     if (index >= 0 && index < availableModels.length) {
       _selectedModelIndex = index;
+      // ignore: discarded_futures - save asynchronously without blocking UI
+      _persistence?.saveSelectedModelIndex(_selectedModelIndex);
       notifyListeners();
     }
   }

@@ -3,6 +3,7 @@ import 'package:wolfchat/core/data/models/conversation.dart';
 import 'package:wolfchat/core/data/models/message.dart';
 import 'package:wolfchat/core/data/services/cache_service.dart';
 import 'package:wolfchat/core/data/services/database_service.dart';
+import 'package:wolfchat/features/home/models/custom_model.dart';
 
 class PersistenceService {
   PersistenceService._();
@@ -144,5 +145,29 @@ class PersistenceService {
 
   Future<String?> getLanguage() async {
     return _database.getUserSetting('language');
+  }
+
+  Future<int> saveCustomModel(CustomModel model) async {
+    return _database.insertCustomModel(model);
+  }
+
+  Future<List<CustomModel>> getAllCustomModels() async {
+    return _database.getAllCustomModels();
+  }
+
+  Future<void> deleteCustomModel(int id) async {
+    await _database.deleteCustomModel(id);
+  }
+
+  Future<void> saveSelectedModelIndex(int index) async {
+    await _database.saveUserSetting('selected_model_index', index.toString());
+  }
+
+  Future<int> getSelectedModelIndex() async {
+    final value = await _database.getUserSetting('selected_model_index');
+    if (value != null) {
+      return int.tryParse(value) ?? 0;
+    }
+    return 0;
   }
 }
