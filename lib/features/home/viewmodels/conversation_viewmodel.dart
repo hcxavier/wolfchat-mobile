@@ -186,9 +186,10 @@ class ConversationViewModel extends ChangeNotifier {
 
       // Gera o título se for a 1ª mensagem (sem bloquear o resto)
       if (isFirstMessage && _persistence != null) {
+        final selectedModel = _getSelectedModelId();
         unawaited(
           groqService
-              .generateTitle(content.trim())
+              .generateTitle(content.trim(), fallbackModel: selectedModel)
               .then((title) async {
                 if (_currentConversation != null) {
                   _currentConversation = _currentConversation!.copyWith(

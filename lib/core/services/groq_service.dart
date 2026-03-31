@@ -105,12 +105,27 @@ class GroqService {
     }
   }
 
-  Future<String> generateTitle(String content) async {
+  Future<String> generateTitle(String content, {String? fallbackModel}) async {
+    // Tenta primeiro com o modelo rápido
+    var title = await _generateTitleWithModel(content, 'llama-3.1-8b-instant');
+    
+    // Se falhar e tiver um fallback, tenta com o fallback
+    if (title == null && fallbackModel != null) {
+      title = await _generateTitleWithModel(content, fallbackModel);
+    }
+
+    if (title != null) return title;
+    
+    // Fallback final: substring da mensagem
+    return content.length > 20 ? '${content.substring(0, 17)}...' : content;
+  }
+
+  Future<String?> _generateTitleWithModel(String content, String model) async {
     try {
       final url = Uri.parse('$_baseUrl/chat/completions');
 
       final body = jsonEncode({
-        'model': 'llama-3.1-8b-instant', // Use a more reliable fast model
+        'model': model,
         'messages': [
           {
             'role': 'system',
@@ -151,8 +166,8 @@ class GroqService {
         }
       }
     } on Exception catch (e) {
-      debugPrint('Erro ao gerar título: $e');
+      debugPrint('Erro ao gerar título com modelo $model: $e');
     }
-    return content.length > 20 ? '${content.substring(0, 17)}...' : content;
+    return null;
   }
 }
