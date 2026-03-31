@@ -248,6 +248,7 @@ class ConversationViewModel extends ChangeNotifier {
         _messages[_messages.length - 1] = assistantMessage.copyWith(
           content: assistantBuffer.toString(),
         );
+        notifyListeners();
       }
 
       notifyListeners();
@@ -339,7 +340,6 @@ class ConversationViewModel extends ChangeNotifier {
 
       notifyListeners();
 
-      final modelId = _getSelectedModelId();
       final modelName = _getSelectedModelName();
       final systemPrompt = buildSystemPrompt(
         modelName,
@@ -368,6 +368,7 @@ class ConversationViewModel extends ChangeNotifier {
         _messages[_messages.length - 1] = assistantMessage.copyWith(
           content: assistantBuffer.toString(),
         );
+        notifyListeners();
       }
 
       notifyListeners();

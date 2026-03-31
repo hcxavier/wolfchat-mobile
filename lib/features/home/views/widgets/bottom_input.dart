@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 
@@ -28,6 +29,7 @@ class _BottomInputState extends State<BottomInput> {
   void initState() {
     super.initState();
     _focusNode.addListener(_onFocusChange);
+    _focusNode.onKeyEvent = _handleKeyEvent;
   }
 
   @override
@@ -41,6 +43,18 @@ class _BottomInputState extends State<BottomInput> {
 
   void _onFocusChange() {
     setState(() {});
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
+      final isEnter = event.logicalKey == LogicalKeyboardKey.enter;
+      final isShiftPressed = HardwareKeyboard.instance.isShiftPressed;
+      if (isEnter && !isShiftPressed) {
+        _sendMessage();
+        return KeyEventResult.handled;
+      }
+    }
+    return KeyEventResult.ignored;
   }
 
   void _sendMessage() {
@@ -95,6 +109,7 @@ class _BottomInputState extends State<BottomInput> {
                   focusNode: _focusNode,
                   minLines: 1,
                   maxLines: 4,
+                  textInputAction: TextInputAction.newline,
                   style: const TextStyle(color: AppColors.textPrimary),
                   enabled: !widget.isLoading,
                   onSubmitted: (_) => _sendMessage(),
