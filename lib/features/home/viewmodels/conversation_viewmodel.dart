@@ -143,7 +143,7 @@ class ConversationViewModel extends ChangeNotifier {
     // Apenas prefixamos a primeira mensagem da conversa para definir o idioma
     final isFirstMessage = _messages.isEmpty;
     final String apiContent;
-    
+
     if (isFirstMessage && language != null) {
       apiContent =
           'Idioma: ${_getLanguageCode(language)}; User: ${content.trim()}';
@@ -186,19 +186,24 @@ class ConversationViewModel extends ChangeNotifier {
 
       // Gera o título se for a 1ª mensagem (sem bloquear o resto)
       if (isFirstMessage && _persistence != null) {
-        unawaited(groqService.generateTitle(content.trim()).then((title) async {
-          if (_currentConversation != null) {
-            _currentConversation = _currentConversation!.copyWith(
-              title: title,
-              updatedAt: DateTime.now(),
-            );
-            await _persistence!.updateConversation(_currentConversation!);
-            _conversations = await _persistence!.getAllConversations();
-            notifyListeners();
-          }
-        }).catchError((Object e) {
-          debugPrint('Erro ao gerar título: $e');
-        }));
+        unawaited(
+          groqService
+              .generateTitle(content.trim())
+              .then((title) async {
+                if (_currentConversation != null) {
+                  _currentConversation = _currentConversation!.copyWith(
+                    title: title,
+                    updatedAt: DateTime.now(),
+                  );
+                  await _persistence!.updateConversation(_currentConversation!);
+                  _conversations = await _persistence!.getAllConversations();
+                  notifyListeners();
+                }
+              })
+              .catchError((Object e) {
+                debugPrint('Erro ao gerar título: $e');
+              }),
+        );
       }
 
       final modelId = _getSelectedModelId();

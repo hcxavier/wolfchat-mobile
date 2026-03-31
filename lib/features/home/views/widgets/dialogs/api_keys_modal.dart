@@ -52,20 +52,6 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
     super.dispose();
   }
 
-  InputDecoration _inputDecoration(String hint) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
-      filled: true,
-      fillColor: AppColors.surfaceInput,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return KeyboardAwareDialog(
@@ -78,45 +64,9 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    const HeroIcon(
-                      HeroIcons.key,
-                      size: 24,
-                      color: AppColors.brand300,
-                    ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text(
-                        'Configurar API Keys',
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    Material(
-                      color: Colors.transparent,
-                      shape: const CircleBorder(),
-                      child: InkWell(
-                        onTap: widget.onClose,
-                        customBorder: const CircleBorder(),
-                        hoverColor: AppColors.surfaceHover,
-                        child: const Padding(
-                          padding: EdgeInsets.all(6),
-                          child: HeroIcon(
-                            HeroIcons.xMark,
-                            size: 20,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                _ApiKeysHeader(onClose: widget.onClose),
                 const SizedBox(height: 24),
-                _buildKeyField(
+                _ApiKeyField(
                   label: 'OpenRouter',
                   controller: _openRouterController,
                   obscure: _obscureOpenRouter,
@@ -125,7 +75,7 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
                   hint: 'sk-or-v1-...',
                 ),
                 const SizedBox(height: 16),
-                _buildKeyField(
+                _ApiKeyField(
                   label: 'Groq',
                   controller: _groqController,
                   obscure: _obscureGroq,
@@ -134,7 +84,7 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
                   hint: 'gsk_...',
                 ),
                 const SizedBox(height: 16),
-                _buildKeyField(
+                _ApiKeyField(
                   label: 'Opencode Zen',
                   controller: _openCodeZenController,
                   obscure: _obscureOpenCodeZen,
@@ -144,31 +94,11 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
                   hint: 'oz-...',
                 ),
                 const SizedBox(height: 24),
-                SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      widget.onSave(
-                        _openRouterController.text,
-                        _groqController.text,
-                        _openCodeZenController.text,
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.brand500,
-                      foregroundColor: AppColors.textPrimary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'Concluído',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                _DoneButton(
+                  onSave: () => widget.onSave(
+                    _openRouterController.text,
+                    _groqController.text,
+                    _openCodeZenController.text,
                   ),
                 ),
               ],
@@ -178,14 +108,67 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
       ),
     );
   }
+}
 
-  Widget _buildKeyField({
-    required String label,
-    required TextEditingController controller,
-    required bool obscure,
-    required VoidCallback onToggleObscure,
-    required String hint,
-  }) {
+class _ApiKeysHeader extends StatelessWidget {
+  const _ApiKeysHeader({required this.onClose});
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const HeroIcon(HeroIcons.key, size: 24, color: AppColors.brand300),
+        const SizedBox(width: 12),
+        const Expanded(
+          child: Text(
+            'Configurar API Keys',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Material(
+          color: Colors.transparent,
+          shape: const CircleBorder(),
+          child: InkWell(
+            onTap: onClose,
+            customBorder: const CircleBorder(),
+            hoverColor: AppColors.surfaceHover,
+            child: const Padding(
+              padding: EdgeInsets.all(6),
+              child: HeroIcon(
+                HeroIcons.xMark,
+                size: 20,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ApiKeyField extends StatelessWidget {
+  const _ApiKeyField({
+    required this.label,
+    required this.controller,
+    required this.obscure,
+    required this.onToggleObscure,
+    required this.hint,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final bool obscure;
+  final VoidCallback onToggleObscure;
+  final String hint;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -204,7 +187,22 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
           obscureText: obscure,
           style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
           scrollPadding: const EdgeInsets.only(bottom: 120),
-          decoration: _inputDecoration(hint).copyWith(
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+            ),
+            filled: true,
+            fillColor: AppColors.surfaceInput,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
             suffixIcon: IconButton(
               onPressed: onToggleObscure,
               icon: HeroIcon(
@@ -216,6 +214,33 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DoneButton extends StatelessWidget {
+  const _DoneButton({required this.onSave});
+  final VoidCallback onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 48,
+      child: ElevatedButton(
+        onPressed: onSave,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.brand500,
+          foregroundColor: AppColors.textPrimary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+        ),
+        child: const Text(
+          'Concluído',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+      ),
     );
   }
 }

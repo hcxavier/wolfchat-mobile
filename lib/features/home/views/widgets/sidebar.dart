@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/data/models/conversation.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
+import 'package:wolfchat/features/home/views/widgets/sidebar_conversation_widgets.dart';
+import 'package:wolfchat/features/home/views/widgets/sidebar_footer_widget.dart';
+import 'package:wolfchat/features/home/views/widgets/sidebar_header_widgets.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({
@@ -32,236 +35,20 @@ class Sidebar extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.brand500,
-                    ),
-                    child: const HeroIcon(
-                      HeroIcons.sparkles,
-                      style: HeroIconStyle.solid,
-                      size: 16,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'WolfChat',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Material(
-                    color: Colors.transparent,
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      onTap: onClose,
-                      customBorder: const CircleBorder(),
-                      hoverColor: AppColors.surfaceHover,
-                      child: const Padding(
-                        padding: EdgeInsets.all(6),
-                        child: HeroIcon(
-                          HeroIcons.chevronLeft,
-                          size: 20,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceHover,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Row(
-                  children: [
-                    HeroIcon(
-                      HeroIcons.magnifyingGlass,
-                      size: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Buscar nas conversas...',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            SidebarHeader(onClose: onClose),
+            const SidebarSearch(),
             const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'RECENTES',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Material(
-                color: AppColors.brand500,
-                borderRadius: BorderRadius.circular(8),
-                child: InkWell(
-                  onTap: onNewConversation,
-                  borderRadius: BorderRadius.circular(8),
-                  hoverColor: AppColors.brand600,
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        HeroIcon(
-                          HeroIcons.plus,
-                          size: 16,
-                          color: AppColors.textPrimary,
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          'Novo chat',
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            const _RecentSectionLabel(),
+            _SidebarNewChatButton(onTap: onNewConversation),
             const SizedBox(height: 16),
-            Expanded(
-              child: conversations.isEmpty
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Text(
-                          'Nenhuma conversa ainda.\nClique em + para começar.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      itemCount: conversations.length,
-                      itemBuilder: (context, index) {
-                        final conversation = conversations[index];
-                        return SidebarItem(
-                          title: conversation.title,
-                          isSelected: conversation.id == currentConversationId,
-                          onTap: () => onConversationSelected(conversation.id),
-                        );
-                      },
-                    ),
+            SidebarConversationList(
+              conversations: conversations,
+              currentConversationId: currentConversationId,
+              onConversationSelected: onConversationSelected,
             ),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: AppColors.surfaceHover)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.accentLight,
-                    ),
-                    child: Center(
-                      child: Text(
-                        userName.isNotEmpty
-                            ? userName
-                                  .trim()
-                                  .split('')
-                                  .take(2)
-                                  .join()
-                                  .toUpperCase()
-                            : '',
-                        style: const TextStyle(
-                          color: AppColors.brand300,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      userName,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  Material(
-                    color: Colors.transparent,
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      onTap: onOpenSettings,
-                      customBorder: const CircleBorder(),
-                      hoverColor: AppColors.surfaceHover,
-                      child: const Padding(
-                        padding: EdgeInsets.all(6),
-                        child: HeroIcon(
-                          HeroIcons.cog6Tooth,
-                          size: 20,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            SidebarFooter(
+              userName: userName,
+              onOpenSettings: onOpenSettings,
             ),
           ],
         ),
@@ -270,61 +57,72 @@ class Sidebar extends StatelessWidget {
   }
 }
 
-class SidebarItem extends StatelessWidget {
-  const SidebarItem({
-    required this.title,
-    this.isSelected = false,
-    this.onTap,
-    super.key,
-  });
-
-  final String title;
-  final bool isSelected;
-  final VoidCallback? onTap;
+class _RecentSectionLabel extends StatelessWidget {
+  const _RecentSectionLabel();
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        hoverColor: AppColors.surfaceHover,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 4),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: isSelected ? AppColors.surfaceHover : Colors.transparent,
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'RECENTES',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+            ),
           ),
-          child: Row(
-            children: [
-              HeroIcon(
-                HeroIcons.chatBubbleLeft,
-                size: 16,
-                color: isSelected
-                    ? AppColors.textPrimary
-                    : AppColors.textSecondary,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: isSelected
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
-                    fontSize: 16,
-                    fontWeight: isSelected
-                        ? FontWeight.w500
-                        : FontWeight.normal,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+        ],
+      ),
+    );
+  }
+}
+
+class _SidebarNewChatButton extends StatelessWidget {
+  const _SidebarNewChatButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Material(
+        color: AppColors.brand500,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          hoverColor: AppColors.brand600,
+          child: const Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                HeroIcon(
+                  HeroIcons.plus,
+                  size: 16,
+                  color: AppColors.textPrimary,
                 ),
-              ),
-            ],
+                SizedBox(width: 8),
+                Text(
+                  'Novo chat',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

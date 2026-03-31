@@ -59,7 +59,8 @@ class GroqService {
         'messages': [
           {
             'role': 'system',
-            'content': 'Forneça um título curto (máximo 20 caracteres) para '
+            'content':
+                'Forneça um título curto (máximo 20 caracteres) para '
                 'esta conversa com base na mensagem. Seja direto e '
                 'não use aspas ou pontos finais.',
           },
@@ -69,14 +70,16 @@ class GroqService {
         'max_tokens': 20,
       });
 
-      final response = await http.post(
-        url,
-        headers: {
-          'Authorization': 'Bearer $apiKey',
-          'Content-Type': 'application/json',
-        },
-        body: body,
-      ).timeout(const Duration(seconds: 5));
+      final response = await http
+          .post(
+            url,
+            headers: {
+              'Authorization': 'Bearer $apiKey',
+              'Content-Type': 'application/json',
+            },
+            body: body,
+          )
+          .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;

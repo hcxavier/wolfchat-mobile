@@ -103,9 +103,7 @@ class MarkdownStyler {
       blockSpacing: 12,
       horizontalRuleDecoration: BoxDecoration(
         border: Border(
-          top: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
+          top: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         ),
       ),
       tableHead: const TextStyle(
@@ -114,9 +112,7 @@ class MarkdownStyler {
         fontSize: 14,
       ),
       tableBody: defaultText.copyWith(fontSize: 14),
-      tableBorder: TableBorder.all(
-        color: Colors.white.withValues(alpha: 0.1),
-      ),
+      tableBorder: TableBorder.all(color: Colors.white.withValues(alpha: 0.1)),
       tableCellsPadding: const EdgeInsets.symmetric(
         horizontal: 12,
         vertical: 8,
@@ -141,9 +137,7 @@ class CodeBlockBuilder extends MarkdownElementBuilder {
     var language = 'text';
     if (element.attributes['class'] != null) {
       final lgPattern = element.attributes['class'] ?? '';
-      if (lgPattern.startsWith('language-')) {
-        language = lgPattern.substring(9);
-      }
+      if (lgPattern.startsWith('language-')) language = lgPattern.substring(9);
     }
 
     return CodeBlockWidget(
@@ -169,9 +163,10 @@ class HrBuilder extends MarkdownElementBuilder {
 
 class CodeBlockWidget extends StatefulWidget {
   const CodeBlockWidget({
-    required this.language, required this.code, super.key,
+    required this.language,
+    required this.code,
+    super.key,
   });
-
   final String language;
   final String code;
 
@@ -197,9 +192,7 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
       decoration: BoxDecoration(
         color: const Color(0xFF282A36), // Dracula background
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.05),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.2),
@@ -212,98 +205,116 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
-              border: Border(
-                bottom: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.05),
+          _CodeBlockHeader(
+            language: widget.language,
+            copied: _copied,
+            onCopy: _handleCopy,
+          ),
+          _CodeContent(code: widget.code, language: widget.language),
+        ],
+      ),
+    );
+  }
+}
+
+class _CodeBlockHeader extends StatelessWidget {
+  const _CodeBlockHeader({
+    required this.language,
+    required this.copied,
+    required this.onCopy,
+  });
+  final String language;
+  final bool copied;
+  final VoidCallback onCopy;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        border: Border(
+          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.code, size: 16, color: AppColors.textSecondary),
+              const SizedBox(width: 8),
+              Text(
+                language.isEmpty ? 'TEXT' : language.toUpperCase(),
+                style: const TextStyle(
+                  fontFamily: 'JetBrains Mono',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                  letterSpacing: 1,
                 ),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.code,
-                      size: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      widget.language.isEmpty
-                          ? 'TEXT'
-                          : widget.language.toUpperCase(),
-                      style: const TextStyle(
-                        fontFamily: 'JetBrains Mono',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ],
-                ),
-                InkWell(
-                  onTap: _handleCopy,
-                  borderRadius: BorderRadius.circular(6),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _copied ? Icons.check : Icons.copy,
-                          size: 14,
-                          color: _copied
-                              ? AppColors.brand400
-                              : AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          _copied ? 'Copiado' : 'Copiar',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: _copied
-                                ? AppColors.brand400
-                                : AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
+            ],
+          ),
+          InkWell(
+            onTap: onCopy,
+            borderRadius: BorderRadius.circular(6),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    copied ? Icons.check : Icons.copy,
+                    size: 14,
+                    color: copied
+                        ? AppColors.brand400
+                        : AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    copied ? 'Copiado' : 'Copiar',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: copied
+                          ? AppColors.brand400
+                          : AppColors.textSecondary,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          // Code Content
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: HighlightView(
-                widget.code,
-                language: widget.language.isEmpty ? 'text' : widget.language,
-                theme: draculaTheme,
-                padding: EdgeInsets.zero,
-                textStyle: const TextStyle(
-                  fontFamily: 'JetBrains Mono',
-                  fontSize: 14,
-                  height: 1.5,
-                ),
+                ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CodeContent extends StatelessWidget {
+  const _CodeContent({required this.code, required this.language});
+  final String code;
+  final String language;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: HighlightView(
+          code,
+          language: language.isEmpty ? 'text' : language,
+          theme: draculaTheme,
+          padding: EdgeInsets.zero,
+          textStyle: const TextStyle(
+            fontFamily: 'JetBrains Mono',
+            fontSize: 14,
+            height: 1.5,
+          ),
+        ),
       ),
     );
   }
