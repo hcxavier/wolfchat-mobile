@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 import 'package:wolfchat/core/theme/markdown_styler.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
@@ -8,16 +10,26 @@ class ChatMessagesList extends StatelessWidget {
   const ChatMessagesList({
     required this.messages,
     this.isSendingMessage = false,
+    this.onRetry,
     super.key,
   });
 
   final List<ChatMessage> messages;
   final bool isSendingMessage;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
     if (messages.isEmpty) {
       return const SizedBox.shrink();
+    }
+
+    var lastAssistantIndex = -1;
+    for (var i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role == 'assistant') {
+        lastAssistantIndex = i;
+        break;
+      }
     }
 
     return ListView.builder(
@@ -33,6 +45,7 @@ class ChatMessagesList extends StatelessWidget {
             message: message,
             isUser: isUser,
             isLoading: isSendingMessage,
+            onRetry: index == lastAssistantIndex ? onRetry : null,
           ),
         );
       },
@@ -45,11 +58,13 @@ class _MessageBubble extends StatelessWidget {
     required this.message,
     required this.isUser,
     required this.isLoading,
+    this.onRetry,
   });
 
   final ChatMessage message;
   final bool isUser;
   final bool isLoading;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -167,19 +182,161 @@ class _MessageBubble extends StatelessWidget {
       return const _AnimatedEllipsis();
     }
 
-    return MarkdownBody(
-      data: message.content,
-      styleSheet: MarkdownStyler.getStyleSheet(context),
-      selectable: true,
-      builders: {
-        'code': CodeBuilder(),
-        'hr': HrBuilder(),
-      },
-      onTapLink: (text, href, title) {
-        if (href != null) {
-          // Handle link tap
-        }
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        MarkdownBody(
+          data: message.content,
+          styleSheet: MarkdownStyler.getStyleSheet(context),
+          selectable: true,
+          builders: {
+            'code': CodeBuilder(),
+            'hr': HrBuilder(),
+          },
+          onTapLink: (text, href, title) {
+            if (href != null) {
+              // Handle link tap
+            }
+          },
+        ),
+        if (message.content.isNotEmpty)
+          _MessageActions(text: message.content, onRetry: onRetry),
+      ],
+    );
+  }
+}
+
+class _MessageActions extends StatelessWidget {
+  const _MessageActions({required this.text, this.onRetry});
+
+  final String text;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          _CopyButton(text: text),
+          if (onRetry != null) _RetryButton(onRetry: onRetry!),
+        ],
+      ),
+    );
+  }
+}
+
+class _RetryButton extends StatelessWidget {
+  const _RetryButton({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onRetry,
+      borderRadius: BorderRadius.circular(12),
+      splashColor: AppColors.brand500.withAlpha(26),
+      highlightColor: AppColors.brand500.withAlpha(13),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceCard,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.surfaceHover),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            HeroIcon(
+              HeroIcons.arrowPath,
+              size: 18,
+              color: AppColors.textSecondary,
+            ),
+            SizedBox(width: 8),
+            Text(
+              'Tentar novamente',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CopyButton extends StatefulWidget {
+  const _CopyButton({required this.text});
+
+  final String text;
+
+  @override
+  State<_CopyButton> createState() => _CopyButtonState();
+}
+
+class _CopyButtonState extends State<_CopyButton> {
+  bool _copied = false;
+
+  Future<void> _copy() async {
+    await Clipboard.setData(ClipboardData(text: widget.text));
+    if (!mounted) return;
+    setState(() => _copied = true);
+    await Future<void>.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+    setState(() => _copied = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: _copy,
+      borderRadius: BorderRadius.circular(12),
+      splashColor: AppColors.brand500.withAlpha(26),
+      highlightColor: AppColors.brand500.withAlpha(13),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: _copied
+              ? AppColors.brand500.withAlpha(26)
+              : AppColors.surfaceCard,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _copied ? AppColors.brand400 : AppColors.surfaceHover,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: HeroIcon(
+                _copied ? HeroIcons.check : HeroIcons.documentDuplicate,
+                key: ValueKey(_copied),
+                size: 18,
+                color: _copied ? AppColors.brand400 : AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(width: 8),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                color: _copied ? AppColors.brand400 : AppColors.textPrimary,
+                fontSize: 13,
+                fontWeight: _copied ? FontWeight.w600 : FontWeight.w500,
+              ),
+              child: Text(_copied ? 'Copiado!' : 'Copiar mensagem'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

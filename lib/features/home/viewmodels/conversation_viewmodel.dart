@@ -158,6 +158,97 @@ class ConversationViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> retryLastMessage({String? language}) async {
+    if (_isSendingMessage || _messages.length < 2) return;
+
+    final lastMessage = _messages.last;
+    if (lastMessage.role != 'assistant') return;
+
+    _messages.removeLast();
+    notifyListeners();
+
+    final lastUserMessage = _messages.lastWhere(
+      (m) => m.role == 'user',
+      orElse: () =>
+          ChatMessage(role: '', content: '', timestamp: DateTime.now()),
+    );
+
+    if (lastUserMessage.content.isEmpty) return;
+
+    await _sendToAI(lastUserMessage.content, language: language);
+  }
+
+  Future<void> _sendToAI(String content, {String? language}) async {
+    if (content.trim().isEmpty || _isSendingMessage) return;
+
+    _errorMessage = null;
+    _isSendingMessage = true;
+    notifyListeners();
+
+    try {
+      final provider = _getSelectedModelProvider();
+      final apiKey = _getApiKeyForProvider(provider);
+
+      if (apiKey.isEmpty) {
+        throw Exception(
+          'API key do $_getProviderName(provider) não configurada',
+        );
+      }
+
+      final service = _createService(provider);
+
+      final modelId = _getSelectedModelId();
+      final modelName = _getSelectedModelName();
+      final systemPrompt = buildSystemPrompt(
+        modelName,
+        language ?? 'Português (Brasil)',
+      );
+
+      final assistantBuffer = StringBuffer();
+      final assistantMessage = ChatMessage(
+        role: 'assistant',
+        content: '',
+        timestamp: DateTime.now(),
+      );
+      _messages.add(assistantMessage);
+      notifyListeners();
+
+      final stream = service.sendMessageStream(
+        messages: _messages,
+        model: modelId,
+        systemPrompt: systemPrompt,
+      );
+
+      await for (final chunk in stream) {
+        assistantBuffer.write(chunk);
+        _messages[_messages.length - 1] = assistantMessage.copyWith(
+          content: assistantBuffer.toString(),
+        );
+        notifyListeners();
+      }
+
+      if (_currentConversation != null && persistence != null) {
+        await persistence!.addMessage(
+          _currentConversation!.id,
+          'assistant',
+          assistantBuffer.toString(),
+        );
+        _conversations = await persistence!.getAllConversations();
+      }
+    } on Exception catch (e) {
+      _errorMessage = e.toString();
+      final errorMessage = ChatMessage(
+        role: 'assistant',
+        content: 'Erro: $e',
+        timestamp: DateTime.now(),
+      );
+      _messages.add(errorMessage);
+    } finally {
+      _isSendingMessage = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> sendMessage(String content, {String? language}) async {
     if (content.trim().isEmpty || _isSendingMessage) return;
 

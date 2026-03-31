@@ -47,6 +47,7 @@ class MainChatView extends StatelessWidget {
                     ? ChatMessagesList(
                         messages: viewModel.messages,
                         isSendingMessage: viewModel.isSendingMessage,
+                        onRetry: viewModel.retryLastMessage,
                       )
                     : SingleChildScrollView(
                         child: Column(
