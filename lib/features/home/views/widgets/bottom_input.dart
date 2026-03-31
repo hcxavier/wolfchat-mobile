@@ -53,12 +53,12 @@ class _BottomInputState extends State<BottomInput> {
   Widget build(BuildContext context) {
     final isFocused = _focusNode.hasFocus;
     final mediaQuery = MediaQuery.of(context);
-    
+
     // Only follow keyboard if this specific field is focused.
     // If a modal is open, this field won't have focus and won't jump up.
-    final bottomPadding = isFocused 
-      ? math.max(mediaQuery.viewInsets.bottom, mediaQuery.viewPadding.bottom)
-      : mediaQuery.viewPadding.bottom;
+    final bottomPadding = isFocused
+        ? math.max(mediaQuery.viewInsets.bottom, mediaQuery.viewPadding.bottom)
+        : mediaQuery.viewPadding.bottom;
 
     return AnimatedPadding(
       duration: const Duration(milliseconds: 80),
@@ -109,28 +109,21 @@ class _BottomInputState extends State<BottomInput> {
               const SizedBox(width: 8),
               GestureDetector(
                 onTap: widget.isLoading ? null : _sendMessage,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: widget.isLoading
-                        ? AppColors.textSecondary
-                        : AppColors.textPrimary,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: widget.isLoading ? 0.3 : 1.0,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.textPrimary,
+                    ),
+                    child: const HeroIcon(
+                      HeroIcons.arrowUp,
+                      size: 20,
+                      color: AppColors.surfaceMain,
+                    ),
                   ),
-                  child: widget.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.surfaceMain,
-                          ),
-                        )
-                      : const HeroIcon(
-                          HeroIcons.arrowUp,
-                          size: 20,
-                          color: AppColors.surfaceMain,
-                        ),
                 ),
               ),
             ],
@@ -138,6 +131,5 @@ class _BottomInputState extends State<BottomInput> {
         ),
       ),
     );
-
   }
 }

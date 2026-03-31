@@ -44,7 +44,10 @@ class MainChatView extends StatelessWidget {
               ),
               Expanded(
                 child: hasMessages
-                    ? ChatMessagesList(messages: viewModel.messages)
+                    ? ChatMessagesList(
+                        messages: viewModel.messages,
+                        isSendingMessage: viewModel.isSendingMessage,
+                      )
                     : SingleChildScrollView(
                         child: Column(
                           children: [

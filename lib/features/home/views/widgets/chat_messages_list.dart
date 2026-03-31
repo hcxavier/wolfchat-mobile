@@ -5,9 +5,14 @@ import 'package:wolfchat/core/theme/markdown_styler.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
 
 class ChatMessagesList extends StatelessWidget {
-  const ChatMessagesList({required this.messages, super.key});
+  const ChatMessagesList({
+    required this.messages,
+    this.isSendingMessage = false,
+    super.key,
+  });
 
   final List<ChatMessage> messages;
+  final bool isSendingMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +32,7 @@ class ChatMessagesList extends StatelessWidget {
           child: _MessageBubble(
             message: message,
             isUser: isUser,
+            isLoading: isSendingMessage,
           ),
         );
       },
@@ -38,10 +44,12 @@ class _MessageBubble extends StatelessWidget {
   const _MessageBubble({
     required this.message,
     required this.isUser,
+    required this.isLoading,
   });
 
   final ChatMessage message;
   final bool isUser;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +163,10 @@ class _MessageBubble extends StatelessWidget {
   }
 
   Widget _buildBotMessage(BuildContext context) {
+    if (message.content.isEmpty && isLoading) {
+      return const _AnimatedEllipsis();
+    }
+
     return MarkdownBody(
       data: message.content,
       styleSheet: MarkdownStyler.getStyleSheet(context),
@@ -167,6 +179,69 @@ class _MessageBubble extends StatelessWidget {
         if (href != null) {
           // Handle link tap
         }
+      },
+    );
+  }
+}
+
+class _AnimatedEllipsis extends StatefulWidget {
+  const _AnimatedEllipsis();
+
+  @override
+  State<_AnimatedEllipsis> createState() => _AnimatedEllipsisState();
+}
+
+class _AnimatedEllipsisState extends State<_AnimatedEllipsis>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        AnimationController(
+            vsync: this,
+            duration: const Duration(milliseconds: 1200),
+          )
+          // ignore: discarded_futures - repeat is fire-and-forget in initState
+          ..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (index) {
+            final delay = index / 3;
+            final value = (_controller.value + delay) % 1.0;
+            final opacity = value < 0.5
+                ? (0.3 + (value * 2) * 0.7)
+                : (1.0 - ((value - 0.5) * 2) * 0.7);
+            return Padding(
+              padding: EdgeInsets.only(right: index < 2 ? 6 : 0),
+              child: Opacity(
+                opacity: opacity,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            );
+          }),
+        );
       },
     );
   }
