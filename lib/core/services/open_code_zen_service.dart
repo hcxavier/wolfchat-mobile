@@ -15,12 +15,19 @@ class OpenCodeZenService implements AiService {
   Future<String> sendMessage({
     required List<ChatMessage> messages,
     required String model,
+    String? systemPrompt,
   }) async {
     final url = Uri.parse('$_baseUrl/chat/completions');
 
+    final allMessages = <Map<String, dynamic>>[];
+    if (systemPrompt != null && systemPrompt.isNotEmpty) {
+      allMessages.add({'role': 'system', 'content': systemPrompt});
+    }
+    allMessages.addAll(messages.map((m) => m.toJson()).toList());
+
     final body = jsonEncode({
       'model': model,
-      'messages': messages.map((m) => m.toJson()).toList(),
+      'messages': allMessages,
       'temperature': 0.7,
       'max_tokens': 2048,
       'stream': false,
@@ -57,12 +64,19 @@ class OpenCodeZenService implements AiService {
   Stream<String> sendMessageStream({
     required List<ChatMessage> messages,
     required String model,
+    String? systemPrompt,
   }) async* {
     final url = Uri.parse('$_baseUrl/chat/completions');
 
+    final allMessages = <Map<String, dynamic>>[];
+    if (systemPrompt != null && systemPrompt.isNotEmpty) {
+      allMessages.add({'role': 'system', 'content': systemPrompt});
+    }
+    allMessages.addAll(messages.map((m) => m.toJson()).toList());
+
     final body = jsonEncode({
       'model': model,
-      'messages': messages.map((m) => m.toJson()).toList(),
+      'messages': allMessages,
       'temperature': 0.7,
       'max_tokens': 2048,
       'stream': true,

@@ -62,6 +62,7 @@ class HomeViewModel extends ChangeNotifier {
       openRouterKey: '',
       openCodeZenKey: '',
       getSelectedModelId: () => settings.selectedModelId,
+      getSelectedModelName: () => settings.selectedModelName,
       getSelectedModelProvider: () => settings.selectedModelProvider,
     );
 

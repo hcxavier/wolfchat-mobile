@@ -1,3 +1,4 @@
+- Antes de executar qualquer tarefa, leia o arquivo analysis_options.yaml
 - Use a arquitetura MVVM:
 	- O MVVM separa a interface (View) dos dados (Model) através do ViewModel. A View exibe a tela e reage a mudanças, enquanto o ViewModel processa a lógica de negócios sem acoplar à UI, garantindo código limpo e testável;
 - Fontes usadas:

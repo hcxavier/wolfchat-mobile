@@ -84,6 +84,7 @@ class SettingsViewModel extends ChangeNotifier {
       _openCodeZenKey.isNotEmpty;
 
   String get selectedModelId => selectedModel.id;
+  String get selectedModelName => selectedModel.name;
   String get selectedModelProvider => selectedModel.provider;
 
   Future<void> loadSettings() async {

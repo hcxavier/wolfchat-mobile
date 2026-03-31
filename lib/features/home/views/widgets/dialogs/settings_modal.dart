@@ -114,8 +114,11 @@ class _SettingsModalState extends State<SettingsModal> {
                     onShowApiKeys: () => setState(() => _showApiKeys = true),
                     onShowManageModels: () =>
                         setState(() => _showManageModels = true),
-                    onLanguageChanged: (lang) =>
-                        setState(() => _selectedLanguage = lang),
+                    onLanguageChanged: (lang) {
+                      setState(() => _selectedLanguage = lang);
+                      // ignore: discarded_futures, Update immediately
+                      widget.viewModel.updateLanguage(lang);
+                    },
                     onDeleteAllChats: () =>
                         showDeleteAllChatsDialog(context, widget.viewModel),
                     onSave: _onSave,

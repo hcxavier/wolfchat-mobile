@@ -6,11 +6,13 @@ abstract class AiService {
   Future<String> sendMessage({
     required List<ChatMessage> messages,
     required String model,
+    String? systemPrompt,
   });
 
   Stream<String> sendMessageStream({
     required List<ChatMessage> messages,
     required String model,
+    String? systemPrompt,
   });
 
   Future<String?> generateTitle(String content);

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:wolfchat/core/constants/system_prompts.dart';
 import 'package:wolfchat/core/data/models/conversation.dart';
 import 'package:wolfchat/core/data/services/persistence_service.dart';
 import 'package:wolfchat/core/services/ai_service.dart';
@@ -15,8 +16,10 @@ class ConversationViewModel extends ChangeNotifier {
     required this.openRouterKey,
     required this.openCodeZenKey,
     required String Function() getSelectedModelId,
+    required String Function() getSelectedModelName,
     required String Function() getSelectedModelProvider,
   }) : _getSelectedModelId = getSelectedModelId,
+       _getSelectedModelName = getSelectedModelName,
        _getSelectedModelProvider = getSelectedModelProvider;
 
   PersistenceService? persistence;
@@ -24,6 +27,7 @@ class ConversationViewModel extends ChangeNotifier {
   String openRouterKey;
   String openCodeZenKey;
   final String Function() _getSelectedModelId;
+  final String Function() _getSelectedModelName;
   final String Function() _getSelectedModelProvider;
 
   final List<ChatMessage> _messages = [];
@@ -205,6 +209,11 @@ class ConversationViewModel extends ChangeNotifier {
       notifyListeners();
 
       final modelId = _getSelectedModelId();
+      final modelName = _getSelectedModelName();
+      final systemPrompt = buildSystemPrompt(
+        modelName,
+        language ?? 'Português (Brasil)',
+      );
 
       final assistantBuffer = StringBuffer();
       final assistantMessage = ChatMessage(
@@ -218,6 +227,7 @@ class ConversationViewModel extends ChangeNotifier {
       final stream = service.sendMessageStream(
         messages: _messages,
         model: modelId,
+        systemPrompt: systemPrompt,
       );
 
       await for (final chunk in stream) {
