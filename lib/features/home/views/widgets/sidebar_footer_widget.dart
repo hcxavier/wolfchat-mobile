@@ -60,10 +60,10 @@ class SidebarFooter extends StatelessWidget {
               customBorder: const CircleBorder(),
               hoverColor: AppColors.surfaceHover,
               child: const Padding(
-                padding: EdgeInsets.all(6),
+                padding: EdgeInsets.all(10),
                 child: HeroIcon(
                   HeroIcons.cog6Tooth,
-                  size: 20,
+                  size: 22,
                   color: AppColors.textSecondary,
                 ),
               ),

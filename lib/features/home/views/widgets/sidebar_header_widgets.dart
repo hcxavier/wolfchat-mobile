@@ -31,7 +31,7 @@ class SidebarHeader extends StatelessWidget {
               'WolfChat',
               style: TextStyle(
                 color: AppColors.textPrimary,
-                fontSize: 16,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 letterSpacing: -0.5,
               ),
@@ -46,10 +46,10 @@ class SidebarHeader extends StatelessWidget {
               customBorder: const CircleBorder(),
               hoverColor: AppColors.surfaceHover,
               child: const Padding(
-                padding: EdgeInsets.all(6),
+                padding: EdgeInsets.all(10),
                 child: HeroIcon(
                   HeroIcons.chevronLeft,
-                  size: 20,
+                  size: 24,
                   color: AppColors.textSecondary,
                 ),
               ),

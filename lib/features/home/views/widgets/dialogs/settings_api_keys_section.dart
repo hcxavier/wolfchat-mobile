@@ -37,22 +37,21 @@ class ApiKeysSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceInput,
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onBack,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: AppColors.surfaceHover,
-                ),
-              ),
-              child: Material(
-                color: Colors.transparent,
-                shape: const CircleBorder(),
-                child: InkWell(
-                  onTap: onBack,
-                  customBorder: const CircleBorder(),
-                  hoverColor: AppColors.surfaceHover,
+                hoverColor: AppColors.surfaceHover,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceInput,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: AppColors.surfaceHover,
+                    ),
+                  ),
                   child: const Padding(
                     padding: EdgeInsets.all(4),
                     child: HeroIcon(

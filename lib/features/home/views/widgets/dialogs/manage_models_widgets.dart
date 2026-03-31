@@ -12,22 +12,21 @@ class ManageModelsHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceInput,
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onClose,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: AppColors.surfaceHover,
-            ),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            shape: const CircleBorder(),
-            child: InkWell(
-              onTap: onClose,
-              customBorder: const CircleBorder(),
-              hoverColor: AppColors.surfaceHover,
+            hoverColor: AppColors.surfaceHover,
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceInput,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.surfaceHover,
+                ),
+              ),
               child: const Padding(
                 padding: EdgeInsets.all(2),
                 child: HeroIcon(
