@@ -59,18 +59,16 @@ class _BottomInputState extends State<BottomInput> {
     );
 
     return AnimatedPadding(
-      duration: const Duration(milliseconds: 150),
-      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 10),
       padding: EdgeInsets.only(bottom: bottomPadding),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.surfaceInput,
           borderRadius: BorderRadius.circular(16),
+          color: AppColors.surfaceInput,
         ),
         padding: const EdgeInsets.only(
           left: 12,
           right: 12,
-          top: 0,
           bottom: 8,
         ),
         child: Row(
