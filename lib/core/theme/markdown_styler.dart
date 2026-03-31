@@ -85,10 +85,9 @@ class MarkdownStyler {
           bottomRight: Radius.circular(8),
         ),
       ),
-      code: TextStyle(
+      code: const TextStyle(
         fontFamily: 'JetBrains Mono',
-        fontSize: 14,
-        backgroundColor: AppColors.brand500.withValues(alpha: 0.1),
+        fontSize: 13,
         color: AppColors.brand300,
       ),
       codeblockPadding: EdgeInsets.zero,
@@ -124,6 +123,65 @@ class MarkdownStyler {
       a: const TextStyle(
         color: AppColors.brand400,
         decoration: TextDecoration.underline,
+      ),
+    );
+  }
+}
+
+class CodeBuilder extends MarkdownElementBuilder {
+  @override
+  Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
+    // Handle code blocks (multi-line)
+    if (element.textContent.contains('\n')) {
+      var language = 'text';
+      if (element.attributes['class'] != null) {
+        final lgPattern = element.attributes['class'] ?? '';
+        if (lgPattern.startsWith('language-')) {
+          language = lgPattern.substring(9);
+        }
+      }
+
+      return CodeBlockWidget(
+        language: language,
+        code: element.textContent.trimRight(),
+      );
+    }
+
+    // Handle inline code
+    return InlineCodeWidget(code: element.textContent);
+  }
+}
+
+class InlineCodeWidget extends StatelessWidget {
+  const InlineCodeWidget({required this.code, super.key});
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceInput.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: AppColors.brand500.withValues(alpha: 0.3),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.brand500.withValues(alpha: 0.08),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        code,
+        style: const TextStyle(
+          fontFamily: 'JetBrains Mono',
+          fontSize: 13,
+          color: AppColors.brand300,
+          letterSpacing: 0.3,
+        ),
       ),
     );
   }

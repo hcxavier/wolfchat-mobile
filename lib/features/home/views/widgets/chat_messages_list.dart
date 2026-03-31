@@ -160,7 +160,7 @@ class _MessageBubble extends StatelessWidget {
       styleSheet: MarkdownStyler.getStyleSheet(context),
       selectable: true,
       builders: {
-        'code': CodeBlockBuilder(),
+        'code': CodeBuilder(),
         'hr': HrBuilder(),
       },
       onTapLink: (text, href, title) {
