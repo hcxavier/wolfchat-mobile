@@ -8,11 +8,13 @@ class BottomInput extends StatefulWidget {
   const BottomInput({
     required this.onSendMessage,
     required this.isLoading,
+    this.onCancel,
     super.key,
   });
 
   final void Function(String) onSendMessage;
   final bool isLoading;
+  final void Function()? onCancel;
 
   @override
   State<BottomInput> createState() => _BottomInputState();
@@ -107,25 +109,37 @@ class _BottomInputState extends State<BottomInput> {
                 ),
               ),
               const SizedBox(width: 8),
-              GestureDetector(
-                onTap: widget.isLoading ? null : _sendMessage,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 200),
-                  opacity: widget.isLoading ? 0.3 : 1.0,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.brand500,
+              widget.isLoading
+                  ? GestureDetector(
+                      onTap: widget.onCancel,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: AppColors.brand500,
+                        ),
+                        child: const HeroIcon(
+                          HeroIcons.stop,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : GestureDetector(
+                      onTap: _sendMessage,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: AppColors.brand500,
+                        ),
+                        child: const HeroIcon(
+                          HeroIcons.arrowUp,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                    child: const HeroIcon(
-                      HeroIcons.arrowUp,
-                      size: 20,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),

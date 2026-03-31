@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -10,6 +11,14 @@ class OpenCodeZenService implements AiService {
   @override
   final String apiKey;
   static const String _baseUrl = 'https://opencode.ai/zen/v1';
+  final _cancelCompleter = Completer<void>();
+
+  @override
+  void cancel() {
+    if (!_cancelCompleter.isCompleted) {
+      _cancelCompleter.complete();
+    }
+  }
 
   @override
   Future<String> sendMessage({
@@ -98,6 +107,7 @@ class OpenCodeZenService implements AiService {
           .transform(const LineSplitter());
 
       await for (final line in stream) {
+        if (_cancelCompleter.isCompleted) break;
         if (line.isEmpty) continue;
         if (line == 'data: [DONE]') break;
 

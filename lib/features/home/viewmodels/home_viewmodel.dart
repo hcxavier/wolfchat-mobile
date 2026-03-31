@@ -196,6 +196,11 @@ class HomeViewModel extends ChangeNotifier {
     await conversation.sendMessage(content, language: settings.language);
   }
 
+  void cancelCurrentRequest() {
+    if (!_isInitialized) return;
+    conversation.cancelCurrentRequest();
+  }
+
   Future<void> retryLastMessage() async {
     if (!_isInitialized) return;
     await conversation.retryLastMessage(language: settings.language);

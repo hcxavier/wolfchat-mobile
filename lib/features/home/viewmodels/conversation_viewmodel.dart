@@ -35,12 +35,17 @@ class ConversationViewModel extends ChangeNotifier {
   String? _errorMessage;
   List<Conversation> _conversations = [];
   Conversation? _currentConversation;
+  AiService? _currentService;
 
   List<ChatMessage> get messages => List.unmodifiable(_messages);
   bool get isSendingMessage => _isSendingMessage;
   String? get errorMessage => _errorMessage;
   List<Conversation> get conversations => List.unmodifiable(_conversations);
   Conversation? get currentConversation => _currentConversation;
+
+  void cancelCurrentRequest() {
+    _currentService?.cancel();
+  }
 
   void clearError() {
     _errorMessage = null;
@@ -196,6 +201,7 @@ class ConversationViewModel extends ChangeNotifier {
       }
 
       final service = _createService(provider);
+      _currentService = service;
 
       final modelId = _getSelectedModelId();
       final modelName = _getSelectedModelName();
@@ -277,6 +283,7 @@ class ConversationViewModel extends ChangeNotifier {
       }
 
       final service = _createService(provider);
+      _currentService = service;
 
       if (persistence != null) {
         if (_currentConversation == null) {

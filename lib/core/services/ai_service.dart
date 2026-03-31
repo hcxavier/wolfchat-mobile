@@ -16,4 +16,6 @@ abstract class AiService {
   });
 
   Future<String?> generateTitle(String content);
+
+  void cancel();
 }
