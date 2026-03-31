@@ -116,12 +116,12 @@ class _BottomInputState extends State<BottomInput> {
                     padding: const EdgeInsets.all(8),
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.textPrimary,
+                      color: AppColors.brand500,
                     ),
                     child: const HeroIcon(
                       HeroIcons.arrowUp,
                       size: 20,
-                      color: AppColors.surfaceMain,
+                      color: Colors.white,
                     ),
                   ),
                 ),

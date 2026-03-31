@@ -219,13 +219,16 @@ class ConversationViewModel extends ChangeNotifier {
         systemPrompt: systemPrompt,
       );
 
+      notifyListeners();
+
       await for (final chunk in stream) {
         assistantBuffer.write(chunk);
         _messages[_messages.length - 1] = assistantMessage.copyWith(
           content: assistantBuffer.toString(),
         );
-        notifyListeners();
       }
+
+      notifyListeners();
 
       if (_currentConversation != null && persistence != null) {
         await persistence!.addMessage(
@@ -321,13 +324,16 @@ class ConversationViewModel extends ChangeNotifier {
         systemPrompt: systemPrompt,
       );
 
+      notifyListeners();
+
       await for (final chunk in stream) {
         assistantBuffer.write(chunk);
         _messages[_messages.length - 1] = assistantMessage.copyWith(
           content: assistantBuffer.toString(),
         );
-        notifyListeners();
       }
+
+      notifyListeners();
 
       if (_currentConversation != null && persistence != null) {
         await persistence!.addMessage(
