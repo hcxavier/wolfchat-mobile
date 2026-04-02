@@ -1,11 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 import 'package:wolfchat/features/home/viewmodels/home_viewmodel.dart';
-import 'package:wolfchat/features/home/views/widgets/dialogs/api_keys_modal.dart';
 import 'package:wolfchat/features/home/views/widgets/dialogs/dialog_wrappers.dart';
-import 'package:wolfchat/features/home/views/widgets/dialogs/manage_models_modal.dart';
 import 'package:wolfchat/features/home/views/widgets/dialogs/settings_sections.dart';
-import 'package:wolfchat/shared/widgets/animated_dialog.dart';
 
 class SettingsModal extends StatefulWidget {
   const SettingsModal({
@@ -26,9 +26,6 @@ class _SettingsModalState extends State<SettingsModal> {
   late final TextEditingController _openRouterController;
   late final TextEditingController _groqController;
   late final TextEditingController _openCodeZenController;
-  bool _obscureOpenRouter = true;
-  bool _obscureGroq = true;
-  bool _obscureOpenCodeZen = true;
   String _selectedLanguage = 'Português (Brasil)';
 
   @override
@@ -54,50 +51,18 @@ class _SettingsModalState extends State<SettingsModal> {
     super.dispose();
   }
 
-  void _onSave() {
-    // ignore: discarded_futures, Intentional background update
-    widget.viewModel.updateUserName(_nameController.text);
-    // ignore: discarded_futures, Intentional background update
-    widget.viewModel.updateLanguage(_selectedLanguage);
+  Future<void> _onSave() async {
+    await widget.viewModel.updateUserName(_nameController.text);
+    await widget.viewModel.updateLanguage(_selectedLanguage);
     widget.onClose();
   }
 
   void _onShowApiKeys(BuildContext context) {
-    showAnimatedDialog<void>(
-      context: context,
-      builder: (dialogContext) => ApiKeysModal(
-        openRouterController: _openRouterController,
-        groqController: _groqController,
-        openCodeZenController: _openCodeZenController,
-        obscureOpenRouter: _obscureOpenRouter,
-        obscureGroq: _obscureGroq,
-        obscureOpenCodeZen: _obscureOpenCodeZen,
-        onToggleOpenRouter: () =>
-            setState(() => _obscureOpenRouter = !_obscureOpenRouter),
-        onToggleGroq: () => setState(() => _obscureGroq = !_obscureGroq),
-        onToggleOpenCodeZen: () =>
-            setState(() => _obscureOpenCodeZen = !_obscureOpenCodeZen),
-        onClose: () => Navigator.of(dialogContext).pop(),
-        onSave: () {
-          widget.viewModel.saveApiKeys(
-            openRouter: _openRouterController.text,
-            groq: _groqController.text,
-            openCodeZen: _openCodeZenController.text,
-          );
-          Navigator.of(dialogContext).pop();
-        },
-      ),
-    );
+    unawaited(context.pushNamed('api-keys'));
   }
 
   void _onShowManageModels(BuildContext context) {
-    showAnimatedDialog<void>(
-      context: context,
-      builder: (dialogContext) => ManageModelsModal(
-        viewModel: widget.viewModel,
-        onClose: () => Navigator.of(dialogContext).pop(),
-      ),
-    );
+    unawaited(context.pushNamed('models'));
   }
 
   @override
@@ -109,7 +74,7 @@ class _SettingsModalState extends State<SettingsModal> {
           borderRadius: BorderRadius.circular(24),
         ),
         child: Container(
-          width: 480,
+          width: 640,
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.9,
           ),
@@ -136,12 +101,11 @@ class _SettingsModalState extends State<SettingsModal> {
               onShowManageModels: _onShowManageModels,
               onLanguageChanged: (lang) {
                 setState(() => _selectedLanguage = lang);
-                // ignore: discarded_futures, Update immediately
-                widget.viewModel.updateLanguage(lang);
+                unawaited(widget.viewModel.updateLanguage(lang));
               },
               onDeleteAllChats: () =>
                   showDeleteAllChatsDialog(context, widget.viewModel),
-              onSave: _onSave,
+              onSave: () => unawaited(_onSave()),
             ),
           ),
         ),

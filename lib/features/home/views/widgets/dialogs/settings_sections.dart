@@ -191,8 +191,8 @@ class _UserNameField extends StatelessWidget {
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
-        decoration: InputDecoration(
-          prefixIcon: const Padding(
+        decoration: const InputDecoration(
+          prefixIcon: Padding(
             padding: EdgeInsets.only(left: 14, right: 12),
             child: HeroIcon(
               HeroIcons.user,
@@ -200,17 +200,17 @@ class _UserNameField extends StatelessWidget {
               color: AppColors.brand400,
             ),
           ),
-          prefixIconConstraints: const BoxConstraints(
+          prefixIconConstraints: BoxConstraints(
             minWidth: 40,
             minHeight: 40,
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
+          contentPadding: EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 16,
           ),
           hintText: 'Seu nome',
-          hintStyle: const TextStyle(
+          hintStyle: TextStyle(
             color: AppColors.textSecondary,
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -535,50 +535,53 @@ Future<void> showDeleteAllChatsDialog(
 ) async {
   await showAnimatedDialog<void>(
     context: context,
-    builder: (context) => AlertDialog(
-      backgroundColor: AppColors.surfaceCard,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Text(
-        'Excluir todos os chats?',
-        style: TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      content: const Text(
-        'Esta ação não pode ser desfeita. '
-        'Todos os seus chats serão excluídos permanentemente.',
-        style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.textSecondary,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+    builder: (context) => ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 480),
+      child: AlertDialog(
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Excluir todos os chats?',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
           ),
-          child: const Text('Cancelar'),
         ),
-        const SizedBox(width: 8),
-        ElevatedButton(
-          onPressed: () async {
-            final navigator = Navigator.of(context);
-            await viewModel.deleteAllConversations();
-            navigator.pop();
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red.shade600,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+        content: const Text(
+          'Esta ação não pode ser desfeita. '
+          'Todos os seus chats serão excluídos permanentemente.',
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
-            elevation: 0,
+            child: const Text('Cancelar'),
           ),
-          child: const Text('Excluir'),
-        ),
-      ],
+          const SizedBox(width: 8),
+          ElevatedButton(
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              await viewModel.deleteAllConversations();
+              navigator.pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade600,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
+            ),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
     ),
   );
 }

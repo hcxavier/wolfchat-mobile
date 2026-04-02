@@ -64,7 +64,7 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
           borderRadius: BorderRadius.circular(24),
         ),
         child: Container(
-          width: 480,
+          width: 640,
           decoration: BoxDecoration(
             color: AppColors.surfaceCard,
             borderRadius: BorderRadius.circular(24),

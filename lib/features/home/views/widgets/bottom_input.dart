@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:heroicons/heroicons.dart';
@@ -21,28 +19,38 @@ class BottomInput extends StatefulWidget {
   State<BottomInput> createState() => _BottomInputState();
 }
 
-class _BottomInputState extends State<BottomInput> {
+class _BottomInputState extends State<BottomInput> with WidgetsBindingObserver {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
+  bool _wasKeyboardOpen = false;
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(_onFocusChange);
+    WidgetsBinding.instance.addObserver(this);
     _focusNode.onKeyEvent = _handleKeyEvent;
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
-    _focusNode
-      ..removeListener(_onFocusChange)
-      ..dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
-  void _onFocusChange() {
-    setState(() {});
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    final view = WidgetsBinding.instance.platformDispatcher.views.first;
+    final bottomInset = view.viewInsets.bottom;
+    final isKeyboardOpen = bottomInset > 0;
+
+    if (_wasKeyboardOpen && !isKeyboardOpen) {
+      FocusManager.instance.primaryFocus?.unfocus();
+    }
+
+    _wasKeyboardOpen = isKeyboardOpen;
   }
 
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
@@ -67,96 +75,79 @@ class _BottomInputState extends State<BottomInput> {
 
   @override
   Widget build(BuildContext context) {
-    final isFocused = _focusNode.hasFocus;
-    final mediaQuery = MediaQuery.of(context);
-
-    // Only follow keyboard if this specific field is focused.
-    // If a modal is open, this field won't have focus and won't jump up.
-    final bottomPadding = isFocused
-        ? math.max(mediaQuery.viewInsets.bottom, mediaQuery.viewPadding.bottom)
-        : mediaQuery.viewPadding.bottom;
-
-    return AnimatedPadding(
-      duration: const Duration(milliseconds: 80),
-      curve: Curves.easeOutCubic,
-      padding: EdgeInsets.only(bottom: bottomPadding),
-      child: AnimatedScale(
-        scale: isFocused ? 1.02 : 1.0,
-        duration: const Duration(milliseconds: 80),
-        curve: Curves.easeOutCubic,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 80),
-          curve: Curves.easeOutCubic,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: AppColors.surfaceInput,
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 4,
-          ),
-          child: Row(
-            children: [
-              const HeroIcon(
-                HeroIcons.plusCircle,
-                color: AppColors.textSecondary,
-                size: 24,
+    return SafeArea(
+      top: false,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: AppColors.surfaceInput,
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 4,
+        ),
+        child: Row(
+          children: [
+            const HeroIcon(
+              HeroIcons.plusCircle,
+              color: AppColors.textSecondary,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                minLines: 1,
+                maxLines: 4,
+                textInputAction: TextInputAction.newline,
+                style: const TextStyle(color: AppColors.textPrimary),
+                enabled: !widget.isLoading,
+                onSubmitted: (_) => _sendMessage(),
+                decoration: const InputDecoration(
+                  hintText: 'Envie uma mensagem...',
+                  hintStyle: TextStyle(color: AppColors.textSecondary),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 12),
+                ),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  focusNode: _focusNode,
-                  minLines: 1,
-                  maxLines: 4,
-                  textInputAction: TextInputAction.newline,
-                  style: const TextStyle(color: AppColors.textPrimary),
-                  enabled: !widget.isLoading,
-                  onSubmitted: (_) => _sendMessage(),
-                  decoration: const InputDecoration(
-                    hintText: 'Envie uma mensagem...',
-                    hintStyle: TextStyle(color: AppColors.textSecondary),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 12),
+            ),
+            const SizedBox(width: 8),
+            if (widget.isLoading)
+              GestureDetector(
+                onTap: widget.onCancel,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: AppColors.brand500,
+                  ),
+                  child: const HeroIcon(
+                    HeroIcons.stop,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                ),
+              )
+            else
+              GestureDetector(
+                onTap: _sendMessage,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: AppColors.brand500,
+                  ),
+                  child: const HeroIcon(
+                    HeroIcons.arrowUp,
+                    size: 20,
+                    color: Colors.white,
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              widget.isLoading
-                  ? GestureDetector(
-                      onTap: widget.onCancel,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: AppColors.brand500,
-                        ),
-                        child: const HeroIcon(
-                          HeroIcons.stop,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                      ),
-                    )
-                  : GestureDetector(
-                      onTap: _sendMessage,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: AppColors.brand500,
-                        ),
-                        child: const HeroIcon(
-                          HeroIcons.arrowUp,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-            ],
-          ),
+          ],
         ),
       ),
     );
