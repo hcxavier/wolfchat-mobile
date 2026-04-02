@@ -1,0 +1,3 @@
+{"created_at_ms":1775408044406,"session_id":"session-1775408044406-0","type":"session_meta","updated_at_ms":1775408067822,"version":1}
+{"message":{"blocks":[{"text":"Qual o nome do projeto?","type":"text"}],"role":"user"},"type":"message"}
+{"message":{"blocks":[{"text":" O nome do projeto é **WolfChat** (ou **wolfchat** no formato técnico).\n\nIsso pode ser confirmado por:\n- O diretório do projeto: `/home/proxjie/Documents/Projects/Flutter/wolfchat`\n- O nome do package no código: `package:wolfchat` \n- O branch principal: `main...origin/main`","type":"text"}],"role":"assistant","usage":{"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"input_tokens":6910,"output_tokens":217}},"type":"message"}
