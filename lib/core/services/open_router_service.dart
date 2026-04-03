@@ -269,3 +269,5 @@ class OpenRouterService implements AiService {
     return content.length > 20 ? '${content.substring(0, 17)}...' : content;
   }
 }
+
+// Pseudo-update for commit 2 at 2026-04-02 22:19:27
