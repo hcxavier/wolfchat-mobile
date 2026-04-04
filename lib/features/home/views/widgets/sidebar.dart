@@ -10,6 +10,7 @@ class Sidebar extends StatelessWidget {
   const Sidebar({
     required this.onClose,
     required this.onOpenSettings,
+    required this.onSearchTap,
     required this.userName,
     required this.conversations,
     required this.currentConversationId,
@@ -21,6 +22,7 @@ class Sidebar extends StatelessWidget {
 
   final VoidCallback onClose;
   final VoidCallback onOpenSettings;
+  final VoidCallback onSearchTap;
   final String userName;
   final List<Conversation> conversations;
   final int? currentConversationId;
@@ -38,7 +40,7 @@ class Sidebar extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SidebarHeader(onClose: onClose),
-            const SidebarSearch(),
+            SidebarSearch(onTap: onSearchTap),
             const SizedBox(height: 16),
             const _RecentSectionLabel(),
             _SidebarNewChatButton(onTap: onNewConversation),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 
@@ -12,18 +13,10 @@ class SidebarHeader extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.brand500,
-            ),
-            child: const HeroIcon(
-              HeroIcons.sparkles,
-              style: HeroIconStyle.solid,
-              size: 16,
-              color: AppColors.textPrimary,
-            ),
+          SvgPicture.asset(
+            'assets/images/logo.svg',
+            width: 28,
+            height: 28,
           ),
           const SizedBox(width: 12),
           const Expanded(
@@ -62,36 +55,45 @@ class SidebarHeader extends StatelessWidget {
 }
 
 class SidebarSearch extends StatelessWidget {
-  const SidebarSearch({super.key});
+  const SidebarSearch({required this.onTap, super.key});
+
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceHover,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Row(
-          children: [
-            HeroIcon(
-              HeroIcons.magnifyingGlass,
-              size: 16,
-              color: AppColors.textSecondary,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceHover,
+              borderRadius: BorderRadius.circular(8),
             ),
-            SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Buscar nas conversas...',
-                style: TextStyle(
+            child: const Row(
+              children: [
+                HeroIcon(
+                  HeroIcons.magnifyingGlass,
+                  size: 16,
                   color: AppColors.textSecondary,
-                  fontSize: 16,
                 ),
-              ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Buscar nas conversas...',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 
@@ -9,18 +10,10 @@ class HeaderSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.brand500,
-          ),
-          child: const HeroIcon(
-            HeroIcons.sparkles,
-            style: HeroIconStyle.solid,
-            size: 40,
-            color: AppColors.textPrimary,
-          ),
+        SvgPicture.asset(
+          'assets/images/logo.svg',
+          width: 72,
+          height: 72,
         ),
         const SizedBox(height: 24),
         const Text(

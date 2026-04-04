@@ -235,6 +235,55 @@ class DatabaseService {
     );
   }
 
+  Future<List<Map<String, dynamic>>> searchConversations(String query) async {
+    final db = await database;
+
+    if (query.isEmpty) {
+      // Return all conversations with their last assistant message
+      final results = await db.rawQuery('''
+        SELECT 
+          c.id,
+          c.title,
+          c.created_at,
+          c.updated_at,
+          c.model_id,
+          m.content as last_message_content,
+          m.role as last_message_role
+        FROM conversations c
+        LEFT JOIN messages m ON m.conversation_id = c.id
+          AND m.id = (
+            SELECT MAX(m2.id) 
+            FROM messages m2 
+            WHERE m2.conversation_id = c.id AND m2.role = 'assistant'
+          )
+        ORDER BY c.updated_at DESC
+      ''');
+      return results;
+    }
+
+    // Search for conversations with messages containing the query
+    final searchQuery = '%${query.toLowerCase()}%';
+    final results = await db.rawQuery(
+      '''
+      SELECT DISTINCT
+        c.id,
+        c.title,
+        c.created_at,
+        c.updated_at,
+        c.model_id,
+        m.content as matched_content,
+        m.role as matched_role
+      FROM conversations c
+      INNER JOIN messages m ON m.conversation_id = c.id
+      WHERE LOWER(m.content) LIKE ?
+      ORDER BY c.updated_at DESC
+    ''',
+      [searchQuery],
+    );
+
+    return results;
+  }
+
   Future<void> saveUserSetting(String key, String value) async {
     final db = await database;
     await db.insert(

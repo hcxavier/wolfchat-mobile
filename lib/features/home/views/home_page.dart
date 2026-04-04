@@ -46,6 +46,7 @@ class _HomePageState extends State<HomePage>
                 viewModel.removeListener(onInit);
               }
             }
+
             viewModel.addListener(onInit);
           }
         }
@@ -166,6 +167,10 @@ class _HomePageState extends State<HomePage>
                 onOpenSettings: () {
                   viewModel.closeSidebar();
                   unawaited(context.pushNamed('settings'));
+                },
+                onSearchTap: () {
+                  viewModel.closeSidebar();
+                  unawaited(context.pushNamed('search'));
                 },
                 userName: viewModel.userName,
                 conversations: viewModel.conversations,

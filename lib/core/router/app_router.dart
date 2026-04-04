@@ -6,6 +6,8 @@ import 'package:wolfchat/features/home/views/home_page.dart';
 import 'package:wolfchat/features/home/views/widgets/dialogs/api_keys_modal.dart';
 import 'package:wolfchat/features/home/views/widgets/dialogs/manage_models_modal.dart';
 import 'package:wolfchat/features/home/views/widgets/dialogs/settings_modal.dart';
+import 'package:wolfchat/features/search/viewmodels/search_viewmodel.dart';
+import 'package:wolfchat/features/search/views/search_page.dart';
 
 abstract final class AppRouter {
   static final router = GoRouter(
@@ -19,10 +21,29 @@ abstract final class AppRouter {
           GoRoute(
             path: 'chat/:id',
             name: 'chat',
-            builder: (context, state) {
+            pageBuilder: (context, state) {
               final id = int.tryParse(state.pathParameters['id'] ?? '');
-              return HomePage(conversationId: id);
+              return CustomTransitionPage(
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+                child: HomePage(conversationId: id),
+              );
             },
+          ),
+          GoRoute(
+            path: 'search',
+            name: 'search',
+            pageBuilder: (context, state) => CustomTransitionPage(
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+              child: Consumer<SearchViewModel>(
+                builder: (context, viewModel, _) => const SearchPage(),
+              ),
+            ),
           ),
           GoRoute(
             path: 'settings',
@@ -32,8 +53,8 @@ abstract final class AppRouter {
               barrierColor: Colors.black54,
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) {
-                return FadeTransition(opacity: animation, child: child);
-              },
+                    return FadeTransition(opacity: animation, child: child);
+                  },
               child: Consumer<HomeViewModel>(
                 builder: (context, viewModel, _) => SettingsModal(
                   viewModel: viewModel,
@@ -56,8 +77,8 @@ abstract final class AppRouter {
                   barrierColor: Colors.black54,
                   transitionsBuilder:
                       (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
+                        return FadeTransition(opacity: animation, child: child);
+                      },
                   child: Consumer<HomeViewModel>(
                     builder: (context, viewModel, _) => ApiKeysModal(
                       viewModel: viewModel,
@@ -80,8 +101,8 @@ abstract final class AppRouter {
                   barrierColor: Colors.black54,
                   transitionsBuilder:
                       (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
+                        return FadeTransition(opacity: animation, child: child);
+                      },
                   child: Consumer<HomeViewModel>(
                     builder: (context, viewModel, _) => ManageModelsModal(
                       viewModel: viewModel,

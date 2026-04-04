@@ -105,6 +105,10 @@ class PersistenceService {
     await _database.deleteAllConversations();
   }
 
+  Future<List<Map<String, dynamic>>> searchConversations(String query) async {
+    return _database.searchConversations(query);
+  }
+
   Future<Message> addMessage(
     int conversationId,
     String role,
