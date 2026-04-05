@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
@@ -22,9 +20,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    // Load recent conversations when page opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(context.read<SearchViewModel>().search(''));
       _searchFocusNode.requestFocus();
     });
   }
@@ -65,10 +61,11 @@ class _SearchPageState extends State<SearchPage> {
             controller: _searchController,
             focusNode: _searchFocusNode,
             onChanged: (query) {
-              unawaited(context.read<SearchViewModel>().search(query));
+              // ignore: discarded_futures - search is triggered from sync callback
+              context.read<SearchViewModel>().search(query);
             },
           ),
-          Expanded(child: _SearchResultsList()),
+          const Expanded(child: _SearchResultsList()),
         ],
       ),
     );
@@ -143,14 +140,74 @@ class _SearchInput extends StatelessWidget {
 }
 
 class _SearchResultsList extends StatelessWidget {
+  const _SearchResultsList();
+
   @override
   Widget build(BuildContext context) {
     return Consumer<SearchViewModel>(
       builder: (context, viewModel, _) {
+        // Loading state takes priority (e.g., retrying after error)
         if (viewModel.isLoading) {
           return const Center(
             child: CircularProgressIndicator(
               color: AppColors.brand500,
+            ),
+          );
+        }
+
+        // Show error state when not loading
+        if (viewModel.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const HeroIcon(
+                  HeroIcons.exclamationTriangle,
+                  size: 48,
+                  color: AppColors.brand500,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Erro ao carregar conversas',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    viewModel.errorMessage ?? 'Erro desconhecido',
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    viewModel.clearError();
+                    await viewModel.search(viewModel.query);
+                  },
+                  icon: const HeroIcon(
+                    HeroIcons.arrowPath,
+                    size: 16,
+                    color: AppColors.textPrimary,
+                  ),
+                  label: const Text(
+                    'Tentar novamente',
+                    style: TextStyle(color: AppColors.textPrimary),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.surfaceCard,
+                    foregroundColor: AppColors.textPrimary,
+                  ),
+                ),
+              ],
             ),
           );
         }

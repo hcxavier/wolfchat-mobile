@@ -7,53 +7,90 @@ import 'package:wolfchat/features/search/models/search_result.dart';
 class SearchViewModel extends ChangeNotifier {
   SearchViewModel({PersistenceService? persistence})
     : _persistence = persistence {
-    if (_persistence == null) {
-      // ignore: discarded_futures - async init called in constructor
-      _init();
-    }
+    // ignore: discarded_futures - initialization is async but we don't need to await it
+    _init();
   }
 
   PersistenceService? _persistence;
   bool _isInitialized = false;
+  bool _isDisposed = false;
 
   List<SearchResult> _results = [];
   bool _isLoading = false;
   String _query = '';
+  String? _errorMessage;
   Timer? _debounceTimer;
 
   List<SearchResult> get results => List.unmodifiable(_results);
   bool get isLoading => _isLoading;
   String get query => _query;
+  String? get errorMessage => _errorMessage;
+  bool get hasError => _errorMessage != null;
 
   Future<void> _init() async {
-    _persistence = await PersistenceService.getInstance();
-    _isInitialized = true;
+    try {
+      _persistence ??= await PersistenceService.getInstance();
+      _isInitialized = true;
+      // Perform initial search for recent conversations
+      await search('');
+    } on Exception catch (e) {
+      if (_isDisposed) return;
+      _errorMessage = 'Erro ao inicializar: $e';
+      notifyListeners();
+    }
   }
 
   Future<void> search(String query) async {
-    if (!_isInitialized) return;
+    if (_isDisposed) return;
+
+    // Wait for initialization if not ready
+    if (!_isInitialized) {
+      // Queue the search to run after initialization
+      final success = await _waitForInitialization();
+      if (!success || _isDisposed) return;
+    }
 
     _query = query;
+    _errorMessage = null;
 
     // Debounce search to avoid too many database queries
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () async {
-      await _performSearch(query);
-    });
+    _debounceTimer = Timer(
+      const Duration(milliseconds: 300),
+      () => _performSearch(query),
+    );
+  }
+
+  /// Waits for initialization with timeout.
+  /// Returns true if initialized successfully, false if timed out or disposed.
+  Future<bool> _waitForInitialization() async {
+    const maxAttempts = 50; // 5 seconds timeout
+    var attempts = 0;
+    while (!_isInitialized && attempts < maxAttempts && !_isDisposed) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      attempts++;
+    }
+    return _isInitialized && !_isDisposed;
   }
 
   Future<void> _performSearch(String query) async {
+    if (_isDisposed) return;
+
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
       final rawResults = await _persistence!.searchConversations(query);
 
+      if (_isDisposed) return;
+
       _results = rawResults.map((data) {
         final title = data['title'] as String? ?? 'Nova conversa';
-        final updatedAt = DateTime.fromMillisecondsSinceEpoch(
-          data['updated_at'] as int,
-        );
+        final updatedAtValue = data['updated_at'];
+        final updatedAt = updatedAtValue != null
+            ? DateTime.fromMillisecondsSinceEpoch(updatedAtValue as int)
+            : DateTime.now();
 
         String preview;
         String? matchedContent;
@@ -86,13 +123,26 @@ class SearchViewModel extends ChangeNotifier {
           matchedContent: matchedContent,
         );
       }).toList();
+
+      _errorMessage = null;
     } on Exception catch (e) {
-      debugPrint('Error searching conversations: $e');
-      _results = [];
+      if (!_isDisposed) {
+        debugPrint('Error searching conversations: $e');
+        _errorMessage = 'Erro ao buscar conversas: $e';
+        _results = [];
+      }
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (!_isDisposed) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
+  }
+
+  void clearError() {
+    if (_isDisposed) return;
+    _errorMessage = null;
+    notifyListeners();
   }
 
   String _truncateContent(String content, {int maxLength = 100}) {
@@ -125,6 +175,7 @@ class SearchViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
     _debounceTimer?.cancel();
     super.dispose();
   }

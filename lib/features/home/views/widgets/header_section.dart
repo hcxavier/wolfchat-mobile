@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 
 class HeaderSection extends StatelessWidget {
