@@ -15,6 +15,9 @@ class ApiKeysSection extends StatelessWidget {
     required this.onToggleOpenCodeZen,
     required this.onBack,
     required this.onDone,
+    this.openRouterError,
+    this.groqError,
+    this.openCodeZenError,
     super.key,
   });
 
@@ -29,6 +32,9 @@ class ApiKeysSection extends StatelessWidget {
   final VoidCallback onToggleOpenCodeZen;
   final VoidCallback onBack;
   final VoidCallback onDone;
+  final String? openRouterError;
+  final String? groqError;
+  final String? openCodeZenError;
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +104,7 @@ class ApiKeysSection extends StatelessWidget {
           obscure: obscureOpenRouter,
           onToggle: onToggleOpenRouter,
           hint: 'sk-or-v1-...',
+          error: openRouterError,
         ),
         const SizedBox(height: 20),
         _buildSectionTitle('Groq'),
@@ -107,6 +114,7 @@ class ApiKeysSection extends StatelessWidget {
           obscure: obscureGroq,
           onToggle: onToggleGroq,
           hint: 'gsk_...',
+          error: groqError,
         ),
         const SizedBox(height: 20),
         _buildSectionTitle('OpenCode Zen'),
@@ -116,6 +124,7 @@ class ApiKeysSection extends StatelessWidget {
           obscure: obscureOpenCodeZen,
           onToggle: onToggleOpenCodeZen,
           hint: 'oz-...',
+          error: openCodeZenError,
         ),
         const SizedBox(height: 28),
         SizedBox(
@@ -201,81 +210,116 @@ class _ApiKeyInput extends StatelessWidget {
     required this.obscure,
     required this.onToggle,
     required this.hint,
+    this.error,
   });
   final TextEditingController controller;
   final bool obscure;
   final VoidCallback onToggle;
   final String hint;
+  final String? error;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceInput,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: AppColors.surfaceHover,
-        ),
-      ),
-      child: TextField(
-        controller: controller,
-        obscureText: obscure,
-        style: const TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 13,
-            fontWeight: FontWeight.w400,
-          ),
-          prefixIcon: const Padding(
-            padding: EdgeInsets.only(left: 14, right: 12),
-            child: HeroIcon(
-              HeroIcons.key,
-              size: 18,
-              color: AppColors.brand400,
+    final hasError = error != null && error!.isNotEmpty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceInput,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: hasError ? Colors.red.shade400 : AppColors.surfaceHover,
+              width: hasError ? 1.5 : 1,
             ),
           ),
-          prefixIconConstraints: const BoxConstraints(
-            minWidth: 40,
-            minHeight: 40,
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-          suffixIcon: Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Material(
-              color: Colors.transparent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          child: TextField(
+            controller: controller,
+            obscureText: obscure,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
               ),
-              child: InkWell(
-                onTap: onToggle,
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  child: HeroIcon(
-                    obscure ? HeroIcons.eyeSlash : HeroIcons.eye,
-                    size: 18,
-                    color: AppColors.textSecondary,
+              prefixIcon: const Padding(
+                padding: EdgeInsets.only(left: 14, right: 12),
+                child: HeroIcon(
+                  HeroIcons.key,
+                  size: 18,
+                  color: AppColors.brand400,
+                ),
+              ),
+              prefixIconConstraints: const BoxConstraints(
+                minWidth: 40,
+                minHeight: 40,
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Material(
+                  color: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: InkWell(
+                    onTap: onToggle,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      child: HeroIcon(
+                        obscure ? HeroIcons.eyeSlash : HeroIcons.eye,
+                        size: 18,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                   ),
                 ),
               ),
+              suffixIconConstraints: const BoxConstraints(
+                minWidth: 40,
+                minHeight: 40,
+              ),
             ),
           ),
-          suffixIconConstraints: const BoxConstraints(
-            minWidth: 40,
-            minHeight: 40,
-          ),
         ),
-      ),
+        if (hasError) ...[
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: Row(
+              children: [
+                HeroIcon(
+                  HeroIcons.exclamationCircle,
+                  size: 14,
+                  color: Colors.red.shade400,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    error!,
+                    style: TextStyle(
+                      color: Colors.red.shade400,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

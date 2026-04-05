@@ -25,6 +25,9 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
   bool _obscureOpenRouter = true;
   bool _obscureGroq = true;
   bool _obscureOpenCodeZen = true;
+  String? _openRouterError;
+  String? _groqError;
+  String? _openCodeZenError;
 
   @override
   void initState() {
@@ -47,10 +50,41 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
   }
 
   Future<void> _onSave() async {
+    setState(() {
+      _openRouterError = null;
+      _groqError = null;
+      _openCodeZenError = null;
+    });
+
+    final openRouter = _openRouterController.text.trim();
+    final groq = _groqController.text.trim();
+    final openCodeZen = _openCodeZenController.text.trim();
+
+    final errors = <String, String?>{};
+
+    if (openRouter.isNotEmpty && openRouter.length < 10) {
+      errors['openRouter'] = 'Chave parece inválida. Verifique o formato.';
+    }
+    if (groq.isNotEmpty && groq.length < 10) {
+      errors['groq'] = 'Chave parece inválida. Verifique o formato.';
+    }
+    if (openCodeZen.isNotEmpty && openCodeZen.length < 5) {
+      errors['openCodeZen'] = 'Chave parece inválida. Verifique o formato.';
+    }
+
+    if (errors.isNotEmpty) {
+      setState(() {
+        _openRouterError = errors['openRouter'];
+        _groqError = errors['groq'];
+        _openCodeZenError = errors['openCodeZen'];
+      });
+      return;
+    }
+
     await widget.viewModel.saveApiKeys(
-      openRouter: _openRouterController.text,
-      groq: _groqController.text,
-      openCodeZen: _openCodeZenController.text,
+      openRouter: openRouter,
+      groq: groq,
+      openCodeZen: openCodeZen,
     );
     widget.onClose();
   }
@@ -94,6 +128,9 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
                   setState(() => _obscureOpenCodeZen = !_obscureOpenCodeZen),
               onBack: widget.onClose,
               onDone: _onSave,
+              openRouterError: _openRouterError,
+              groqError: _groqError,
+              openCodeZenError: _openCodeZenError,
             ),
           ),
         ),

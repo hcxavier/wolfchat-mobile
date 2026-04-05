@@ -1,7 +1,8 @@
-import 'dart:async';
+import 'dart:async' as dart_async;
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:wolfchat/core/exceptions/app_exceptions.dart';
 import 'package:wolfchat/core/models/available_model.dart';
 import 'package:wolfchat/core/services/ai_service.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
@@ -12,7 +13,7 @@ class GroqService implements AiService {
   @override
   final String apiKey;
   static const String _baseUrl = 'https://api.groq.com/openai/v1';
-  final _cancelCompleter = Completer<void>();
+  final _cancelCompleter = dart_async.Completer<void>();
 
   @override
   void cancel() {
@@ -60,13 +61,24 @@ class GroqService implements AiService {
         final messageContent = message['message'] as Map<String, dynamic>;
         return messageContent['content'] as String;
       }
-      throw Exception('No response from model');
+      throw const ModelException('A IA não retornou uma resposta.');
     } else if (response.statusCode == 401) {
-      throw Exception('Invalid API key');
+      throw const AuthException(
+        'Sua chave de API é inválida. Verifique-a nas configurações.',
+      );
     } else if (response.statusCode == 429) {
-      throw Exception('Rate limit exceeded');
+      throw const RateLimitException(
+        'Você excedeu o limite de requisições. '
+        'Aguarde um momento e tente novamente.',
+      );
+    } else if (response.statusCode >= 500) {
+      throw const ServerException(
+        'O servidor está com problemas. Tente novamente em instantes.',
+      );
     } else {
-      throw Exception('Failed to get response: ${response.statusCode}');
+      throw ServerException(
+        'Erro na comunicação com o servidor (${response.statusCode}).',
+      );
     }
   }
 
@@ -126,10 +138,21 @@ class GroqService implements AiService {
         }
       }
     } else {
-      final responseBody = await response.stream.bytesToString();
-      throw Exception(
-        'Failed to get streaming response: ${response.statusCode} '
-        '- $responseBody',
+      await response.stream.bytesToString();
+      if (response.statusCode == 401) {
+        throw const AuthException(
+          'Sua chave de API é inválida. '
+          'Verifique-a nas configurações.',
+        );
+      } else if (response.statusCode == 429) {
+        throw const RateLimitException(
+          'Você excedeu o limite de requisições. '
+          'Aguarde um momento e tente novamente.',
+        );
+      }
+      throw ServerException(
+        'Erro no streaming da resposta: '
+        '${response.statusCode}.',
       );
     }
   }
@@ -158,14 +181,35 @@ class GroqService implements AiService {
             )
             .toList();
       } else if (response.statusCode == 401) {
-        throw Exception('Chave de API inválida');
+        throw const AuthException(
+          'Sua chave de API é inválida. Verifique-a nas configurações.',
+        );
+      } else if (response.statusCode == 429) {
+        throw const RateLimitException(
+          'Você excedeu o limite de requisições. '
+          'Aguarde um momento e tente novamente.',
+        );
+      } else if (response.statusCode >= 500) {
+        throw const ServerException(
+          'O servidor está com problemas. Tente novamente em instantes.',
+        );
       } else {
-        throw Exception('Erro ao buscar modelos (${response.statusCode})');
+        throw ServerException(
+          'Erro ao buscar modelos (${response.statusCode}).',
+        );
       }
-    } on TimeoutException {
-      throw Exception('Timeout ao buscar modelos');
-    } on Exception {
+    } on dart_async.TimeoutException {
+      throw const TimeoutException(
+        'A conexão demorou muito. '
+        'Verifique sua internet e tente novamente.',
+      );
+    } on AppException {
       rethrow;
+    } on Exception catch (_) {
+      throw const NetworkException(
+        'Não foi possível conectar ao servidor. '
+        'Verifique sua conexão com a internet.',
+      );
     }
   }
 

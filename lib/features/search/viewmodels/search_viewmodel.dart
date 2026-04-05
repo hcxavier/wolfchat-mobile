@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:wolfchat/core/data/services/persistence_service.dart';
+import 'package:wolfchat/core/utils/error_message_mapper.dart';
 import 'package:wolfchat/features/search/models/search_result.dart';
 
 class SearchViewModel extends ChangeNotifier {
@@ -35,7 +36,7 @@ class SearchViewModel extends ChangeNotifier {
       await search('');
     } on Exception catch (e) {
       if (_isDisposed) return;
-      _errorMessage = 'Erro ao inicializar: $e';
+      _errorMessage = ErrorMessageMapper.from(e);
       notifyListeners();
     }
   }
@@ -128,7 +129,7 @@ class SearchViewModel extends ChangeNotifier {
     } on Exception catch (e) {
       if (!_isDisposed) {
         debugPrint('Error searching conversations: $e');
-        _errorMessage = 'Erro ao buscar conversas: $e';
+        _errorMessage = ErrorMessageMapper.from(e);
         _results = [];
       }
     } finally {

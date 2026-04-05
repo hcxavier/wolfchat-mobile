@@ -3,6 +3,7 @@ import 'package:wolfchat/core/data/models/conversation.dart';
 import 'package:wolfchat/core/data/models/message.dart';
 import 'package:wolfchat/core/data/services/cache_service.dart';
 import 'package:wolfchat/core/data/services/database_service.dart';
+import 'package:wolfchat/core/exceptions/app_exceptions.dart';
 import 'package:wolfchat/features/home/models/custom_model.dart';
 
 class PersistenceService {
@@ -69,20 +70,33 @@ class PersistenceService {
     String title, {
     String? modelId,
   }) async {
-    final now = DateTime.now();
-    final conversation = Conversation(
-      id: 0,
-      title: title,
-      createdAt: now,
-      updatedAt: now,
-      modelId: modelId,
-    );
-    final id = await _database.insertConversation(conversation);
-    return conversation.copyWith(id: id);
+    try {
+      final now = DateTime.now();
+      final conversation = Conversation(
+        id: 0,
+        title: title,
+        createdAt: now,
+        updatedAt: now,
+        modelId: modelId,
+      );
+      final id = await _database.insertConversation(conversation);
+      return conversation.copyWith(id: id);
+    } on Exception catch (_) {
+      throw const PersistenceException(
+        'Não foi possível criar a conversa. '
+        'Tente novamente.',
+      );
+    }
   }
 
   Future<List<Conversation>> getAllConversations() async {
-    return _database.getAllConversations();
+    try {
+      return _database.getAllConversations();
+    } on Exception catch (_) {
+      throw const PersistenceException(
+        'Não foi possível carregar suas conversas.',
+      );
+    }
   }
 
   Future<Conversation?> getConversation(int id) async {
@@ -98,11 +112,23 @@ class PersistenceService {
   }
 
   Future<void> deleteConversation(int id) async {
-    await _database.deleteConversation(id);
+    try {
+      await _database.deleteConversation(id);
+    } on Exception catch (_) {
+      throw const PersistenceException(
+        'Não foi possível excluir a conversa.',
+      );
+    }
   }
 
   Future<void> deleteAllConversations() async {
-    await _database.deleteAllConversations();
+    try {
+      await _database.deleteAllConversations();
+    } on Exception catch (_) {
+      throw const PersistenceException(
+        'Não foi possível excluir as conversas.',
+      );
+    }
   }
 
   Future<List<Map<String, dynamic>>> searchConversations(String query) async {
@@ -114,15 +140,21 @@ class PersistenceService {
     String role,
     String content,
   ) async {
-    final message = Message(
-      id: 0,
-      conversationId: conversationId,
-      role: role,
-      content: content,
-      timestamp: DateTime.now(),
-    );
-    final id = await _database.insertMessage(message);
-    return message.copyWith(id: id);
+    try {
+      final message = Message(
+        id: 0,
+        conversationId: conversationId,
+        role: role,
+        content: content,
+        timestamp: DateTime.now(),
+      );
+      final id = await _database.insertMessage(message);
+      return message.copyWith(id: id);
+    } on Exception catch (_) {
+      throw const PersistenceException(
+        'Não foi possível salvar a mensagem.',
+      );
+    }
   }
 
   Future<List<Message>> getMessages(int conversationId) async {

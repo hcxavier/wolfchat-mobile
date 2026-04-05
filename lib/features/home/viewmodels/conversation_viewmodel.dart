@@ -3,10 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'package:wolfchat/core/constants/system_prompts.dart';
 import 'package:wolfchat/core/data/models/conversation.dart';
 import 'package:wolfchat/core/data/services/persistence_service.dart';
+import 'package:wolfchat/core/exceptions/app_exceptions.dart';
 import 'package:wolfchat/core/services/ai_service.dart';
 import 'package:wolfchat/core/services/groq_service.dart';
 import 'package:wolfchat/core/services/open_code_zen_service.dart';
 import 'package:wolfchat/core/services/open_router_service.dart';
+import 'package:wolfchat/core/utils/error_message_mapper.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
 
 class ConversationViewModel extends ChangeNotifier {
@@ -261,11 +263,20 @@ class ConversationViewModel extends ChangeNotifier {
         );
         _conversations = await persistence!.getAllConversations();
       }
-    } on Exception catch (e) {
-      _errorMessage = e.toString();
+    } on AppException catch (e) {
+      _errorMessage = e.message;
       final errorMessage = ChatMessage(
         role: 'assistant',
-        content: 'Erro: $e',
+        content: e.message,
+        timestamp: DateTime.now(),
+      );
+      _messages.add(errorMessage);
+    } on Exception catch (e) {
+      final friendlyMessage = ErrorMessageMapper.from(e);
+      _errorMessage = friendlyMessage;
+      final errorMessage = ChatMessage(
+        role: 'assistant',
+        content: friendlyMessage,
         timestamp: DateTime.now(),
       );
       _messages.add(errorMessage);
@@ -381,11 +392,20 @@ class ConversationViewModel extends ChangeNotifier {
         );
         _conversations = await persistence!.getAllConversations();
       }
-    } on Exception catch (e) {
-      _errorMessage = e.toString();
+    } on AppException catch (e) {
+      _errorMessage = e.message;
       final errorMessage = ChatMessage(
         role: 'assistant',
-        content: 'Erro: $e',
+        content: e.message,
+        timestamp: DateTime.now(),
+      );
+      _messages.add(errorMessage);
+    } on Exception catch (e) {
+      final friendlyMessage = ErrorMessageMapper.from(e);
+      _errorMessage = friendlyMessage;
+      final errorMessage = ChatMessage(
+        role: 'assistant',
+        content: friendlyMessage,
         timestamp: DateTime.now(),
       );
       _messages.add(errorMessage);

@@ -5,6 +5,7 @@ import 'package:wolfchat/core/services/groq_service.dart';
 import 'package:wolfchat/core/services/open_code_zen_service.dart';
 import 'package:wolfchat/core/services/open_router_service.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
+import 'package:wolfchat/core/utils/error_message_mapper.dart';
 import 'package:wolfchat/features/home/models/custom_model.dart';
 import 'package:wolfchat/features/home/viewmodels/home_viewmodel.dart';
 import 'package:wolfchat/features/home/views/widgets/dialogs/dialog_wrappers.dart';
@@ -33,6 +34,8 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
   bool _useCustomModelId = false;
   String? _selectedModelId;
   String? _fetchError;
+  String? _nameError;
+  String? _customIdError;
 
   @override
   void initState() {
@@ -87,7 +90,7 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
       if (mounted) {
         setState(() {
           _isLoadingModels = false;
-          _fetchError = 'Erro ao carregar modelos: $e';
+          _fetchError = ErrorMessageMapper.from(e);
         });
       }
     }
@@ -101,12 +104,42 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
   }
 
   Future<void> _addModel() async {
+    setState(() {
+      _nameError = null;
+      _customIdError = null;
+    });
+
     final name = _nameController.text.trim();
     final modelId = _useCustomModelId
         ? _modelIdController.text.trim()
         : _selectedModelId ?? '';
 
-    if (name.isEmpty || modelId.isEmpty) return;
+    var hasError = false;
+
+    if (name.isEmpty) {
+      setState(() => _nameError = 'Informe um nome para o modelo.');
+      hasError = true;
+    }
+
+    if (modelId.isEmpty) {
+      if (_useCustomModelId) {
+        setState(() => _customIdError = 'Informe o ID do modelo.');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Selecione um modelo da lista.'),
+            backgroundColor: AppColors.brand700,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+      hasError = true;
+    }
+
+    if (hasError) return;
 
     await widget.viewModel.addCustomModel(
       name: name,
@@ -119,6 +152,8 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
     setState(() {
       _selectedModelId = null;
       _useCustomModelId = false;
+      _nameError = null;
+      _customIdError = null;
     });
   }
 
@@ -166,6 +201,7 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
                   controller: _nameController,
                   hint: 'Llama 3',
                   icon: HeroIcons.cpuChip,
+                  error: _nameError,
                 ),
                 const SizedBox(height: 20),
                 _buildSectionTitle('ID do modelo'),
@@ -179,6 +215,7 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
                   onModelSelected: _onModelSelected,
                   onUseCustomChanged: _onUseCustomChanged,
                   error: _fetchError,
+                  customIdError: _customIdError,
                 ),
                 const SizedBox(height: 24),
                 _AddButton(onTap: _addModel),
@@ -260,55 +297,90 @@ class _ModelInputField extends StatelessWidget {
     required this.controller,
     required this.hint,
     required this.icon,
+    this.error,
   });
 
   final TextEditingController controller;
   final String hint;
   final HeroIcons icon;
+  final String? error;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceInput,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: AppColors.surfaceHover,
-        ),
-      ),
-      child: TextField(
-        controller: controller,
-        style: const TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 13,
-            fontWeight: FontWeight.w400,
-          ),
-          prefixIcon: Padding(
-            padding: const EdgeInsets.only(left: 14, right: 12),
-            child: HeroIcon(
-              icon,
-              size: 18,
-              color: AppColors.brand400,
+    final hasError = error != null && error!.isNotEmpty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceInput,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: hasError ? Colors.red.shade400 : AppColors.surfaceHover,
+              width: hasError ? 1.5 : 1,
             ),
           ),
-          prefixIconConstraints: const BoxConstraints(
-            minWidth: 40,
-            minHeight: 40,
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
+          child: TextField(
+            controller: controller,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+              ),
+              prefixIcon: Padding(
+                padding: const EdgeInsets.only(left: 14, right: 12),
+                child: HeroIcon(
+                  icon,
+                  size: 18,
+                  color: AppColors.brand400,
+                ),
+              ),
+              prefixIconConstraints: const BoxConstraints(
+                minWidth: 40,
+                minHeight: 40,
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
+            ),
           ),
         ),
-      ),
+        if (hasError) ...[
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: Row(
+              children: [
+                HeroIcon(
+                  HeroIcons.exclamationCircle,
+                  size: 14,
+                  color: Colors.red.shade400,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    error!,
+                    style: TextStyle(
+                      color: Colors.red.shade400,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -323,6 +395,7 @@ class _ModelIdSelector extends StatefulWidget {
     required this.onModelSelected,
     required this.onUseCustomChanged,
     this.error,
+    this.customIdError,
   });
 
   final List<AvailableModel> availableModels;
@@ -333,6 +406,7 @@ class _ModelIdSelector extends StatefulWidget {
   final ValueChanged<String?> onModelSelected;
   final ValueChanged<bool> onUseCustomChanged;
   final String? error;
+  final String? customIdError;
 
   @override
   State<_ModelIdSelector> createState() => _ModelIdSelectorState();
@@ -436,6 +510,7 @@ class _ModelIdSelectorState extends State<_ModelIdSelector> {
             controller: widget.customModelIdController,
             hint: 'ex: llama3-70b-8192',
             icon: HeroIcons.codeBracket,
+            error: widget.customIdError,
           ),
         ],
         if (widget.error != null && !widget.useCustomModelId) ...[
