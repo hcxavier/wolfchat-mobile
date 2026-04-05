@@ -236,6 +236,7 @@ class _ApiKeyInput extends StatelessWidget {
           child: TextField(
             controller: controller,
             obscureText: obscure,
+            textCapitalization: TextCapitalization.sentences,
             style: const TextStyle(
               color: AppColors.textPrimary,
               fontSize: 14,

@@ -332,6 +332,7 @@ class _PromptInputField extends StatelessWidget {
       child: TextField(
         controller: controller,
         focusNode: focusNode,
+        textCapitalization: TextCapitalization.sentences,
         maxLines: 8,
         maxLength: maxCharacters,
         buildCounter:

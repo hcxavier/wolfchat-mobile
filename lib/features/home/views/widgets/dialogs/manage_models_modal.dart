@@ -322,6 +322,7 @@ class _ModelInputField extends StatelessWidget {
           ),
           child: TextField(
             controller: controller,
+            textCapitalization: TextCapitalization.sentences,
             style: const TextStyle(
               color: AppColors.textPrimary,
               fontSize: 14,

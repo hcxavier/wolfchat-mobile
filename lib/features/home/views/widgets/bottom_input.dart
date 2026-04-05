@@ -98,6 +98,7 @@ class _BottomInputState extends State<BottomInput> with WidgetsBindingObserver {
               child: TextField(
                 controller: _controller,
                 focusNode: _focusNode,
+                textCapitalization: TextCapitalization.sentences,
                 minLines: 1,
                 maxLines: 4,
                 textInputAction: TextInputAction.newline,

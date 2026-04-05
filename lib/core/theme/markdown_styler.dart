@@ -88,7 +88,7 @@ class MarkdownStyler {
       code: const TextStyle(
         fontFamily: 'JetBrains Mono',
         fontSize: 13,
-        color: AppColors.brand300,
+        color: AppColors.brand500,
       ),
       codeblockPadding: EdgeInsets.zero,
       codeblockDecoration: const BoxDecoration(),
@@ -147,43 +147,10 @@ class CodeBuilder extends MarkdownElementBuilder {
       );
     }
 
-    // Handle inline code
-    return InlineCodeWidget(code: element.textContent);
-  }
-}
-
-class InlineCodeWidget extends StatelessWidget {
-  const InlineCodeWidget({required this.code, super.key});
-  final String code;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceInput.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: AppColors.brand500.withValues(alpha: 0.3),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.brand500.withValues(alpha: 0.08),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Text(
-        code,
-        style: const TextStyle(
-          fontFamily: 'JetBrains Mono',
-          fontSize: 13,
-          color: AppColors.brand300,
-          letterSpacing: 0.3,
-        ),
-      ),
-    );
+    // Keep inline code rendering in the markdown text flow.
+    // Returning a widget here can break line composition and force
+    // following text to wrap to the next line unexpectedly.
+    return null;
   }
 }
 

@@ -95,6 +95,7 @@ class _SearchInput extends StatelessWidget {
         child: TextField(
           controller: controller,
           focusNode: focusNode,
+          textCapitalization: TextCapitalization.sentences,
           onChanged: onChanged,
           style: const TextStyle(
             color: AppColors.textPrimary,
