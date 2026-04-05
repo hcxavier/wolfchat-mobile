@@ -35,6 +35,7 @@ class SidebarConversationList extends StatelessWidget {
               ),
             )
           : ListView.builder(
+              physics: const ClampingScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 12),
               itemCount: conversations.length,
               itemBuilder: (context, index) {
