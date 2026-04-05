@@ -539,15 +539,15 @@ class _CopyButtonState extends State<_CopyButton> {
           ),
           backgroundColor: AppColors.surfaceCard,
           behavior: SnackBarBehavior.floating,
-          shape: const RoundedRectangleBorder(
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(12)),
           ),
-          margin: const EdgeInsets.all(16),
-          duration: const Duration(seconds: 2),
+          margin: EdgeInsets.all(16),
+          duration: Duration(seconds: 2),
         ),
       );
     }
-    await Future<void>.delayed(const Duration(seconds: 2));
+    await Future<void>.delayed(Duration(seconds: 2));
     if (!mounted) return;
     setState(() => _copied = false);
   }
