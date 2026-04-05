@@ -11,12 +11,14 @@ import 'package:wolfchat/features/home/models/chat_message.dart';
 class ChatMessagesList extends StatefulWidget {
   const ChatMessagesList({
     required this.messages,
+    this.conversationId,
     this.isSendingMessage = false,
     this.onRetry,
     super.key,
   });
 
   final List<ChatMessage> messages;
+  final int? conversationId;
   final bool isSendingMessage;
   final VoidCallback? onRetry;
 
@@ -35,6 +37,12 @@ class _ChatMessagesListState extends State<ChatMessagesList> {
   bool _gestureCountedInCurrentDrag = false;
   bool _isScrollingToBottom = false;
   Timer? _autoHideButtonTimer;
+
+  List<ChatMessage> get _reversedMessages => widget.messages.reversed.toList();
+
+  bool get _hasAssistantResponse => widget.messages.any(
+    (message) => message.role == 'assistant',
+  );
 
   @override
   void initState() {
@@ -83,8 +91,7 @@ class _ChatMessagesListState extends State<ChatMessagesList> {
     }
 
     final position = _scrollController.position;
-    final distanceToBottom = position.maxScrollExtent - position.pixels;
-    return distanceToBottom <= _bottomTolerance;
+    return position.pixels <= _bottomTolerance;
   }
 
   bool _onScrollNotification(ScrollNotification notification) {
@@ -144,9 +151,8 @@ class _ChatMessagesListState extends State<ChatMessagesList> {
         return;
       }
 
-      final maxExtent = _scrollController.position.maxScrollExtent;
       await _scrollController.animateTo(
-        maxExtent,
+        0,
         duration: const Duration(milliseconds: 320),
         curve: Curves.easeOutCubic,
       );
@@ -155,7 +161,7 @@ class _ChatMessagesListState extends State<ChatMessagesList> {
     }
 
     if (_scrollController.hasClients && !_isAtBottom()) {
-      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      _scrollController.jumpTo(0);
     }
   }
 
@@ -165,13 +171,7 @@ class _ChatMessagesListState extends State<ChatMessagesList> {
       return const SizedBox.shrink();
     }
 
-    var lastAssistantIndex = -1;
-    for (var i = widget.messages.length - 1; i >= 0; i--) {
-      if (widget.messages[i].role == 'assistant') {
-        lastAssistantIndex = i;
-        break;
-      }
-    }
+    final lastAssistantIndex = _findLastAssistantIndex();
 
     return NotificationListener<ScrollNotification>(
       onNotification: _onScrollNotification,
@@ -179,11 +179,17 @@ class _ChatMessagesListState extends State<ChatMessagesList> {
         children: [
           ListView.builder(
             controller: _scrollController,
+            reverse: _hasAssistantResponse,
             padding: const EdgeInsets.symmetric(vertical: 16),
             itemCount: widget.messages.length,
             itemBuilder: (context, index) {
-              final message = widget.messages[index];
+              final message = _hasAssistantResponse
+                  ? _reversedMessages[index]
+                  : widget.messages[index];
               final isUser = message.role == 'user';
+              final originalIndex = _hasAssistantResponse
+                  ? widget.messages.length - 1 - index
+                  : index;
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
@@ -191,7 +197,9 @@ class _ChatMessagesListState extends State<ChatMessagesList> {
                   message: message,
                   isUser: isUser,
                   isLoading: widget.isSendingMessage,
-                  onRetry: index == lastAssistantIndex ? widget.onRetry : null,
+                  onRetry: originalIndex == lastAssistantIndex
+                      ? widget.onRetry
+                      : null,
                 ),
               );
             },
@@ -207,6 +215,15 @@ class _ChatMessagesListState extends State<ChatMessagesList> {
         ],
       ),
     );
+  }
+
+  int _findLastAssistantIndex() {
+    for (var i = widget.messages.length - 1; i >= 0; i--) {
+      if (widget.messages[i].role == 'assistant') {
+        return i;
+      }
+    }
+    return -1;
   }
 }
 

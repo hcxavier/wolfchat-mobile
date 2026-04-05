@@ -45,6 +45,7 @@ class MainChatView extends StatelessWidget {
               Expanded(
                 child: hasMessages
                     ? ChatMessagesList(
+                        conversationId: viewModel.currentConversation?.id,
                         messages: viewModel.messages,
                         isSendingMessage: viewModel.isSendingMessage,
                         onRetry: viewModel.retryLastMessage,
