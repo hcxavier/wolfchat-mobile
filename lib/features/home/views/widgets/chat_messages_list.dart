@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -6,7 +8,7 @@ import 'package:wolfchat/core/theme/app_colors.dart';
 import 'package:wolfchat/core/theme/markdown_styler.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
 
-class ChatMessagesList extends StatelessWidget {
+class ChatMessagesList extends StatefulWidget {
   const ChatMessagesList({
     required this.messages,
     this.isSendingMessage = false,
@@ -19,36 +21,244 @@ class ChatMessagesList extends StatelessWidget {
   final VoidCallback? onRetry;
 
   @override
+  State<ChatMessagesList> createState() => _ChatMessagesListState();
+}
+
+class _ChatMessagesListState extends State<ChatMessagesList> {
+  static const _swipeWindow = Duration(seconds: 2);
+  static const _buttonVisibleDuration = Duration(seconds: 3);
+  static const _bottomTolerance = 16.0;
+  static const _maxBottomScrollPasses = 4;
+  final ScrollController _scrollController = ScrollController();
+  final List<DateTime> _scrollGestures = <DateTime>[];
+  bool _showScrollToBottomButton = false;
+  bool _gestureCountedInCurrentDrag = false;
+  bool _isScrollingToBottom = false;
+  Timer? _autoHideButtonTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScrollPositionChanged);
+  }
+
+  @override
+  void dispose() {
+    _cancelAutoHideButtonTimer();
+    _scrollController
+      ..removeListener(_onScrollPositionChanged)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onScrollPositionChanged() {
+    if (_showScrollToBottomButton && _isAtBottom()) {
+      _cancelAutoHideButtonTimer();
+      setState(() => _showScrollToBottomButton = false);
+    }
+  }
+
+  void _cancelAutoHideButtonTimer() {
+    _autoHideButtonTimer?.cancel();
+    _autoHideButtonTimer = null;
+  }
+
+  void _showScrollButtonTemporarily() {
+    _cancelAutoHideButtonTimer();
+    if (!_showScrollToBottomButton && mounted) {
+      setState(() => _showScrollToBottomButton = true);
+    }
+
+    _autoHideButtonTimer = Timer(_buttonVisibleDuration, () {
+      if (!mounted || !_showScrollToBottomButton) {
+        return;
+      }
+      setState(() => _showScrollToBottomButton = false);
+    });
+  }
+
+  bool _isAtBottom() {
+    if (!_scrollController.hasClients) {
+      return true;
+    }
+
+    final position = _scrollController.position;
+    final distanceToBottom = position.maxScrollExtent - position.pixels;
+    return distanceToBottom <= _bottomTolerance;
+  }
+
+  bool _onScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollStartNotification &&
+        notification.dragDetails != null) {
+      _gestureCountedInCurrentDrag = false;
+    }
+
+    if (notification is ScrollUpdateNotification &&
+        notification.dragDetails != null &&
+        !_gestureCountedInCurrentDrag &&
+        notification.dragDetails!.delta.dy != 0) {
+      _registerScrollGesture();
+      _gestureCountedInCurrentDrag = true;
+    }
+
+    if (notification is ScrollEndNotification) {
+      _gestureCountedInCurrentDrag = false;
+    }
+
+    return false;
+  }
+
+  void _registerScrollGesture() {
+    final now = DateTime.now();
+    _scrollGestures
+      ..removeWhere((swipeAt) => now.difference(swipeAt) > _swipeWindow)
+      ..add(now);
+
+    if (_scrollGestures.length >= 2 && !_isAtBottom()) {
+      _showScrollButtonTemporarily();
+    }
+  }
+
+  Future<void> _scrollToBottom() async {
+    if (!_scrollController.hasClients || _isScrollingToBottom) {
+      return;
+    }
+
+    _isScrollingToBottom = true;
+    _cancelAutoHideButtonTimer();
+    setState(() => _showScrollToBottomButton = false);
+
+    try {
+      await _animateToBottomUntilSettled();
+    } finally {
+      _isScrollingToBottom = false;
+      if (mounted && !_isAtBottom()) {
+        _showScrollButtonTemporarily();
+      }
+    }
+  }
+
+  Future<void> _animateToBottomUntilSettled() async {
+    for (var pass = 0; pass < _maxBottomScrollPasses; pass++) {
+      if (!_scrollController.hasClients || _isAtBottom()) {
+        return;
+      }
+
+      final maxExtent = _scrollController.position.maxScrollExtent;
+      await _scrollController.animateTo(
+        maxExtent,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+
+      await WidgetsBinding.instance.endOfFrame;
+    }
+
+    if (_scrollController.hasClients && !_isAtBottom()) {
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (messages.isEmpty) {
+    if (widget.messages.isEmpty) {
       return const SizedBox.shrink();
     }
 
     var lastAssistantIndex = -1;
-    for (var i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].role == 'assistant') {
+    for (var i = widget.messages.length - 1; i >= 0; i--) {
+      if (widget.messages[i].role == 'assistant') {
         lastAssistantIndex = i;
         break;
       }
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      itemCount: messages.length,
-      itemBuilder: (context, index) {
-        final message = messages[index];
-        final isUser = message.role == 'user';
+    return NotificationListener<ScrollNotification>(
+      onNotification: _onScrollNotification,
+      child: Stack(
+        children: [
+          ListView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            itemCount: widget.messages.length,
+            itemBuilder: (context, index) {
+              final message = widget.messages[index];
+              final isUser = message.role == 'user';
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _MessageBubble(
-            message: message,
-            isUser: isUser,
-            isLoading: isSendingMessage,
-            onRetry: index == lastAssistantIndex ? onRetry : null,
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _MessageBubble(
+                  message: message,
+                  isUser: isUser,
+                  isLoading: widget.isSendingMessage,
+                  onRetry: index == lastAssistantIndex ? widget.onRetry : null,
+                ),
+              );
+            },
           ),
-        );
-      },
+          if (_showScrollToBottomButton)
+            Positioned(
+              right: 8,
+              bottom: 16,
+              child: _ScrollToBottomButton(
+                onTap: () => unawaited(_scrollToBottom()),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ScrollToBottomButton extends StatelessWidget {
+  const _ScrollToBottomButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        splashColor: AppColors.brand500.withAlpha(38),
+        highlightColor: AppColors.brand500.withAlpha(20),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceCard,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: AppColors.surfaceHover),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x33000000),
+                blurRadius: 12,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              HeroIcon(
+                HeroIcons.chevronDown,
+                size: 18,
+                color: AppColors.textPrimary,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Ir para o fim',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
