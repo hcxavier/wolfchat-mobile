@@ -106,36 +106,35 @@ class MarkdownStyler {
         ),
       ),
       tableHead: const TextStyle(
-        fontWeight: FontWeight.w700,
-        color: AppColors.brand300,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
         fontSize: 14,
         letterSpacing: 0.3,
       ),
-      tableBody: defaultText.copyWith(fontSize: 14),
+      tableBody: defaultText.copyWith(
+        fontSize: 14,
+        color: AppColors.textSecondary,
+        height: 1.5,
+      ),
       tableBorder: TableBorder(
-        top: BorderSide(
-          color: AppColors.accentLight.withValues(alpha: 0.4),
-          width: 1.5,
-        ),
-        bottom: BorderSide(
-          color: AppColors.accentLight.withValues(alpha: 0.4),
-          width: 1.5,
-        ),
-        left: BorderSide(color: AppColors.accentLight.withValues(alpha: 0.2)),
-        right: BorderSide(color: AppColors.accentLight.withValues(alpha: 0.2)),
+        borderRadius: BorderRadius.circular(10),
+        top: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+        bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+        left: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+        right: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         horizontalInside: BorderSide(
-          color: AppColors.accentLight.withValues(alpha: 0.15),
+          color: Colors.white.withValues(alpha: 0.08),
         ),
         verticalInside: BorderSide(
-          color: AppColors.accentLight.withValues(alpha: 0.1),
+          color: Colors.white.withValues(alpha: 0.05),
         ),
       ),
       tableCellsPadding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 10,
+        horizontal: 16,
+        vertical: 14,
       ),
       tableCellsDecoration: BoxDecoration(
-        color: AppColors.surfaceCard.withValues(alpha: 0.3),
+        color: Colors.white.withValues(alpha: 0.02),
       ),
       tableHeadAlign: TextAlign.left,
       a: const TextStyle(
