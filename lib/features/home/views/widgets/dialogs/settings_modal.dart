@@ -6,6 +6,8 @@ import 'package:wolfchat/core/theme/app_colors.dart';
 import 'package:wolfchat/features/home/viewmodels/home_viewmodel.dart';
 import 'package:wolfchat/features/home/views/widgets/dialogs/dialog_wrappers.dart';
 import 'package:wolfchat/features/home/views/widgets/dialogs/settings_sections.dart';
+import 'package:wolfchat/features/home/views/widgets/dialogs/system_prompt_dialog.dart';
+import 'package:wolfchat/shared/widgets/animated_dialog.dart';
 
 class SettingsModal extends StatefulWidget {
   const SettingsModal({
@@ -65,6 +67,18 @@ class _SettingsModalState extends State<SettingsModal> {
     unawaited(context.pushNamed('models'));
   }
 
+  void _onShowSystemPrompt(BuildContext context) {
+    unawaited(
+      showAnimatedDialog<void>(
+        context: context,
+        builder: (context) => SystemPromptDialog(
+          onClose: () => Navigator.of(context).pop(),
+          onSave: (_) {},
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return DialogWrapper(
@@ -99,6 +113,7 @@ class _SettingsModalState extends State<SettingsModal> {
               onClose: widget.onClose,
               onShowApiKeys: _onShowApiKeys,
               onShowManageModels: _onShowManageModels,
+              onShowSystemPrompt: _onShowSystemPrompt,
               onLanguageChanged: (lang) {
                 setState(() => _selectedLanguage = lang);
                 unawaited(widget.viewModel.updateLanguage(lang));

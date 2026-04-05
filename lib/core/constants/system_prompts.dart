@@ -1,5 +1,10 @@
-String buildSystemPrompt(String modelName, String language) {
-  return 'Você é um assistente de IA baseado no $modelName. '
+String buildSystemPrompt(
+  String modelName,
+  String language, {
+  String? customPrompt,
+}) {
+  final basePrompt =
+      'Você é um assistente de IA baseado no $modelName. '
       'Responda o usuário no idioma $language '
       'independente do idioma da mensagem dele. '
       'Seja amigável e explique com clareza.\n'
@@ -8,4 +13,10 @@ String buildSystemPrompt(String modelName, String language) {
       '- Se necessário, use listas não enumeradas\n'
       '- Se necessário, use tabelas\n'
       '- Se necessário, use emoji antes de títulos';
+
+  if (customPrompt != null && customPrompt.trim().isNotEmpty) {
+    return '$basePrompt\n\nInstruções adicionais do usuário:\n$customPrompt';
+  }
+
+  return basePrompt;
 }

@@ -206,4 +206,12 @@ class PersistenceService {
     }
     return 0;
   }
+
+  Future<void> saveSystemPrompt(String prompt) async {
+    await _database.saveUserSetting('system_prompt', prompt);
+  }
+
+  Future<String?> getSystemPrompt() async {
+    return _database.getUserSetting('system_prompt');
+  }
 }

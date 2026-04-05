@@ -223,9 +223,11 @@ class ConversationViewModel extends ChangeNotifier {
       _currentService = service;
 
       final modelName = _getSelectedModelName();
+      final customPrompt = await persistence?.getSystemPrompt();
       final systemPrompt = buildSystemPrompt(
         modelName,
         language ?? 'Português (Brasil)',
+        customPrompt: customPrompt,
       );
 
       final assistantBuffer = StringBuffer();
@@ -352,9 +354,11 @@ class ConversationViewModel extends ChangeNotifier {
       notifyListeners();
 
       final modelName = _getSelectedModelName();
+      final customPrompt = await persistence?.getSystemPrompt();
       final systemPrompt = buildSystemPrompt(
         modelName,
         language ?? 'Português (Brasil)',
+        customPrompt: customPrompt,
       );
 
       final assistantBuffer = StringBuffer();

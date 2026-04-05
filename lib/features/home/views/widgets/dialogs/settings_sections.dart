@@ -12,6 +12,7 @@ class MainSettingsContent extends StatelessWidget {
     required this.onClose,
     required this.onShowApiKeys,
     required this.onShowManageModels,
+    required this.onShowSystemPrompt,
     required this.onLanguageChanged,
     required this.onDeleteAllChats,
     required this.onSave,
@@ -23,6 +24,7 @@ class MainSettingsContent extends StatelessWidget {
   final VoidCallback onClose;
   final ValueChanged<BuildContext> onShowApiKeys;
   final ValueChanged<BuildContext> onShowManageModels;
+  final ValueChanged<BuildContext> onShowSystemPrompt;
   final ValueChanged<String> onLanguageChanged;
   final VoidCallback onDeleteAllChats;
   final VoidCallback onSave;
@@ -42,6 +44,7 @@ class MainSettingsContent extends StatelessWidget {
         _SettingsButtonsGroup(
           onShowApiKeys: onShowApiKeys,
           onShowManageModels: onShowManageModels,
+          onShowSystemPrompt: onShowSystemPrompt,
         ),
         const SizedBox(height: 24),
         _buildSectionTitle('Preferências'),
@@ -225,9 +228,11 @@ class _SettingsButtonsGroup extends StatelessWidget {
   const _SettingsButtonsGroup({
     required this.onShowApiKeys,
     required this.onShowManageModels,
+    required this.onShowSystemPrompt,
   });
   final ValueChanged<BuildContext> onShowApiKeys;
   final ValueChanged<BuildContext> onShowManageModels;
+  final ValueChanged<BuildContext> onShowSystemPrompt;
 
   @override
   Widget build(BuildContext context) {
@@ -262,7 +267,7 @@ class _SettingsButtonsGroup extends StatelessWidget {
           _SettingsButtonItem(
             icon: HeroIcons.adjustmentsHorizontal,
             title: 'Personalização (System Prompt)',
-            onTap: () {},
+            onTap: () => onShowSystemPrompt(context),
           ),
           Container(
             height: 1,
