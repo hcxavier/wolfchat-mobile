@@ -172,7 +172,7 @@ class CustomModelsList extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             const Text(
-              'MODELOS ADICIONADOS',
+              'MODELOS DISPONÍVEIS',
               style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 11,
@@ -186,9 +186,15 @@ class CustomModelsList extends StatelessWidget {
         ListenableBuilder(
           listenable: viewModel,
           builder: (context, _) {
-            final models = viewModel.customModels;
-            if (models.isEmpty) return const _EmptyState();
-            return _ModelsListView(models: models, viewModel: viewModel);
+            final allModels = viewModel.availableModels;
+            final customModels = viewModel.customModels;
+            final defaultCount = allModels.length - customModels.length;
+            if (allModels.isEmpty) return const _EmptyState();
+            return _ModelsListView(
+              models: allModels,
+              viewModel: viewModel,
+              defaultModelsCount: defaultCount,
+            );
           },
         ),
       ],
@@ -247,9 +253,14 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _ModelsListView extends StatelessWidget {
-  const _ModelsListView({required this.models, required this.viewModel});
+  const _ModelsListView({
+    required this.models,
+    required this.viewModel,
+    required this.defaultModelsCount,
+  });
   final List<CustomModel> models;
   final HomeViewModel viewModel;
+  final int defaultModelsCount;
 
   @override
   Widget build(BuildContext context) {
@@ -268,10 +279,11 @@ class _ModelsListView extends StatelessWidget {
         itemCount: models.length,
         itemBuilder: (context, index) {
           final model = models[index];
+          final customIndex = index - defaultModelsCount;
           return _ModelListItem(
             model: model,
             isLast: index == models.length - 1,
-            onDelete: () => viewModel.removeCustomModel(index),
+            onDelete: () => viewModel.removeCustomModel(customIndex),
           );
         },
       ),
@@ -309,14 +321,18 @@ class _ModelListItem extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.brand900.withValues(alpha: 0.3),
+              color: model.isDefault
+                  ? AppColors.surfaceHover.withValues(alpha: 0.5)
+                  : AppColors.brand900.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Center(
+            child: Center(
               child: HeroIcon(
-                HeroIcons.cube,
+                model.isDefault ? HeroIcons.sparkles : HeroIcons.cube,
                 size: 18,
-                color: AppColors.brand400,
+                color: model.isDefault
+                    ? AppColors.brand400
+                    : AppColors.brand400,
               ),
             ),
           ),
@@ -325,17 +341,44 @@ class _ModelListItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  model.name,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        model.name,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if (model.isDefault) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.brand500.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text(
+                          'Padrão',
+                          style: TextStyle(
+                            color: AppColors.brand400,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${model.provider} • ${model.id}',
+                  '${model.provider} • ${model.modelId}',
                   style: TextStyle(
                     color: AppColors.textSecondary.withValues(alpha: 0.8),
                     fontSize: 12,
@@ -345,30 +388,31 @@ class _ModelListItem extends StatelessWidget {
               ],
             ),
           ),
-          Material(
-            color: Colors.transparent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: InkWell(
-              onTap: onDelete,
-              customBorder: RoundedRectangleBorder(
+          if (!model.isDefault)
+            Material(
+              color: Colors.transparent,
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              hoverColor: AppColors.brand700.withValues(alpha: 0.2),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
+              child: InkWell(
+                onTap: onDelete,
+                customBorder: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const HeroIcon(
-                  HeroIcons.trash,
-                  size: 16,
-                  color: AppColors.brand500,
+                hoverColor: AppColors.brand700.withValues(alpha: 0.2),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const HeroIcon(
+                    HeroIcons.trash,
+                    size: 16,
+                    color: AppColors.brand500,
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

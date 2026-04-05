@@ -83,12 +83,13 @@ class _SettingsModalState extends State<SettingsModal> {
   Widget build(BuildContext context) {
     return DialogWrapper(
       child: Dialog(
+        insetPadding: const EdgeInsets.all(20),
         backgroundColor: AppColors.surfaceCard,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
         child: Container(
-          width: 640,
+          width: 800,
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.9,
           ),

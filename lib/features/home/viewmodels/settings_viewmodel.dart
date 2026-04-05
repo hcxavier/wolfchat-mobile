@@ -25,41 +25,49 @@ class SettingsViewModel extends ChangeNotifier {
       name: 'GPT OSS 120B',
       modelId: 'openai/gpt-oss-120b',
       provider: 'Groq',
+      isDefault: true,
     ),
     CustomModel(
       name: 'Llama 3.3 70B',
       modelId: 'meta-llama/llama-3.3-70b-instruct:free',
       provider: 'OpenRouter',
+      isDefault: true,
     ),
     CustomModel(
       name: 'Gemma 3 12B',
       modelId: 'google/gemma-3-12b-it:free',
       provider: 'OpenRouter',
+      isDefault: true,
     ),
     CustomModel(
       name: 'OpenRouter Free',
       modelId: 'openrouter/free',
       provider: 'OpenRouter',
+      isDefault: true,
     ),
     CustomModel(
       name: 'Big Pickle',
       modelId: 'big-pickle',
       provider: 'OpenCode Zen',
+      isDefault: true,
     ),
     CustomModel(
       name: 'Qwen 3.6 Plus',
       modelId: 'qwen3.6-plus-free',
       provider: 'OpenCode Zen',
+      isDefault: true,
     ),
     CustomModel(
       name: 'MiniMax M2.5',
       modelId: 'minimax-m2.5-free',
       provider: 'OpenCode Zen',
+      isDefault: true,
     ),
     CustomModel(
       name: 'Mimo V2 Pro',
       modelId: 'mimo-v2-pro-free',
       provider: 'OpenCode Zen',
+      isDefault: true,
     ),
   ];
 

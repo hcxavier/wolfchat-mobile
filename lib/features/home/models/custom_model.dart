@@ -4,6 +4,7 @@ class CustomModel {
     required this.modelId,
     required this.provider,
     this.id,
+    this.isDefault = false,
   });
 
   factory CustomModel.fromMap(Map<String, dynamic> map) {
@@ -19,6 +20,7 @@ class CustomModel {
   final String name;
   final String modelId;
   final String provider;
+  final bool isDefault;
 
   Map<String, dynamic> toMap() {
     return {

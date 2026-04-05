@@ -161,12 +161,13 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
   Widget build(BuildContext context) {
     return DialogWrapper(
       child: Dialog(
+        insetPadding: const EdgeInsets.all(20),
         backgroundColor: AppColors.surfaceCard,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
         child: Container(
-          width: 640,
+          width: 800,
           decoration: BoxDecoration(
             color: AppColors.surfaceCard,
             borderRadius: BorderRadius.circular(24),
