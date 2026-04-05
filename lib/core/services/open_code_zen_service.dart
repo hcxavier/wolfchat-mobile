@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:wolfchat/core/models/available_model.dart';
 import 'package:wolfchat/core/services/ai_service.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
 
@@ -130,6 +131,41 @@ class OpenCodeZenService implements AiService {
         'Failed to get streaming response: ${response.statusCode} '
         '- $responseBody',
       );
+    }
+  }
+
+  @override
+  Future<List<AvailableModel>> getAvailableModels() async {
+    try {
+      final url = Uri.parse('$_baseUrl/models');
+
+      final response = await http
+          .get(
+            url,
+            headers: {
+              'Authorization': 'Bearer $apiKey',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final models = data['data'] as List<dynamic>;
+        return models
+            .map(
+              (model) => AvailableModel.fromJson(model as Map<String, dynamic>),
+            )
+            .toList();
+      } else if (response.statusCode == 401) {
+        throw Exception('Chave de API inválida');
+      } else {
+        throw Exception('Erro ao buscar modelos (${response.statusCode})');
+      }
+    } on TimeoutException {
+      throw Exception('Timeout ao buscar modelos');
+    } on Exception {
+      rethrow;
     }
   }
 

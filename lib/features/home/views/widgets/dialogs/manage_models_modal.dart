@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:wolfchat/core/models/available_model.dart';
+import 'package:wolfchat/core/services/groq_service.dart';
+import 'package:wolfchat/core/services/open_code_zen_service.dart';
+import 'package:wolfchat/core/services/open_router_service.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 import 'package:wolfchat/features/home/models/custom_model.dart';
 import 'package:wolfchat/features/home/viewmodels/home_viewmodel.dart';
@@ -24,12 +28,69 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
   late final TextEditingController _nameController;
   late final TextEditingController _modelIdController;
   ModelProvider _selectedProvider = ModelProvider.openRouter;
+  List<AvailableModel> _availableModels = [];
+  bool _isLoadingModels = false;
+  bool _useCustomModelId = false;
+  String? _selectedModelId;
+  String? _fetchError;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
     _modelIdController = TextEditingController();
+    // ignore: discarded_futures - async init called in constructor
+    _loadAvailableModels();
+  }
+
+  Future<void> _loadAvailableModels() async {
+    final apiKey = switch (_selectedProvider) {
+      ModelProvider.openRouter => widget.viewModel.openRouterKey,
+      ModelProvider.groq => widget.viewModel.groqKey,
+      ModelProvider.openCodeZen => widget.viewModel.openCodeZenKey,
+    };
+
+    if (apiKey.isEmpty) {
+      setState(() {
+        _availableModels = [];
+        _isLoadingModels = false;
+        _fetchError =
+            'Chave de API não configurada para '
+            '${_selectedProvider.displayName}';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoadingModels = true;
+      _fetchError = null;
+    });
+
+    final service = switch (_selectedProvider) {
+      ModelProvider.openRouter => OpenRouterService(apiKey: apiKey),
+      ModelProvider.groq => GroqService(apiKey: apiKey),
+      ModelProvider.openCodeZen => OpenCodeZenService(apiKey: apiKey),
+    };
+
+    try {
+      final models = await service.getAvailableModels();
+      if (mounted) {
+        setState(() {
+          _availableModels = models;
+          _isLoadingModels = false;
+          if (models.isEmpty) {
+            _fetchError = 'Nenhum modelo disponível';
+          }
+        });
+      }
+    } on Exception catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingModels = false;
+          _fetchError = 'Erro ao carregar modelos: $e';
+        });
+      }
+    }
   }
 
   @override
@@ -41,7 +102,9 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
 
   Future<void> _addModel() async {
     final name = _nameController.text.trim();
-    final modelId = _modelIdController.text.trim();
+    final modelId = _useCustomModelId
+        ? _modelIdController.text.trim()
+        : _selectedModelId ?? '';
 
     if (name.isEmpty || modelId.isEmpty) return;
 
@@ -53,6 +116,10 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
 
     _nameController.clear();
     _modelIdController.clear();
+    setState(() {
+      _selectedModelId = null;
+      _useCustomModelId = false;
+    });
   }
 
   @override
@@ -90,7 +157,7 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
                 const SizedBox(height: 10),
                 ModelProviderSelector(
                   selectedProvider: _selectedProvider,
-                  onChanged: (val) => setState(() => _selectedProvider = val),
+                  onChanged: _onProviderChanged,
                 ),
                 const SizedBox(height: 20),
                 _buildSectionTitle('Nome do modelo'),
@@ -103,10 +170,15 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
                 const SizedBox(height: 20),
                 _buildSectionTitle('ID do modelo'),
                 const SizedBox(height: 10),
-                _ModelInputField(
-                  controller: _modelIdController,
-                  hint: 'ex: llama3-70b-8192',
-                  icon: HeroIcons.codeBracket,
+                _ModelIdSelector(
+                  availableModels: _availableModels,
+                  isLoading: _isLoadingModels,
+                  useCustomModelId: _useCustomModelId,
+                  selectedModelId: _selectedModelId,
+                  customModelIdController: _modelIdController,
+                  onModelSelected: _onModelSelected,
+                  onUseCustomChanged: _onUseCustomChanged,
+                  error: _fetchError,
                 ),
                 const SizedBox(height: 24),
                 _AddButton(onTap: _addModel),
@@ -120,6 +192,41 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
         ),
       ),
     );
+  }
+
+  void _onProviderChanged(ModelProvider newProvider) {
+    setState(() {
+      _selectedProvider = newProvider;
+      _selectedModelId = null;
+      _useCustomModelId = false;
+      _modelIdController.clear();
+    });
+    // ignore: discarded_futures - async call without blocking UI
+    _loadAvailableModels();
+  }
+
+  void _onModelSelected(String? modelId) {
+    setState(() {
+      _useCustomModelId = false;
+      _modelIdController.clear();
+      _selectedModelId = modelId;
+      if (modelId?.isNotEmpty ?? false) {
+        final model = _availableModels.firstWhere(
+          (m) => m.id == modelId,
+          orElse: () => AvailableModel(id: modelId!, name: modelId),
+        );
+        _nameController.text = model.name;
+      }
+    });
+  }
+
+  void _onUseCustomChanged(bool useCustom) {
+    setState(() {
+      _useCustomModelId = useCustom;
+      if (useCustom) {
+        _selectedModelId = null;
+      }
+    });
   }
 
   Widget _buildSectionTitle(String title) {
@@ -206,6 +313,177 @@ class _ModelInputField extends StatelessWidget {
   }
 }
 
+class _ModelIdSelector extends StatefulWidget {
+  const _ModelIdSelector({
+    required this.availableModels,
+    required this.isLoading,
+    required this.useCustomModelId,
+    required this.selectedModelId,
+    required this.customModelIdController,
+    required this.onModelSelected,
+    required this.onUseCustomChanged,
+    this.error,
+  });
+
+  final List<AvailableModel> availableModels;
+  final bool isLoading;
+  final bool useCustomModelId;
+  final String? selectedModelId;
+  final TextEditingController customModelIdController;
+  final ValueChanged<String?> onModelSelected;
+  final ValueChanged<bool> onUseCustomChanged;
+  final String? error;
+
+  @override
+  State<_ModelIdSelector> createState() => _ModelIdSelectorState();
+}
+
+class _ModelIdSelectorState extends State<_ModelIdSelector> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceInput,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: AppColors.surfaceHover,
+            ),
+          ),
+          child: widget.isLoading
+              ? const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.brand400,
+                      ),
+                    ),
+                  ),
+                )
+              : DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: widget.useCustomModelId
+                        ? null
+                        : widget.selectedModelId,
+                    isExpanded: true,
+                    dropdownColor: AppColors.surfaceCard,
+                    hint: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'Selecione um modelo',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    icon: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceHover,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const HeroIcon(
+                        HeroIcons.chevronDown,
+                        size: 14,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    items: [
+                      ...widget.availableModels.map(
+                        (model) => DropdownMenuItem(
+                          value: model.id,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              model.name,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const DropdownMenuItem(
+                        value: '__other__',
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            'Outro',
+                            style: TextStyle(
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                    onChanged: _onDropdownChanged,
+                  ),
+                ),
+        ),
+        if (widget.useCustomModelId) ...[
+          const SizedBox(height: 10),
+          _ModelInputField(
+            controller: widget.customModelIdController,
+            hint: 'ex: llama3-70b-8192',
+            icon: HeroIcons.codeBracket,
+          ),
+        ],
+        if (widget.error != null && !widget.useCustomModelId) ...[
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.brand900.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: AppColors.brand700.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Row(
+              children: [
+                const HeroIcon(
+                  HeroIcons.exclamationTriangle,
+                  size: 16,
+                  color: AppColors.brand400,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widget.error!,
+                    style: const TextStyle(
+                      color: AppColors.brand400,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _onDropdownChanged(String? value) {
+    if (value == '__other__') {
+      widget.onUseCustomChanged(true);
+    } else {
+      widget.onModelSelected(value);
+    }
+  }
+}
+
 class _AddButton extends StatelessWidget {
   const _AddButton({required this.onTap});
   final VoidCallback onTap;
@@ -221,11 +499,7 @@ class _AddButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           child: Ink(
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.brand500, AppColors.brand600],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppColors.brand500,
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
