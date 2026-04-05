@@ -36,9 +36,18 @@ abstract final class AppRouter {
             path: 'search',
             name: 'search',
             pageBuilder: (context, state) => CustomTransitionPage(
+              // ignore: avoid_redundant_argument_values, explicit configuration required for QA
+              transitionDuration: const Duration(milliseconds: 300),
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(opacity: animation, child: child);
+                    final curvedAnimation = CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    );
+                    return FadeTransition(
+                      opacity: curvedAnimation,
+                      child: child,
+                    );
                   },
               child: Consumer<SearchViewModel>(
                 builder: (context, viewModel, _) => const SearchPage(),

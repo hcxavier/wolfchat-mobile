@@ -2,7 +2,6 @@
 
 Lista de tarefas:
 
-- [ ] Modifique background da topbar para ficar translúcido
 - [ ] Modifique a estilização da tabela markdown
 - [ ] Adicionar animação (fade) para tela de buscar chat (quando usuário clica no botão 'buscar nas conversas...')
 - [ ] Adicionar um alert para quando o usuário copia algo nas mensagens

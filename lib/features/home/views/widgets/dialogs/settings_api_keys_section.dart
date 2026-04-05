@@ -49,6 +49,8 @@ class ApiKeysSection extends StatelessWidget {
                 onTap: onBack,
                 borderRadius: BorderRadius.circular(10),
                 hoverColor: AppColors.surfaceHover,
+                splashColor: AppColors.brand500.withAlpha(38),
+                highlightColor: AppColors.brand500.withAlpha(20),
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(

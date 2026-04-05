@@ -68,6 +68,8 @@ class SidebarSearch extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(8),
+          splashColor: AppColors.brand500.withAlpha(38),
+          highlightColor: AppColors.brand500.withAlpha(20),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(

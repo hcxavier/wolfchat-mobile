@@ -18,6 +18,8 @@ class ManageModelsHeader extends StatelessWidget {
             onTap: onClose,
             borderRadius: BorderRadius.circular(12),
             hoverColor: AppColors.surfaceHover,
+            splashColor: AppColors.brand500.withAlpha(38),
+            highlightColor: AppColors.brand500.withAlpha(20),
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(

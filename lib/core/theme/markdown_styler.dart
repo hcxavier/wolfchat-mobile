@@ -106,18 +106,36 @@ class MarkdownStyler {
         ),
       ),
       tableHead: const TextStyle(
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         color: AppColors.brand300,
         fontSize: 14,
+        letterSpacing: 0.3,
       ),
       tableBody: defaultText.copyWith(fontSize: 14),
-      tableBorder: TableBorder.all(color: Colors.white.withValues(alpha: 0.1)),
+      tableBorder: TableBorder(
+        top: BorderSide(
+          color: AppColors.accentLight.withValues(alpha: 0.4),
+          width: 1.5,
+        ),
+        bottom: BorderSide(
+          color: AppColors.accentLight.withValues(alpha: 0.4),
+          width: 1.5,
+        ),
+        left: BorderSide(color: AppColors.accentLight.withValues(alpha: 0.2)),
+        right: BorderSide(color: AppColors.accentLight.withValues(alpha: 0.2)),
+        horizontalInside: BorderSide(
+          color: AppColors.accentLight.withValues(alpha: 0.15),
+        ),
+        verticalInside: BorderSide(
+          color: AppColors.accentLight.withValues(alpha: 0.1),
+        ),
+      ),
       tableCellsPadding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 8,
+        horizontal: 14,
+        vertical: 10,
       ),
       tableCellsDecoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.02),
+        color: AppColors.surfaceCard.withValues(alpha: 0.3),
       ),
       tableHeadAlign: TextAlign.left,
       a: const TextStyle(
@@ -205,6 +223,33 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
   Future<void> _handleCopy() async {
     await Clipboard.setData(ClipboardData(text: widget.code));
     setState(() => _copied = true);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.code, size: 18, color: AppColors.textPrimary),
+              SizedBox(width: 12),
+              Text(
+                'Código copiado!',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: AppColors.surfaceCard,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
+          margin: EdgeInsets.all(16),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) setState(() => _copied = false);
     });

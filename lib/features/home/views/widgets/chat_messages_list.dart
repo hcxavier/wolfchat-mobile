@@ -516,6 +516,37 @@ class _CopyButtonState extends State<_CopyButton> {
     await Clipboard.setData(ClipboardData(text: widget.text));
     if (!mounted) return;
     setState(() => _copied = true);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              HeroIcon(
+                HeroIcons.clipboardDocument,
+                size: 18,
+                color: AppColors.textPrimary,
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Mensagem copiada!',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: AppColors.surfaceCard,
+          behavior: SnackBarBehavior.floating,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
     await Future<void>.delayed(const Duration(seconds: 2));
     if (!mounted) return;
     setState(() => _copied = false);
