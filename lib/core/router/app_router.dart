@@ -46,7 +46,12 @@ abstract final class AppRouter {
                     );
                     return FadeTransition(
                       opacity: curvedAnimation,
-                      child: child,
+                      child: ScaleTransition(
+                        scale: Tween<double>(begin: 0.9, end: 1).animate(
+                          curvedAnimation,
+                        ),
+                        child: child,
+                      ),
                     );
                   },
               child: Consumer<SearchViewModel>(

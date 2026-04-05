@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_highlighter/flutter_highlighter.dart';
 import 'package:flutter_highlighter/themes/dracula.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:heroicons/heroicons.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:wolfchat/core/services/clipboard_helper.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 
 class MarkdownStyler {
@@ -220,35 +221,13 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
   bool _copied = false;
 
   Future<void> _handleCopy() async {
-    await Clipboard.setData(ClipboardData(text: widget.code));
+    await ClipboardHelper.copyToClipboard(
+      context,
+      text: widget.code,
+      message: 'Código copiado!',
+      icon: HeroIcons.codeBracket,
+    );
     setState(() => _copied = true);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.code, size: 18, color: AppColors.textPrimary),
-              SizedBox(width: 12),
-              Text(
-                'Código copiado!',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: AppColors.surfaceCard,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-          ),
-          margin: EdgeInsets.all(16),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) setState(() => _copied = false);
     });

@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:wolfchat/core/services/clipboard_helper.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 import 'package:wolfchat/core/theme/markdown_styler.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
@@ -513,40 +513,13 @@ class _CopyButtonState extends State<_CopyButton> {
   bool _copied = false;
 
   Future<void> _copy() async {
-    await Clipboard.setData(ClipboardData(text: widget.text));
+    await ClipboardHelper.copyToClipboard(
+      context,
+      text: widget.text,
+      message: 'Mensagem copiada!',
+    );
     if (!mounted) return;
     setState(() => _copied = true);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Row(
-            children: [
-              HeroIcon(
-                HeroIcons.clipboardDocument,
-                size: 18,
-                color: AppColors.textPrimary,
-              ),
-              SizedBox(width: 12),
-              Text(
-                'Mensagem copiada!',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: AppColors.surfaceCard,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-          ),
-          margin: EdgeInsets.all(16),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
     await Future<void>.delayed(const Duration(seconds: 2));
     if (!mounted) return;
     setState(() => _copied = false);
