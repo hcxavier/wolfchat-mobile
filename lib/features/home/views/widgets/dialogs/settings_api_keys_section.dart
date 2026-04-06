@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
+import 'package:wolfchat/shared/widgets/animated_clickable.dart';
 
 class ApiKeysSection extends StatelessWidget {
   const ApiKeysSection({
@@ -43,30 +44,23 @@ class ApiKeysSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onBack,
-                borderRadius: BorderRadius.circular(10),
-                hoverColor: AppColors.surfaceHover,
-                splashColor: AppColors.brand500.withAlpha(38),
-                highlightColor: AppColors.brand500.withAlpha(20),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceInput,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: AppColors.surfaceHover,
-                    ),
+            AnimatedClickable(
+              onTap: onBack,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceInput,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: AppColors.surfaceHover,
                   ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(4),
-                    child: HeroIcon(
-                      HeroIcons.arrowLeft,
-                      size: 16,
-                      color: AppColors.textSecondary,
-                    ),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(4),
+                  child: HeroIcon(
+                    HeroIcons.arrowLeft,
+                    size: 16,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -270,21 +264,14 @@ class _ApiKeyInput extends StatelessWidget {
               ),
               suffixIcon: Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: Material(
-                  color: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: InkWell(
-                    onTap: onToggle,
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      child: HeroIcon(
-                        obscure ? HeroIcons.eyeSlash : HeroIcons.eye,
-                        size: 18,
-                        color: AppColors.textSecondary,
-                      ),
+                child: AnimatedClickable(
+                  onTap: onToggle,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    child: HeroIcon(
+                      obscure ? HeroIcons.eyeSlash : HeroIcons.eye,
+                      size: 18,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ),

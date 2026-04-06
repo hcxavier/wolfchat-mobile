@@ -3,6 +3,7 @@ import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/data/services/persistence_service.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 import 'package:wolfchat/features/home/views/widgets/dialogs/dialog_wrappers.dart';
+import 'package:wolfchat/shared/widgets/animated_clickable.dart';
 
 class SystemPromptDialog extends StatefulWidget {
   const SystemPromptDialog({
@@ -228,28 +229,23 @@ class _SystemPromptHeader extends StatelessWidget {
             ],
           ),
         ),
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onClose,
-            borderRadius: BorderRadius.circular(10),
-            hoverColor: AppColors.surfaceHover,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceInput,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: AppColors.surfaceHover,
-                ),
+        AnimatedClickable(
+          onTap: onClose,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceInput,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: AppColors.surfaceHover,
               ),
-              child: const Padding(
-                padding: EdgeInsets.all(4),
-                child: HeroIcon(
-                  HeroIcons.xMark,
-                  size: 16,
-                  color: AppColors.textSecondary,
-                ),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(4),
+              child: HeroIcon(
+                HeroIcons.xMark,
+                size: 16,
+                color: AppColors.textSecondary,
               ),
             ),
           ),

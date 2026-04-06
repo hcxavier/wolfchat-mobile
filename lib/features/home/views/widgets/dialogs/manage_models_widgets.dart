@@ -3,6 +3,7 @@ import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 import 'package:wolfchat/features/home/models/custom_model.dart';
 import 'package:wolfchat/features/home/viewmodels/home_viewmodel.dart';
+import 'package:wolfchat/shared/widgets/animated_clickable.dart';
 
 class ManageModelsHeader extends StatelessWidget {
   const ManageModelsHeader({required this.onClose, super.key});
@@ -12,30 +13,23 @@ class ManageModelsHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onClose,
-            borderRadius: BorderRadius.circular(12),
-            hoverColor: AppColors.surfaceHover,
-            splashColor: AppColors.brand500.withAlpha(38),
-            highlightColor: AppColors.brand500.withAlpha(20),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceInput,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppColors.surfaceHover,
-                ),
+        AnimatedClickable(
+          onTap: onClose,
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceInput,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.surfaceHover,
               ),
-              child: const Padding(
-                padding: EdgeInsets.all(2),
-                child: HeroIcon(
-                  HeroIcons.arrowLeft,
-                  size: 18,
-                  color: AppColors.textSecondary,
-                ),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(2),
+              child: HeroIcon(
+                HeroIcons.arrowLeft,
+                size: 18,
+                color: AppColors.textSecondary,
               ),
             ),
           ),
