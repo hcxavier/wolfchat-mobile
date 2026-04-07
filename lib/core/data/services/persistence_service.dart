@@ -215,3 +215,5 @@ class PersistenceService {
     return _database.getUserSetting('system_prompt');
   }
 }
+
+// Pseudo-update for commit 25 at 2026-04-07 19:24:54
