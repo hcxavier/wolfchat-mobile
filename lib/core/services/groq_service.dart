@@ -318,3 +318,5 @@ class GroqService implements AiService {
     return null;
   }
 }
+
+// Pseudo-update for commit 21 at 2026-04-06 23:03:05
