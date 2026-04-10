@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:wolfchat/core/exceptions/app_exceptions.dart';
+import 'package:wolfchat/core/models/ai_stream_chunk.dart';
 import 'package:wolfchat/core/models/available_model.dart';
 import 'package:wolfchat/core/services/ai_service.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
@@ -83,10 +84,11 @@ class OpenRouterService implements AiService {
   }
 
   @override
-  Stream<String> sendMessageStream({
+  Stream<AiStreamChunk> sendMessageStream({
     required List<ChatMessage> messages,
     required String model,
     String? systemPrompt,
+    bool enableThinking = false,
   }) async* {
     final url = Uri.parse('$_baseUrl/chat/completions');
 
@@ -102,6 +104,7 @@ class OpenRouterService implements AiService {
       'temperature': 0.7,
       'max_tokens': 2048,
       'stream': true,
+      if (enableThinking) 'include_reasoning': true,
     });
 
     final request = http.Request('POST', url)
@@ -131,8 +134,9 @@ class OpenRouterService implements AiService {
             final choice = choices[0] as Map<String, dynamic>;
             final delta = choice['delta'] as Map<String, dynamic>;
             final content = delta['content'] as String?;
-            if (content != null) {
-              yield content;
+            final reasoning = delta['reasoning'] as String?;
+            if (content != null || reasoning != null) {
+              yield AiStreamChunk(content: content, thinking: reasoning);
             }
           }
         }

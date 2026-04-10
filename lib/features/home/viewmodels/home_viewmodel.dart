@@ -52,6 +52,9 @@ class HomeViewModel extends ChangeNotifier {
       _isInitialized ? conversation.currentConversation : null;
   List<ChatMessage> get messages => _isInitialized ? conversation.messages : [];
 
+  bool get isThinkingEnabled =>
+      _isInitialized && conversation.isThinkingEnabled;
+
   Future<void> _init() async {
     _persistence = await PersistenceService.getInstance();
 
@@ -203,6 +206,11 @@ class HomeViewModel extends ChangeNotifier {
   void cancelCurrentRequest() {
     if (!_isInitialized) return;
     conversation.cancelCurrentRequest();
+  }
+
+  void toggleThinking() {
+    if (!_isInitialized) return;
+    conversation.toggleThinking();
   }
 
   Future<void> retryLastMessage() async {

@@ -1,3 +1,4 @@
+import 'package:wolfchat/core/models/ai_stream_chunk.dart';
 import 'package:wolfchat/core/models/available_model.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
 
@@ -10,10 +11,11 @@ abstract class AiService {
     String? systemPrompt,
   });
 
-  Stream<String> sendMessageStream({
+  Stream<AiStreamChunk> sendMessageStream({
     required List<ChatMessage> messages,
     required String model,
     String? systemPrompt,
+    bool enableThinking = false,
   });
 
   Future<String?> generateTitle(String content);

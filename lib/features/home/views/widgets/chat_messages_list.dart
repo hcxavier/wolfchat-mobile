@@ -7,6 +7,7 @@ import 'package:wolfchat/core/services/clipboard_helper.dart';
 import 'package:wolfchat/core/theme/app_colors.dart';
 import 'package:wolfchat/core/theme/markdown_styler.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
+import 'package:wolfchat/features/home/views/widgets/thinking_panel.dart';
 
 class ChatMessagesList extends StatefulWidget {
   const ChatMessagesList({
@@ -40,9 +41,8 @@ class _ChatMessagesListState extends State<ChatMessagesList> {
 
   List<ChatMessage> get _reversedMessages => widget.messages.reversed.toList();
 
-  bool get _hasAssistantResponse => widget.messages.any(
-    (message) => message.role == 'assistant',
-  );
+  bool get _hasAssistantResponse =>
+      widget.messages.any((message) => message.role == 'assistant');
 
   @override
   void initState() {
@@ -304,10 +304,7 @@ class _MessageBubble extends StatelessWidget {
         if (isUser)
           Flexible(
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: AppColors.brand500,
                 borderRadius: BorderRadius.circular(16),
@@ -344,12 +341,7 @@ class _MessageBubble extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
         decoration: const BoxDecoration(
-          border: Border(
-            left: BorderSide(
-              color: AppColors.brand500,
-              width: 3,
-            ),
-          ),
+          border: Border(left: BorderSide(color: AppColors.brand500, width: 3)),
           color: Color(0x0DFFFFFF),
           borderRadius: BorderRadius.only(
             topRight: Radius.circular(6),
@@ -414,14 +406,15 @@ class _MessageBubble extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (message.thinking != null && message.thinking!.isNotEmpty) ...[
+          ThinkingPanel(thinking: message.thinking!),
+          const SizedBox(height: 12),
+        ],
         MarkdownBody(
           data: message.content,
           styleSheet: MarkdownStyler.getStyleSheet(context),
           selectable: true,
-          builders: {
-            'code': CodeBuilder(),
-            'hr': HrBuilder(),
-          },
+          builders: {'code': CodeBuilder(), 'hr': HrBuilder()},
           onTapLink: (text, href, title) {
             if (href != null) {
               // Handle link tap

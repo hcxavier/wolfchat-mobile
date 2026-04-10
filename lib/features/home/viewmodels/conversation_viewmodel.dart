@@ -34,6 +34,7 @@ class ConversationViewModel extends ChangeNotifier {
 
   final List<ChatMessage> _messages = [];
   bool _isSendingMessage = false;
+  bool _isThinkingEnabled = false;
   String? _errorMessage;
   List<Conversation> _conversations = [];
   Conversation? _currentConversation;
@@ -41,12 +42,18 @@ class ConversationViewModel extends ChangeNotifier {
 
   List<ChatMessage> get messages => List.unmodifiable(_messages);
   bool get isSendingMessage => _isSendingMessage;
+  bool get isThinkingEnabled => _isThinkingEnabled;
   String? get errorMessage => _errorMessage;
   List<Conversation> get conversations => List.unmodifiable(_conversations);
   Conversation? get currentConversation => _currentConversation;
 
   void cancelCurrentRequest() {
     _currentService?.cancel();
+  }
+
+  void toggleThinking() {
+    _isThinkingEnabled = !_isThinkingEnabled;
+    notifyListeners();
   }
 
   void clearError() {
@@ -231,6 +238,7 @@ class ConversationViewModel extends ChangeNotifier {
       );
 
       final assistantBuffer = StringBuffer();
+      final thinkingBuffer = StringBuffer();
       final assistantMessage = ChatMessage(
         role: 'assistant',
         content: '',
@@ -243,14 +251,23 @@ class ConversationViewModel extends ChangeNotifier {
         messages: _messages,
         model: modelId,
         systemPrompt: systemPrompt,
+        enableThinking: _isThinkingEnabled,
       );
 
       notifyListeners();
 
       await for (final chunk in stream) {
-        assistantBuffer.write(chunk);
+        if (chunk.thinking != null) {
+          thinkingBuffer.write(chunk.thinking);
+        }
+        if (chunk.content != null) {
+          assistantBuffer.write(chunk.content);
+        }
         _messages[_messages.length - 1] = assistantMessage.copyWith(
           content: assistantBuffer.toString(),
+          thinking: thinkingBuffer.isNotEmpty
+              ? thinkingBuffer.toString()
+              : null,
         );
         notifyListeners();
       }
@@ -362,6 +379,7 @@ class ConversationViewModel extends ChangeNotifier {
       );
 
       final assistantBuffer = StringBuffer();
+      final thinkingBuffer = StringBuffer();
       final assistantMessage = ChatMessage(
         role: 'assistant',
         content: '',
@@ -374,14 +392,23 @@ class ConversationViewModel extends ChangeNotifier {
         messages: _messages,
         model: modelId,
         systemPrompt: systemPrompt,
+        enableThinking: _isThinkingEnabled,
       );
 
       notifyListeners();
 
       await for (final chunk in stream) {
-        assistantBuffer.write(chunk);
+        if (chunk.thinking != null) {
+          thinkingBuffer.write(chunk.thinking);
+        }
+        if (chunk.content != null) {
+          assistantBuffer.write(chunk.content);
+        }
         _messages[_messages.length - 1] = assistantMessage.copyWith(
           content: assistantBuffer.toString(),
+          thinking: thinkingBuffer.isNotEmpty
+              ? thinkingBuffer.toString()
+              : null,
         );
         notifyListeners();
       }

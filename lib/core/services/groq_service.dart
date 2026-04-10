@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:wolfchat/core/exceptions/app_exceptions.dart';
+import 'package:wolfchat/core/models/ai_stream_chunk.dart';
 import 'package:wolfchat/core/models/available_model.dart';
 import 'package:wolfchat/core/services/ai_service.dart';
 import 'package:wolfchat/features/home/models/chat_message.dart';
@@ -83,10 +84,11 @@ class GroqService implements AiService {
   }
 
   @override
-  Stream<String> sendMessageStream({
+  Stream<AiStreamChunk> sendMessageStream({
     required List<ChatMessage> messages,
     required String model,
     String? systemPrompt,
+    bool enableThinking = false,
   }) async* {
     final url = Uri.parse('$_baseUrl/chat/completions');
 
@@ -132,7 +134,7 @@ class GroqService implements AiService {
             final delta = choice['delta'] as Map<String, dynamic>;
             final content = delta['content'] as String?;
             if (content != null) {
-              yield content;
+              yield AiStreamChunk(content: content);
             }
           }
         }

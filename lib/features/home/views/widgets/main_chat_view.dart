@@ -66,6 +66,8 @@ class MainChatView extends StatelessWidget {
               BottomInput(
                 onSendMessage: viewModel.sendMessage,
                 isLoading: viewModel.isSendingMessage,
+                isThinkingEnabled: viewModel.isThinkingEnabled,
+                onToggleThinking: viewModel.toggleThinking,
                 onCancel: viewModel.cancelCurrentRequest,
               ),
             ],

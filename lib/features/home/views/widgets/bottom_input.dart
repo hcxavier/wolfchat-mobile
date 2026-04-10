@@ -7,12 +7,16 @@ class BottomInput extends StatefulWidget {
   const BottomInput({
     required this.onSendMessage,
     required this.isLoading,
+    required this.isThinkingEnabled,
+    required this.onToggleThinking,
     this.onCancel,
     super.key,
   });
 
   final void Function(String) onSendMessage;
   final bool isLoading;
+  final bool isThinkingEnabled;
+  final VoidCallback onToggleThinking;
   final void Function()? onCancel;
 
   @override
@@ -82,16 +86,18 @@ class _BottomInputState extends State<BottomInput> with WidgetsBindingObserver {
           borderRadius: BorderRadius.circular(16),
           color: AppColors.surfaceInput,
         ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 4,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         child: Row(
           children: [
             const HeroIcon(
               HeroIcons.plusCircle,
               color: AppColors.textSecondary,
               size: 24,
+            ),
+            const SizedBox(width: 4),
+            _ThinkingToggleButton(
+              isEnabled: widget.isThinkingEnabled,
+              onTap: widget.onToggleThinking,
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -149,6 +155,42 @@ class _BottomInputState extends State<BottomInput> with WidgetsBindingObserver {
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ThinkingToggleButton extends StatelessWidget {
+  const _ThinkingToggleButton({required this.isEnabled, required this.onTap});
+
+  final bool isEnabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: isEnabled ? 'Desativar thinking' : 'Ativar thinking',
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: isEnabled
+                ? AppColors.brand500.withAlpha(30)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isEnabled ? AppColors.brand400 : Colors.transparent,
+            ),
+          ),
+          child: HeroIcon(
+            HeroIcons.lightBulb,
+            size: 20,
+            color: isEnabled ? AppColors.brand400 : AppColors.textSecondary,
+          ),
         ),
       ),
     );
