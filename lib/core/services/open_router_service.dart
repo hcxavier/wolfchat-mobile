@@ -104,13 +104,13 @@ class OpenRouterService implements AiService {
       'temperature': 0.7,
       'max_tokens': 2048,
       'stream': true,
-      if (enableThinking) 'include_reasoning': true,
     });
 
     final request = http.Request('POST', url)
       ..headers.addAll({
         'Authorization': 'Bearer $apiKey',
         'Content-Type': 'application/json',
+        if (enableThinking) 'X-Include-Reasoning': 'true',
       })
       ..body = body;
 
