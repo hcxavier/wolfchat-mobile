@@ -82,7 +82,9 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
           _availableModels = models;
           _isLoadingModels = false;
           if (models.isEmpty) {
-            _fetchError = 'Nenhum modelo disponível';
+            _fetchError = _selectedProvider == ModelProvider.groq
+                ? 'Nenhum modelo de chat disponível para Groq.'
+                : 'Nenhum modelo disponível';
           }
         });
       }

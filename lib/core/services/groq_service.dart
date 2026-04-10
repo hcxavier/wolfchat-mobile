@@ -140,7 +140,7 @@ class GroqService implements AiService {
         }
       }
     } else {
-      await response.stream.bytesToString();
+      final errorBody = await response.stream.bytesToString();
       if (response.statusCode == 401) {
         throw const AuthException(
           'Sua chave de API é inválida. '
@@ -151,12 +151,38 @@ class GroqService implements AiService {
           'Você excedeu o limite de requisições. '
           'Aguarde um momento e tente novamente.',
         );
+      } else if (response.statusCode == 400) {
+        if (errorBody.contains('chat/completions') ||
+            errorBody.contains('not supported') ||
+            errorBody.contains('invalid model')) {
+          throw const ModelException(
+            'Este modelo Groq não suporta chat. '
+            'Escolha outro no Gerenciar Modelos.',
+          );
+        }
+        throw ServerException(
+          'Erro no streaming da resposta: 400.',
+        );
       }
       throw ServerException(
         'Erro no streaming da resposta: '
         '${response.statusCode}.',
       );
     }
+  }
+
+  bool isLikelyChatModelId(String modelId) {
+    final lowerId = modelId.toLowerCase();
+    final excludedPatterns = [
+      'whisper',
+      'tts',
+      'speech',
+      'transcribe',
+      'guard',
+      'embed',
+      'audio',
+    ];
+    return !excludedPatterns.any((pattern) => lowerId.contains(pattern));
   }
 
   @override
@@ -177,11 +203,25 @@ class GroqService implements AiService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final models = data['data'] as List<dynamic>;
-        return models
+        final availableModels = models
             .map(
               (model) => AvailableModel.fromJson(model as Map<String, dynamic>),
             )
             .toList();
+        return availableModels.where((m) => isLikelyChatModelId(m.id)).toList();
+      } else if (response.statusCode == 400) {
+        final errorBody = response.body;
+        String message;
+        if (errorBody.contains('chat/completions') ||
+            errorBody.contains('not supported') ||
+            errorBody.contains('invalid model')) {
+          message =
+              'Este modelo Groq não suporta chat. '
+              'Escolha outro no Gerenciar Modelos.';
+        } else {
+          message = 'Erro na comunicação com o servidor (400).';
+        }
+        throw ModelException(message);
       } else if (response.statusCode == 401) {
         throw const AuthException(
           'Sua chave de API é inválida. Verifique-a nas configurações.',
