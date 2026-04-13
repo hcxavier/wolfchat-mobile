@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:wolfchat/core/models/available_model.dart';
 import 'package:wolfchat/core/services/groq_service.dart';
-import 'package:wolfchat/core/services/minimax_service.dart';
 import 'package:wolfchat/core/services/nvidia_nim_service.dart';
 import 'package:wolfchat/core/services/open_code_zen_service.dart';
 import 'package:wolfchat/core/services/open_router_service.dart';
@@ -54,7 +53,6 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
       ModelProvider.groq => widget.viewModel.groqKey,
       ModelProvider.openCodeZen => widget.viewModel.openCodeZenKey,
       ModelProvider.nvidiaNim => widget.viewModel.nvidiaNimKey,
-      ModelProvider.minimax => widget.viewModel.minimaxKey,
     };
 
     if (apiKey.isEmpty) {
@@ -78,7 +76,6 @@ class _ManageModelsModalState extends State<ManageModelsModal> {
       ModelProvider.groq => GroqService(apiKey: apiKey),
       ModelProvider.openCodeZen => OpenCodeZenService(apiKey: apiKey),
       ModelProvider.nvidiaNim => NvidiaNimService(apiKey: apiKey),
-      ModelProvider.minimax => MinimaxService(apiKey: apiKey),
     };
 
     try {

@@ -9,24 +9,20 @@ class ApiKeysSection extends StatelessWidget {
     required this.groqController,
     required this.openCodeZenController,
     required this.nvidiaNimController,
-    required this.minimaxController,
     required this.obscureOpenRouter,
     required this.obscureGroq,
     required this.obscureOpenCodeZen,
     required this.obscureNvidiaNim,
-    required this.obscureMinimax,
     required this.onToggleOpenRouter,
     required this.onToggleGroq,
     required this.onToggleOpenCodeZen,
     required this.onToggleNvidiaNim,
-    required this.onToggleMinimax,
     required this.onBack,
     required this.onDone,
     this.openRouterError,
     this.groqError,
     this.openCodeZenError,
     this.nvidiaNimError,
-    this.minimaxError,
     super.key,
   });
 
@@ -34,24 +30,20 @@ class ApiKeysSection extends StatelessWidget {
   final TextEditingController groqController;
   final TextEditingController openCodeZenController;
   final TextEditingController nvidiaNimController;
-  final TextEditingController minimaxController;
   final bool obscureOpenRouter;
   final bool obscureGroq;
   final bool obscureOpenCodeZen;
   final bool obscureNvidiaNim;
-  final bool obscureMinimax;
   final VoidCallback onToggleOpenRouter;
   final VoidCallback onToggleGroq;
   final VoidCallback onToggleOpenCodeZen;
   final VoidCallback onToggleNvidiaNim;
-  final VoidCallback onToggleMinimax;
   final VoidCallback onBack;
   final VoidCallback onDone;
   final String? openRouterError;
   final String? groqError;
   final String? openCodeZenError;
   final String? nvidiaNimError;
-  final String? minimaxError;
 
   @override
   Widget build(BuildContext context) {
@@ -147,16 +139,6 @@ class ApiKeysSection extends StatelessWidget {
           onToggle: onToggleNvidiaNim,
           hint: 'nvapi-...',
           error: nvidiaNimError,
-        ),
-        const SizedBox(height: 20),
-        _buildSectionTitle('MiniMax'),
-        const SizedBox(height: 10),
-        _ApiKeyInput(
-          controller: minimaxController,
-          obscure: obscureMinimax,
-          onToggle: onToggleMinimax,
-          hint: 'sk-...',
-          error: minimaxError,
         ),
         const SizedBox(height: 28),
         SizedBox(

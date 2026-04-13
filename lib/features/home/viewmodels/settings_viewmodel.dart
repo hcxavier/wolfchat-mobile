@@ -17,7 +17,6 @@ class SettingsViewModel extends ChangeNotifier {
   String _groqKey = '';
   String _openCodeZenKey = '';
   String _nvidiaNimKey = '';
-  String _minimaxKey = '';
   String _language = 'Português (Brasil)';
   final List<CustomModel> _customModels = [];
   int _selectedModelIndex = 0;
@@ -81,7 +80,6 @@ class SettingsViewModel extends ChangeNotifier {
   String get groqKey => _groqKey;
   String get openCodeZenKey => _openCodeZenKey;
   String get nvidiaNimKey => _nvidiaNimKey;
-  String get minimaxKey => _minimaxKey;
   String get language => _language;
   List<CustomModel> get customModels => List.unmodifiable(_customModels);
   List<CustomModel> get availableModels => [
@@ -94,8 +92,7 @@ class SettingsViewModel extends ChangeNotifier {
       _groqKey.isNotEmpty ||
       _openRouterKey.isNotEmpty ||
       _openCodeZenKey.isNotEmpty ||
-      _nvidiaNimKey.isNotEmpty ||
-      _minimaxKey.isNotEmpty;
+      _nvidiaNimKey.isNotEmpty;
 
   String get selectedModelId => selectedModel.modelId;
   String get selectedModelName => selectedModel.name;
@@ -112,7 +109,6 @@ class SettingsViewModel extends ChangeNotifier {
         _groqKey = apiKeys['groq'] ?? '';
         _openCodeZenKey = apiKeys['open_code_zen'] ?? '';
         _nvidiaNimKey = apiKeys['nvidia_nim'] ?? '';
-        _minimaxKey = apiKeys['minimax'] ?? '';
 
         final savedUserName = await _persistence.getUserName();
         if (savedUserName != null && savedUserName.isNotEmpty) {
@@ -180,13 +176,11 @@ class SettingsViewModel extends ChangeNotifier {
     required String groq,
     required String openCodeZen,
     String nvidiaNim = '',
-    String minimax = '',
   }) async {
     _openRouterKey = openRouter;
     _groqKey = groq;
     _openCodeZenKey = openCodeZen;
     _nvidiaNimKey = nvidiaNim;
-    _minimaxKey = minimax;
 
     if (_persistence != null) {
       if (openRouter.isNotEmpty) {
@@ -208,11 +202,6 @@ class SettingsViewModel extends ChangeNotifier {
         await _persistence.saveApiKey('nvidia_nim', nvidiaNim);
       } else {
         await _persistence.deleteApiKey('nvidia_nim');
-      }
-      if (minimax.isNotEmpty) {
-        await _persistence.saveApiKey('minimax', minimax);
-      } else {
-        await _persistence.deleteApiKey('minimax');
       }
     }
 

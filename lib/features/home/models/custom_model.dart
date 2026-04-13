@@ -36,8 +36,7 @@ enum ModelProvider {
   openRouter('OpenRouter'),
   groq('Groq'),
   openCodeZen('OpenCode Zen'),
-  nvidiaNim('NVIDIA NIM'),
-  minimax('MiniMax')
+  nvidiaNim('NVIDIA NIM')
   ;
 
   const ModelProvider(this.displayName);

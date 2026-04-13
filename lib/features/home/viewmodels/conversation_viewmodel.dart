@@ -6,7 +6,6 @@ import 'package:wolfchat/core/data/services/persistence_service.dart';
 import 'package:wolfchat/core/exceptions/app_exceptions.dart';
 import 'package:wolfchat/core/services/ai_service.dart';
 import 'package:wolfchat/core/services/groq_service.dart';
-import 'package:wolfchat/core/services/minimax_service.dart';
 import 'package:wolfchat/core/services/nvidia_nim_service.dart';
 import 'package:wolfchat/core/services/open_code_zen_service.dart';
 import 'package:wolfchat/core/services/open_router_service.dart';
@@ -20,7 +19,6 @@ class ConversationViewModel extends ChangeNotifier {
     required this.openRouterKey,
     required this.openCodeZenKey,
     required this.nvidiaNimKey,
-    required this.minimaxKey,
     required String Function() getSelectedModelId,
     required String Function() getSelectedModelName,
     required String Function() getSelectedModelProvider,
@@ -33,7 +31,6 @@ class ConversationViewModel extends ChangeNotifier {
   String openRouterKey;
   String openCodeZenKey;
   String nvidiaNimKey;
-  String minimaxKey;
   final String Function() _getSelectedModelId;
   final String Function() _getSelectedModelName;
   final String Function() _getSelectedModelProvider;
@@ -150,8 +147,6 @@ class ConversationViewModel extends ChangeNotifier {
         return OpenCodeZenService(apiKey: openCodeZenKey);
       case 'NVIDIA NIM':
         return NvidiaNimService(apiKey: nvidiaNimKey);
-      case 'MiniMax':
-        return MinimaxService(apiKey: minimaxKey);
       case 'Groq':
       default:
         return GroqService(apiKey: groqKey);
@@ -166,8 +161,6 @@ class ConversationViewModel extends ChangeNotifier {
         return openCodeZenKey;
       case 'NVIDIA NIM':
         return nvidiaNimKey;
-      case 'MiniMax':
-        return minimaxKey;
       case 'Groq':
       default:
         return groqKey;
@@ -185,8 +178,6 @@ class ConversationViewModel extends ChangeNotifier {
         return 'OpenCode Zen';
       case 'NVIDIA NIM':
         return 'NVIDIA NIM';
-      case 'MiniMax':
-        return 'MiniMax';
       case 'Groq':
       default:
         return 'Groq';
