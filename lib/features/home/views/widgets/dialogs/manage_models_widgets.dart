@@ -143,6 +143,10 @@ class ModelProviderSelector extends StatelessWidget {
         return const Color(0xFF6366F1);
       case ModelProvider.openCodeZen:
         return const Color(0xFF8AB4F8);
+      case ModelProvider.nvidiaNim:
+        return const Color(0xFF76B900);
+      case ModelProvider.minimax:
+        return const Color(0xFFDC2626);
     }
   }
 }

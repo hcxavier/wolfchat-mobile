@@ -22,12 +22,18 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
   late final TextEditingController _openRouterController;
   late final TextEditingController _groqController;
   late final TextEditingController _openCodeZenController;
+  late final TextEditingController _nvidiaNimController;
+  late final TextEditingController _minimaxController;
   bool _obscureOpenRouter = true;
   bool _obscureGroq = true;
   bool _obscureOpenCodeZen = true;
+  bool _obscureNvidiaNim = true;
+  bool _obscureMinimax = true;
   String? _openRouterError;
   String? _groqError;
   String? _openCodeZenError;
+  String? _nvidiaNimError;
+  String? _minimaxError;
 
   @override
   void initState() {
@@ -39,6 +45,12 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
     _openCodeZenController = TextEditingController(
       text: widget.viewModel.openCodeZenKey,
     );
+    _nvidiaNimController = TextEditingController(
+      text: widget.viewModel.nvidiaNimKey,
+    );
+    _minimaxController = TextEditingController(
+      text: widget.viewModel.minimaxKey,
+    );
   }
 
   @override
@@ -46,6 +58,8 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
     _openRouterController.dispose();
     _groqController.dispose();
     _openCodeZenController.dispose();
+    _nvidiaNimController.dispose();
+    _minimaxController.dispose();
     super.dispose();
   }
 
@@ -54,11 +68,15 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
       _openRouterError = null;
       _groqError = null;
       _openCodeZenError = null;
+      _nvidiaNimError = null;
+      _minimaxError = null;
     });
 
     final openRouter = _openRouterController.text.trim();
     final groq = _groqController.text.trim();
     final openCodeZen = _openCodeZenController.text.trim();
+    final nvidiaNim = _nvidiaNimController.text.trim();
+    final minimax = _minimaxController.text.trim();
 
     final errors = <String, String?>{};
 
@@ -71,12 +89,20 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
     if (openCodeZen.isNotEmpty && openCodeZen.length < 5) {
       errors['openCodeZen'] = 'Chave parece inválida. Verifique o formato.';
     }
+    if (nvidiaNim.isNotEmpty && nvidiaNim.length < 10) {
+      errors['nvidiaNim'] = 'Chave parece inválida. Verifique o formato.';
+    }
+    if (minimax.isNotEmpty && minimax.length < 10) {
+      errors['minimax'] = 'Chave parece inválida. Verifique o formato.';
+    }
 
     if (errors.isNotEmpty) {
       setState(() {
         _openRouterError = errors['openRouter'];
         _groqError = errors['groq'];
         _openCodeZenError = errors['openCodeZen'];
+        _nvidiaNimError = errors['nvidiaNim'];
+        _minimaxError = errors['minimax'];
       });
       return;
     }
@@ -85,6 +111,8 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
       openRouter: openRouter,
       groq: groq,
       openCodeZen: openCodeZen,
+      nvidiaNim: nvidiaNim,
+      minimax: minimax,
     );
     widget.onClose();
   }
@@ -119,19 +147,29 @@ class _ApiKeysModalState extends State<ApiKeysModal> {
               openRouterController: _openRouterController,
               groqController: _groqController,
               openCodeZenController: _openCodeZenController,
+              nvidiaNimController: _nvidiaNimController,
+              minimaxController: _minimaxController,
               obscureOpenRouter: _obscureOpenRouter,
               obscureGroq: _obscureGroq,
               obscureOpenCodeZen: _obscureOpenCodeZen,
+              obscureNvidiaNim: _obscureNvidiaNim,
+              obscureMinimax: _obscureMinimax,
               onToggleOpenRouter: () =>
                   setState(() => _obscureOpenRouter = !_obscureOpenRouter),
               onToggleGroq: () => setState(() => _obscureGroq = !_obscureGroq),
               onToggleOpenCodeZen: () =>
                   setState(() => _obscureOpenCodeZen = !_obscureOpenCodeZen),
+              onToggleNvidiaNim: () =>
+                  setState(() => _obscureNvidiaNim = !_obscureNvidiaNim),
+              onToggleMinimax: () =>
+                  setState(() => _obscureMinimax = !_obscureMinimax),
               onBack: widget.onClose,
               onDone: _onSave,
               openRouterError: _openRouterError,
               groqError: _groqError,
               openCodeZenError: _openCodeZenError,
+              nvidiaNimError: _nvidiaNimError,
+              minimaxError: _minimaxError,
             ),
           ),
         ),

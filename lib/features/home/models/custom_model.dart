@@ -35,7 +35,9 @@ class CustomModel {
 enum ModelProvider {
   openRouter('OpenRouter'),
   groq('Groq'),
-  openCodeZen('OpenCode Zen')
+  openCodeZen('OpenCode Zen'),
+  nvidiaNim('NVIDIA NIM'),
+  minimax('MiniMax')
   ;
 
   const ModelProvider(this.displayName);

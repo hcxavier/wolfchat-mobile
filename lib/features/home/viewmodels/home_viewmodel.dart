@@ -30,6 +30,8 @@ class HomeViewModel extends ChangeNotifier {
   String get groqKey => _isInitialized ? settings.groqKey : '';
   String get openRouterKey => _isInitialized ? settings.openRouterKey : '';
   String get openCodeZenKey => _isInitialized ? settings.openCodeZenKey : '';
+  String get nvidiaNimKey => _isInitialized ? settings.nvidiaNimKey : '';
+  String get minimaxKey => _isInitialized ? settings.minimaxKey : '';
   String get language =>
       _isInitialized ? settings.language : 'Português (Brasil)';
   List<CustomModel> get customModels =>
@@ -64,6 +66,8 @@ class HomeViewModel extends ChangeNotifier {
       groqKey: '',
       openRouterKey: '',
       openCodeZenKey: '',
+      nvidiaNimKey: '',
+      minimaxKey: '',
       getSelectedModelId: () => settings.selectedModelId,
       getSelectedModelName: () => settings.selectedModelName,
       getSelectedModelProvider: () => settings.selectedModelProvider,
@@ -86,7 +90,9 @@ class HomeViewModel extends ChangeNotifier {
     conversation
       ..groqKey = settings.groqKey
       ..openRouterKey = settings.openRouterKey
-      ..openCodeZenKey = settings.openCodeZenKey;
+      ..openCodeZenKey = settings.openCodeZenKey
+      ..nvidiaNimKey = settings.nvidiaNimKey
+      ..minimaxKey = settings.minimaxKey;
     if (_isInitialized) {
       notifyListeners();
     }
@@ -142,12 +148,16 @@ class HomeViewModel extends ChangeNotifier {
     required String openRouter,
     required String groq,
     required String openCodeZen,
+    String nvidiaNim = '',
+    String minimax = '',
   }) async {
     if (!_isInitialized) return;
     await settings.saveApiKeys(
       openRouter: openRouter,
       groq: groq,
       openCodeZen: openCodeZen,
+      nvidiaNim: nvidiaNim,
+      minimax: minimax,
     );
   }
 
