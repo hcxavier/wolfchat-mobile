@@ -17,9 +17,7 @@ HARISSON CAIO DA SILVA XAVIER
 
 **DOCS WOLFCHAT**
 
-Atividade apresentada como requisito para aprovação parcial na disciplina Gestão de Tecnologia da Informação do Curso Superior de Tecnologia em Análise e Desenvolvimento de Sistemas do Instituto Federal de Educação, Ciência e Tecnologia Baiano \- Campus Guanambi.
-
-Orientador: Prof. Paula Patricia Oliveira da Silva  
+Atividade apresentada como requisito para trabalho da disciplina Laboratório de Programação para Dispositivos Móveis do Curso Superior de Tecnologia em Análise e Desenvolvimento de Sistemas do Instituto Federal de Educação, Ciência e Tecnologia Baiano \- Campus Guanambi. 
  
 
 GUANAMBI  
