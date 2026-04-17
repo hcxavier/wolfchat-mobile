@@ -2,6 +2,8 @@
 
 O WolfChat Mobile é uma aplicação de chat moderna e de alto desempenho desenvolvida com Flutter. Possui integração profunda com modelos de IA avançados via Groq, OpenRouter e OpenCodeZen, proporcionando uma experiência de chat rica e interativa.
 
+[📖 Documentação Completa](docs/doc.md)
+
 ## Funcionalidades
 
 - **Conversas Potencializadas por IA**: Converse com diversos modelos de IA usando os serviços Groq e OpenRouter.
